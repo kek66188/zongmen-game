@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#081416" />
+    <title>宗门守卫战</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="app" aria-label="宗门守卫战">
+      <header class="game-header">
+        <div class="title-row">
+          <div>
+            <p class="eyebrow">妖潮将至，守我山门</p>
+            <h1>宗门守卫战</h1>
+          </div>
+          <div class="timer-stack">
+            <div class="stage-pill" id="stageText">妖潮初现</div>
+            <div class="timer-pill" id="timeText">02:00</div>
+            <button type="button" class="speed-toggle" id="speedBtn" aria-label="切换战斗速度">速 x1</button>
+          </div>
+        </div>
+
+        <section class="hud-grid" aria-label="战斗状态">
+          <div class="hud-item">
+            <span>境界</span>
+            <strong id="levelText">1</strong>
+          </div>
+          <div class="hud-item wide">
+            <span>修为</span>
+            <strong id="expText">0 / 20</strong>
+          </div>
+          <div class="hud-item">
+            <span>城墙</span>
+            <strong id="wallHpText">100 / 100</strong>
+          </div>
+          <div class="hud-item">
+            <span>斩妖</span>
+            <strong id="killText">0</strong>
+          </div>
+        </section>
+      </header>
+
+      <section class="battlefield" aria-label="战斗画面">
+        <canvas id="gameCanvas" width="360" height="560"></canvas>
+      </section>
+
+      <section class="skill-panel" aria-label="技能状态">
+        <div class="skill-strip" id="skillStrip"></div>
+        <div class="control-row">
+          <button type="button" class="ghost-button" id="pauseBtn">调息</button>
+          <button type="button" class="ghost-button" id="restartBtn">重新开始</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay" id="homeOverlay">
+        <div class="dialog compact home-dialog">
+          <p class="eyebrow">妖潮将至，守我山门</p>
+          <h2>宗门守卫战</h2>
+          <p class="intro">飞剑自鸣，符火逐妖。守住山门 120 秒，护住宗门一线灵脉。</p>
+
+          <div class="coin-banner">
+            <span>当前灵石</span>
+            <strong id="homeCoins">0</strong>
+          </div>
+
+          <div class="panel-title">宗门战绩</div>
+          <div class="record-grid" id="recordGrid">
+            <div><span>最高斩妖</span><strong id="bestKills">0</strong></div>
+            <div><span>最长存活</span><strong id="bestTime">00:00</strong></div>
+            <div><span>最高境界</span><strong id="bestLevel">1</strong></div>
+            <div><span>通关次数</span><strong id="clearCount">0</strong></div>
+            <div><span>总游玩次数</span><strong id="totalRuns">0</strong></div>
+          </div>
+
+          <div class="button-stack">
+            <button type="button" class="primary-button" id="startBtn">开始守山</button>
+            <button type="button" class="ghost-button" id="cultivationBtn">宗门养成</button>
+            <button type="button" class="ghost-button sound-toggle" id="soundToggleBtn">音效：开</button>
+            <button type="button" class="danger-button" id="resetSaveBtn">重置存档</button>
+          </div>
+
+          <section class="trial-section" aria-label="选择试炼">
+            <div class="panel-title">选择试炼</div>
+            <div class="selected-trial" id="selectedTrialText">当前试炼：山门初守</div>
+            <div class="level-list" id="levelList"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="cultivationOverlay" aria-live="polite">
+        <div class="growth-panel">
+          <div class="growth-head">
+            <div>
+              <p class="eyebrow">宗门宝库</p>
+              <h2>宗门养成</h2>
+            </div>
+            <div class="coin-pill">灵石 <strong id="cultivationCoins">0</strong></div>
+          </div>
+
+          <section class="growth-section">
+            <h3>灵石镶嵌</h3>
+            <div class="growth-list" id="gemList"></div>
+          </section>
+
+          <section class="growth-section">
+            <h3>功法修炼</h3>
+            <div class="growth-list" id="talentList"></div>
+          </section>
+
+          <button type="button" class="primary-button sticky-return" id="backHomeBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay hidden" id="upgradeOverlay" aria-live="polite">
+        <div class="upgrade-sheet">
+          <p class="eyebrow">境界突破</p>
+          <h2>参悟一卷机缘</h2>
+          <div class="upgrade-options" id="upgradeOptions"></div>
+        </div>
+      </section>
+
+      <section class="screen-overlay hidden" id="gameOverOverlay" aria-live="polite">
+        <div class="dialog compact">
+          <p class="eyebrow" id="resultEyebrow">战斗结束</p>
+          <h2 id="resultTitle">胜败未定</h2>
+          <div class="result-grid">
+            <div class="wide"><span>当前试炼</span><strong id="resultTrialName">山门初守</strong></div>
+            <div><span>本局斩妖</span><strong id="resultKills">0</strong></div>
+            <div><span>存活时间</span><strong id="resultTime">00:00</strong></div>
+            <div><span>本局境界</span><strong id="resultLevel">1</strong></div>
+            <div><span>是否镇守</span><strong id="resultClear">否</strong></div>
+            <div><span>本局灵石</span><strong id="resultCoins">0</strong></div>
+            <div><span>总灵石</span><strong id="resultTotalCoins">0</strong></div>
+          </div>
+          <div class="result-shards">
+            <span>本局灵石碎晶</span>
+            <strong id="resultShards">无</strong>
+          </div>
+          <div class="unlock-notice hidden" id="resultUnlockNotice"></div>
+          <div class="control-row">
+            <button type="button" class="primary-button" id="againBtn">再战本关</button>
+            <button type="button" class="ghost-button" id="replayLevelBtn">重玩本关</button>
+            <button type="button" class="ghost-button" id="resultHomeBtn">返回关卡</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <script src="main.js" defer></script>
+  </body>
+</html>
