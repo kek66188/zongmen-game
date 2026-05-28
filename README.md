@@ -236,6 +236,40 @@ localStorage.setItem("zongmen_guardian_save_v1", JSON.stringify(save));
 location.reload();
 ```
 
+## localStorage 存档说明
+
+本游戏使用浏览器 `localStorage` 保存局外进度。同一个浏览器、同一个网址下，刷新页面、关闭网页后重新打开，存档都会保留。更换浏览器、更换手机、使用无痕模式、清理浏览器数据，都会导致本地存档不可见或丢失。
+
+注意：本地测试地址 `http://localhost:8000/` 和 GitHub Pages 地址 `https://kek66188.github.io/zongmen-game/` 属于不同网址，浏览器会分别保存两份 localStorage，存档不会互通。
+
+当前仍兼容旧主存档 key：
+
+```text
+zongmen_guardian_save_v1
+```
+
+同时会把关键数据同步保存到统一 key：
+
+```text
+zmsw_spiritStone
+zmsw_jade
+zmsw_highestClearedLevel
+zmsw_selectedLevel
+zmsw_bestKills
+zmsw_bestSurvivalTime
+zmsw_highestPlayerLevel
+zmsw_clearCount
+zmsw_finalCleared
+zmsw_upgrades
+zmsw_redeemedCodes
+zmsw_lastDailyRewardDate
+zmsw_timeScale
+zmsw_totalRechargeTest
+zmsw_saveVersion
+```
+
+首页提供“存档信息”按钮，可查看 localStorage 是否可用、灵石、仙玉、最高通关、最高解锁、宗门强化总等级、速度设置和当前存档版本。
+
 然后在首页选择第 10、20、30、40 关，分别验证黑角妖将、筑基妖帅、金丹魔修和万妖王。
 
 如果以后需要做账号同步，需要新增后端服务、用户注册/登录、数据库、存档上传/下载接口和防作弊校验。

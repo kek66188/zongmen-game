@@ -586,39 +586,131 @@
   const LEVEL_LIST = Object.values(LEVEL_CONFIG).sort((a, b) => a.order - b.order);
   const MAX_PARTICLES = 250;
   const MAX_AURA_PARTICLES = 40;
+  const SAVE_VERSION = 1;
   const SAVE_KEY = "zongmen_guardian_save_v1";
-  const HIGHEST_CLEARED_KEY = "zmsw_highestClearedLevel";
+  const SAVE_VERSION_KEY = "zmsw_saveVersion";
+  const SAVE_KEYS = {
+    spiritStone: "zmsw_spiritStone",
+    jade: "zmsw_jade",
+    highestClearedLevel: "zmsw_highestClearedLevel",
+    selectedLevel: "zmsw_selectedLevel",
+    bestKills: "zmsw_bestKills",
+    bestSurvivalTime: "zmsw_bestSurvivalTime",
+    highestPlayerLevel: "zmsw_highestPlayerLevel",
+    clearCount: "zmsw_clearCount",
+    finalCleared: "zmsw_finalCleared",
+    upgrades: "zmsw_upgrades",
+    redeemedCodes: "zmsw_redeemedCodes",
+    lastDailyRewardDate: "zmsw_lastDailyRewardDate",
+    timeScale: "zmsw_timeScale",
+    totalRechargeTest: "zmsw_totalRechargeTest",
+  };
+  const HIGHEST_CLEARED_KEY = SAVE_KEYS.highestClearedLevel;
   const LEGACY_HIGHEST_CLEARED_KEY = "highestClearedLevel";
-  const TIMESCALE_KEY = "zmsw_timeScale";
-  const readTimeScaleSetting = () => {
+  const TIMESCALE_KEY = SAVE_KEYS.timeScale;
+
+  function hasStorageValue(key) {
     try {
-      return Number(localStorage.getItem(TIMESCALE_KEY)) === 2 ? 2 : 1;
+      return localStorage.getItem(key) !== null;
     } catch (_err) {
-      return 1;
+      return false;
     }
+  }
+
+  function loadNumber(key, defaultValue = 0) {
+    try {
+      const raw = localStorage.getItem(key);
+      const num = Number(raw);
+      return Number.isFinite(num) ? num : defaultValue;
+    } catch (_err) {
+      return defaultValue;
+    }
+  }
+
+  function saveNumber(key, value) {
+    try {
+      const num = Number(value);
+      localStorage.setItem(key, String(Number.isFinite(num) ? num : 0));
+    } catch (err) {
+      console.warn("存档写入失败:", key, err);
+    }
+  }
+
+  function loadJSON(key, defaultValue) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return defaultValue;
+      return JSON.parse(raw);
+    } catch (err) {
+      console.warn("存档读取失败:", key, err);
+      return defaultValue;
+    }
+  }
+
+  function saveJSON(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (err) {
+      console.warn("存档写入失败:", key, err);
+    }
+  }
+
+  function loadString(key, defaultValue = "") {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? defaultValue : String(raw);
+    } catch (_err) {
+      return defaultValue;
+    }
+  }
+
+  function saveString(key, value) {
+    try {
+      localStorage.setItem(key, String(value ?? ""));
+    } catch (err) {
+      console.warn("存档写入失败:", key, err);
+    }
+  }
+
+  function saveBool(key, value) {
+    saveNumber(key, value ? 1 : 0);
+  }
+
+  function loadMigratedNumber(key, defaultValue = 0, legacyKeys = []) {
+    if (hasStorageValue(key)) return loadNumber(key, defaultValue);
+    for (const legacyKey of legacyKeys) {
+      if (hasStorageValue(legacyKey)) {
+        const value = loadNumber(legacyKey, defaultValue);
+        saveNumber(key, value);
+        return value;
+      }
+    }
+    return defaultValue;
+  }
+
+  function isLocalStorageAvailable() {
+    try {
+      const current = localStorage.getItem(SAVE_VERSION_KEY);
+      localStorage.setItem(SAVE_VERSION_KEY, current || String(SAVE_VERSION));
+      return true;
+    } catch (_err) {
+      return false;
+    }
+  }
+
+  const readTimeScaleSetting = () => {
+    return loadNumber(TIMESCALE_KEY, 1) === 2 ? 2 : 1;
   };
   const writeTimeScaleSetting = (value) => {
-    try {
-      localStorage.setItem(TIMESCALE_KEY, String(value === 2 ? 2 : 1));
-    } catch (_err) {
-      // Local storage can be unavailable in private or embedded browsers.
-    }
+    saveNumber(TIMESCALE_KEY, value === 2 ? 2 : 1);
   };
   const readHighestClearedSetting = () => {
-    try {
-      const primary = Number(localStorage.getItem(HIGHEST_CLEARED_KEY));
-      const legacy = Number(localStorage.getItem(LEGACY_HIGHEST_CLEARED_KEY));
-      return clampSetup(Math.max(Number.isFinite(primary) ? primary : 0, Number.isFinite(legacy) ? legacy : 0), 0, 40);
-    } catch (_err) {
-      return 0;
-    }
+    const primary = loadMigratedNumber(HIGHEST_CLEARED_KEY, 0, [LEGACY_HIGHEST_CLEARED_KEY]);
+    const legacy = loadNumber(LEGACY_HIGHEST_CLEARED_KEY, 0);
+    return clampSetup(Math.max(primary, legacy), 0, 40);
   };
   const writeHighestClearedSetting = (value) => {
-    try {
-      localStorage.setItem(HIGHEST_CLEARED_KEY, String(clampSetup(Math.floor(value || 0), 0, 40)));
-    } catch (_err) {
-      // Local storage can be unavailable in private or embedded browsers.
-    }
+    saveNumber(HIGHEST_CLEARED_KEY, clampSetup(Math.floor(value || 0), 0, 40));
   };
 
   const ENEMY_TYPES = {
@@ -1034,6 +1126,24 @@
     return entries[0][0];
   };
   const getLevelById = (id) => LEVEL_CONFIG[id] || LEVEL_CONFIG.level1;
+  const coerceLevelId = (value, fallback = "level1") => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      const order = clampSetup(Math.floor(value), 1, 40);
+      return `level${order}`;
+    }
+    const raw = String(value || "").trim();
+    if (LEVEL_CONFIG[raw]) return raw;
+    if (/^\d+$/.test(raw)) {
+      const order = clampSetup(Number(raw), 1, 40);
+      return `level${order}`;
+    }
+    const match = raw.match(/^level(\d+)$/i);
+    if (match) {
+      const order = clampSetup(Number(match[1]), 1, 40);
+      return `level${order}`;
+    }
+    return LEVEL_CONFIG[fallback] ? fallback : "level1";
+  };
   const getNextLevel = (id) => {
     const level = getLevelById(id);
     return LEVEL_LIST.find((item) => item.order === level.order + 1) || null;
@@ -1060,6 +1170,11 @@
     }
     return "level1";
   };
+  const getSavedSelectedLevelId = (save) => {
+    const highest = getHighestUnlockedLevelId(save);
+    const selected = coerceLevelId(save?.selectedLevelId || loadString(SAVE_KEYS.selectedLevel, highest), highest);
+    return save?.levels?.[selected]?.unlocked ? selected : highest;
+  };
   const getLevelExtraClearShards = (order) => {
     if (order >= 40) return 14;
     if (order >= 30) return 10;
@@ -1074,7 +1189,10 @@
   const getLevelStars = (level) => clamp(Math.ceil(level.order / 2), 1, 5);
 
   const createDefaultSave = () => ({
+    version: SAVE_VERSION,
     coins: 0,
+    jade: 0,
+    selectedLevelId: "level1",
     gems: {
       attack: { level: 0, shards: 0 },
       cooldown: { level: 0, shards: 0 },
@@ -1102,10 +1220,15 @@
       totalKills: 0,
       highestPlayerLevel: 1,
       totalSpiritStone: 0,
+      finalCleared: false,
     },
     levels: createDefaultLevels(),
+    redeemedCodes: [],
+    lastDailyRewardDate: "",
+    totalRechargeTest: 0,
     settings: {
       soundEnabled: true,
+      timeScale: readTimeScaleSetting(),
     },
   });
 
@@ -1127,7 +1250,15 @@
     const save = createDefaultSave();
     if (!source || typeof source !== "object") return save;
 
-    save.coins = Number.isFinite(source.coins) ? Math.max(0, Math.floor(source.coins)) : 0;
+    save.version = SAVE_VERSION;
+    const sourceCoins = Number.isFinite(source.coins)
+      ? source.coins
+      : Number.isFinite(source.spiritStone)
+        ? source.spiritStone
+        : 0;
+    save.coins = Math.max(0, Math.floor(sourceCoins));
+    save.jade = Number.isFinite(source.jade) ? Math.max(0, Math.floor(source.jade)) : 0;
+    save.selectedLevelId = coerceLevelId(source.selectedLevelId || source.selectedLevel || "level1", "level1");
 
     for (const id of Object.keys(GEM_DEFS)) {
       const gem = source.gems && source.gems[id];
@@ -1161,6 +1292,7 @@
       ? Math.max(1, Math.floor(records.highestPlayerLevel))
       : save.records.bestLevel;
     save.records.totalSpiritStone = Number.isFinite(records.totalSpiritStone) ? Math.max(0, Math.floor(records.totalSpiritStone)) : 0;
+    save.records.finalCleared = records.finalCleared === true || source.finalCleared === true;
 
     const sourceLevels = source.levels && typeof source.levels === "object" ? source.levels : null;
     save.levels = createDefaultLevels();
@@ -1199,10 +1331,134 @@
         save.records.highestClearedLevel = Math.max(save.records.highestClearedLevel, level.order);
       }
     }
+    if (save.levels.level40?.cleared || save.records.highestClearedLevel >= 40) {
+      save.records.finalCleared = true;
+      if (save.levels.level40) {
+        save.levels.level40.unlocked = true;
+        save.levels.level40.cleared = true;
+      }
+    }
+    if (!save.levels[save.selectedLevelId]?.unlocked) save.selectedLevelId = getHighestUnlockedLevelId(save);
 
     save.settings.soundEnabled = source.settings?.soundEnabled !== false;
+    save.settings.timeScale = Number(source.settings?.timeScale) === 2 ? 2 : readTimeScaleSetting();
+    save.redeemedCodes = Array.isArray(source.redeemedCodes)
+      ? Array.from(new Set(source.redeemedCodes.map((code) => String(code)).filter(Boolean)))
+      : [];
+    save.lastDailyRewardDate = typeof source.lastDailyRewardDate === "string" ? source.lastDailyRewardDate : "";
+    save.totalRechargeTest = Number.isFinite(source.totalRechargeTest) ? Math.max(0, Math.floor(source.totalRechargeTest)) : 0;
     return save;
   };
+
+  const upgradeAliasToTalent = {
+    wallFoundation: "wallFortify",
+    wallFortify: "wallFortify",
+    swordComprehension: "swordDamage",
+    swordDamage: "swordDamage",
+    fireMastery: "fireMastery",
+    frostSkill: "iceMastery",
+    iceMastery: "iceMastery",
+    thunderManual: "thunderMastery",
+    thunderMastery: "thunderMastery",
+    swordArrayAtlas: "swordArrayMastery",
+    swordArrayMastery: "swordArrayMastery",
+    agility: "battleInsight",
+    battleInsight: "battleInsight",
+    startSpirit: "startSpirit",
+  };
+
+  function applyMirroredKeys(save) {
+    save.coins = loadMigratedNumber(SAVE_KEYS.spiritStone, save.coins, ["spiritStone", "totalSpiritStone", "coins", "gold"]);
+    save.jade = loadMigratedNumber(SAVE_KEYS.jade, save.jade, ["jade", "xianyu", "仙玉"]);
+    save.records.highestClearedLevel = Math.max(
+      save.records.highestClearedLevel || 0,
+      loadMigratedNumber(SAVE_KEYS.highestClearedLevel, save.records.highestClearedLevel || 0, [LEGACY_HIGHEST_CLEARED_KEY]),
+    );
+    save.records.bestKills = Math.max(save.records.bestKills, loadMigratedNumber(SAVE_KEYS.bestKills, save.records.bestKills, ["bestKills"]));
+    save.records.bestSurvivalTime = Math.max(
+      save.records.bestSurvivalTime,
+      loadMigratedNumber(SAVE_KEYS.bestSurvivalTime, save.records.bestSurvivalTime, ["bestSurvivalTime"]),
+    );
+    save.records.highestPlayerLevel = Math.max(
+      save.records.highestPlayerLevel || 1,
+      loadMigratedNumber(SAVE_KEYS.highestPlayerLevel, save.records.highestPlayerLevel || 1, ["highestPlayerLevel", "bestLevel"]),
+    );
+    save.records.bestLevel = Math.max(save.records.bestLevel || 1, save.records.highestPlayerLevel || 1);
+    save.records.clearCount = Math.max(save.records.clearCount, loadMigratedNumber(SAVE_KEYS.clearCount, save.records.clearCount, ["clearCount"]));
+    if (hasStorageValue(SAVE_KEYS.finalCleared)) save.records.finalCleared = loadNumber(SAVE_KEYS.finalCleared, 0) === 1;
+
+    const selected = loadString(SAVE_KEYS.selectedLevel, save.selectedLevelId);
+    save.selectedLevelId = coerceLevelId(selected, save.selectedLevelId);
+
+    const mirroredUpgrades = loadJSON(SAVE_KEYS.upgrades, null);
+    if (mirroredUpgrades && typeof mirroredUpgrades === "object") {
+      for (const [key, value] of Object.entries(mirroredUpgrades)) {
+        const talentId = upgradeAliasToTalent[key] || key;
+        if (!TALENT_DEFS[talentId]) continue;
+        const level = Number(value);
+        if (Number.isFinite(level)) save.talents[talentId] = clamp(Math.floor(level), 0, TALENT_DEFS[talentId].max);
+      }
+    }
+
+    const redeemed = loadJSON(SAVE_KEYS.redeemedCodes, null);
+    if (Array.isArray(redeemed)) {
+      save.redeemedCodes = Array.from(new Set(redeemed.map((code) => String(code)).filter(Boolean)));
+    }
+    if (hasStorageValue(SAVE_KEYS.lastDailyRewardDate)) save.lastDailyRewardDate = loadString(SAVE_KEYS.lastDailyRewardDate, "");
+    save.settings.timeScale = loadNumber(SAVE_KEYS.timeScale, save.settings.timeScale) === 2 ? 2 : 1;
+    save.totalRechargeTest = loadMigratedNumber(SAVE_KEYS.totalRechargeTest, save.totalRechargeTest, ["totalRechargeTest"]);
+    return save;
+  }
+
+  function reconcileSaveProgress(save) {
+    save.version = SAVE_VERSION;
+    save.records.highestClearedLevel = clampSetup(Math.floor(save.records.highestClearedLevel || 0), 0, 40);
+    for (const level of LEVEL_LIST) {
+      const state = save.levels[level.id] || createDefaultLevels()[level.id];
+      save.levels[level.id] = state;
+      if (level.order === 1 || level.order <= save.records.highestClearedLevel + 1) state.unlocked = true;
+      if (level.order <= save.records.highestClearedLevel) state.cleared = true;
+      if (state.cleared) {
+        state.unlocked = true;
+        save.records.highestClearedLevel = Math.max(save.records.highestClearedLevel, level.order);
+      }
+    }
+    save.records.finalCleared = save.records.finalCleared === true || save.records.highestClearedLevel >= 40 || save.levels.level40?.cleared === true;
+    if (save.records.finalCleared && save.levels.level40) {
+      save.levels.level40.unlocked = true;
+      save.levels.level40.cleared = true;
+    }
+    if (!save.levels[save.selectedLevelId]?.unlocked) save.selectedLevelId = getHighestUnlockedLevelId(save);
+    save.records.bestLevel = Math.max(save.records.bestLevel || 1, save.records.highestPlayerLevel || 1);
+    return save;
+  }
+
+  function saveSave(save) {
+    const data = reconcileSaveProgress(save || createDefaultSave());
+    saveJSON(SAVE_KEY, data);
+    saveNumber(SAVE_VERSION_KEY, SAVE_VERSION);
+    saveNumber(SAVE_KEYS.spiritStone, data.coins || 0);
+    saveNumber(SAVE_KEYS.jade, data.jade || 0);
+    saveNumber(SAVE_KEYS.highestClearedLevel, data.records.highestClearedLevel || 0);
+    saveString(SAVE_KEYS.selectedLevel, data.selectedLevelId || getHighestUnlockedLevelId(data));
+    saveNumber(SAVE_KEYS.bestKills, data.records.bestKills || 0);
+    saveNumber(SAVE_KEYS.bestSurvivalTime, data.records.bestSurvivalTime || 0);
+    saveNumber(SAVE_KEYS.highestPlayerLevel, data.records.highestPlayerLevel || data.records.bestLevel || 1);
+    saveNumber(SAVE_KEYS.clearCount, data.records.clearCount || 0);
+    saveBool(SAVE_KEYS.finalCleared, data.records.finalCleared === true);
+    saveJSON(SAVE_KEYS.upgrades, data.talents || {});
+    saveJSON(SAVE_KEYS.redeemedCodes, data.redeemedCodes || []);
+    saveString(SAVE_KEYS.lastDailyRewardDate, data.lastDailyRewardDate || "");
+    saveNumber(SAVE_KEYS.timeScale, data.settings?.timeScale === 2 ? 2 : 1);
+    saveNumber(SAVE_KEYS.totalRechargeTest, data.totalRechargeTest || 0);
+    return data;
+  }
+
+  function loadSave() {
+    const rawSave = loadJSON(SAVE_KEY, null);
+    const save = reconcileSaveProgress(applyMirroredKeys(normalizeSave(rawSave)));
+    return saveSave(save);
+  }
 
   const getMetaBonuses = (save) => {
     const data = normalizeSave(save);
@@ -1230,33 +1486,27 @@
     }
 
     load() {
-      try {
-        const raw = localStorage.getItem(SAVE_KEY);
-        if (!raw) {
-          const fresh = createDefaultSave();
-          localStorage.setItem(SAVE_KEY, JSON.stringify(fresh));
-          return fresh;
-        }
-        const parsed = JSON.parse(raw);
-        const normalized = normalizeSave(parsed);
-        localStorage.setItem(SAVE_KEY, JSON.stringify(normalized));
-        return normalized;
-      } catch (_err) {
-        const fresh = createDefaultSave();
-        localStorage.setItem(SAVE_KEY, JSON.stringify(fresh));
-        return fresh;
-      }
+      return loadSave();
     }
 
     save() {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(this.data));
-      writeHighestClearedSetting(this.data.records?.highestClearedLevel || 0);
+      this.data = saveSave(this.data);
     }
 
     reset() {
-      localStorage.removeItem(SAVE_KEY);
-      localStorage.removeItem(HIGHEST_CLEARED_KEY);
-      localStorage.removeItem(LEGACY_HIGHEST_CLEARED_KEY);
+      const keys = [
+        SAVE_KEY,
+        SAVE_VERSION_KEY,
+        LEGACY_HIGHEST_CLEARED_KEY,
+        ...Object.values(SAVE_KEYS),
+      ];
+      for (const key of keys) {
+        try {
+          localStorage.removeItem(key);
+        } catch (_err) {
+          // Reset can continue even if a browser blocks one key.
+        }
+      }
       this.data = createDefaultSave();
       this.save();
     }
@@ -1324,6 +1574,7 @@
         this.data.records.clearCount += 1;
         this.data.records.highestClearedLevel = Math.max(this.data.records.highestClearedLevel || 0, levelConfig.order);
         writeHighestClearedSetting(this.data.records.highestClearedLevel);
+        if (levelConfig.order >= 40) this.data.records.finalCleared = true;
         levelRecord.cleared = true;
         levelRecord.clearCount += 1;
         const nextLevel = getNextLevel(levelConfig.id);
@@ -2985,6 +3236,7 @@
         startBtn: document.getElementById("startBtn"),
         cultivationBtn: document.getElementById("cultivationBtn"),
         soundToggleBtn: document.getElementById("soundToggleBtn"),
+        saveInfoBtn: document.getElementById("saveInfoBtn"),
         backHomeBtn: document.getElementById("backHomeBtn"),
         resetSaveBtn: document.getElementById("resetSaveBtn"),
         pauseBtn: document.getElementById("pauseBtn"),
@@ -3016,8 +3268,8 @@
       this.redFlashAlpha = 0;
       this.wallHitFlash = 0;
       this.lastVibrate = 0;
-      this.timeScale = readTimeScaleSetting();
-      this.selectedLevelId = getHighestUnlockedLevelId(this.saveManager.data);
+      this.timeScale = this.saveManager.data.settings.timeScale === 2 ? 2 : 1;
+      this.selectedLevelId = getSavedSelectedLevelId(this.saveManager.data);
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
 
       this.bindEvents();
@@ -3039,6 +3291,7 @@
       this.dom.speedBtn.addEventListener("click", () => this.toggleTimeScale());
       this.dom.cultivationBtn.addEventListener("click", () => this.openCultivation());
       this.dom.soundToggleBtn.addEventListener("click", () => this.toggleSound());
+      this.dom.saveInfoBtn.addEventListener("click", () => this.showSaveInfo());
       this.dom.backHomeBtn.addEventListener("click", () => this.showHome());
       this.dom.resultHomeBtn.addEventListener("click", () => this.showHome());
       this.dom.resetSaveBtn.addEventListener("click", () => this.resetSave());
@@ -3173,6 +3426,8 @@
         return;
       }
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
+      this.saveManager.data.selectedLevelId = this.selectedLevelId;
+      this.saveManager.save();
       this.reset();
       this.state = "playing";
       this.dom.homeOverlay.classList.add("hidden");
@@ -3191,6 +3446,8 @@
       const level = getLevelById(levelId);
       this.selectedLevelId = level.id;
       this.currentLevelConfig = level;
+      this.saveManager.data.selectedLevelId = level.id;
+      this.saveManager.save();
       this.start();
     }
 
@@ -3224,6 +3481,8 @@
       this.state = "home";
       this.selectedLevelId = getHighestUnlockedLevelId(this.saveManager.data);
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
+      this.saveManager.data.selectedLevelId = this.selectedLevelId;
+      this.saveManager.save();
       this.dom.homeOverlay.classList.remove("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
       this.dom.gameOverOverlay.classList.add("hidden");
@@ -3250,6 +3509,8 @@
     toggleTimeScale() {
       this.timeScale = this.timeScale === 1 ? 2 : 1;
       writeTimeScaleSetting(this.timeScale);
+      this.saveManager.data.settings.timeScale = this.timeScale;
+      this.saveManager.save();
       this.renderTimeScale();
       this.showToast(this.timeScale === 2 ? "战斗速度 x2" : "战斗速度 x1");
     }
@@ -3261,12 +3522,35 @@
       this.dom.speedBtn.setAttribute("aria-pressed", this.timeScale === 2 ? "true" : "false");
     }
 
+    showSaveInfo() {
+      const save = this.saveManager.data;
+      const highestCleared = save.records.highestClearedLevel || 0;
+      const highestUnlocked = Math.min(40, highestCleared + 1);
+      const totalTalentLevel = Object.values(save.talents || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+      const info = [
+        `存档版本：${SAVE_VERSION}`,
+        `localStorage：${isLocalStorageAvailable() ? "可用" : "不可用"}`,
+        `灵石：${save.coins || 0}`,
+        `仙玉：${save.jade || 0}`,
+        `最高通关：第 ${highestCleared} 关`,
+        `最高解锁：第 ${highestUnlocked} 关`,
+        `当前选择：第 ${getLevelById(this.selectedLevelId).order} 关`,
+        `宗门强化总等级：${totalTalentLevel}`,
+        `礼包码记录：${(save.redeemedCodes || []).length} 个`,
+        `每日奖励日期：${save.lastDailyRewardDate || "未领取"}`,
+        `速度设置：${this.timeScale}x`,
+        `模拟充值：${save.totalRechargeTest || 0}`,
+      ].join("\n");
+      window.alert(info);
+    }
+
     resetSave() {
       const ok = window.confirm("确定要重置存档吗？灵石、宝石、功法和历史战绩都会清空。");
       if (!ok) return;
       this.saveManager.reset();
       this.selectedLevelId = getHighestUnlockedLevelId(this.saveManager.data);
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
+      this.timeScale = this.saveManager.data.settings.timeScale === 2 ? 2 : 1;
       this.reset();
       this.renderHome();
       this.renderCultivation();
@@ -4336,6 +4620,8 @@
           }
           this.selectedLevelId = level.id;
           this.currentLevelConfig = level;
+          this.saveManager.data.selectedLevelId = level.id;
+          this.saveManager.save();
           this.renderLevelSelector();
         });
         this.dom.levelList.appendChild(button);
