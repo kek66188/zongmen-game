@@ -512,7 +512,34 @@ h3 {
 }
 
 #gameOverOverlay .control-row {
-  grid-template-columns: 1fr;
+  position: sticky;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 3;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid rgba(245, 215, 138, 0.26);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(215, 255, 245, 0.18), rgba(159, 217, 207, 0.1)),
+    rgba(23, 63, 66, 0.78);
+  box-shadow: 0 -8px 18px rgba(12, 50, 51, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+#gameOverOverlay #againBtn {
+  grid-column: 1 / -1;
+}
+
+#gameOverOverlay.failure #resultHomeBtn {
+  grid-column: 1 / -1;
+}
+
+#gameOverOverlay .control-row button {
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 14px;
 }
 
 .button-stack {
@@ -592,11 +619,17 @@ h3 {
 }
 
 .screen-overlay.scrollable,
-#homeOverlay {
+#homeOverlay,
+#gameOverOverlay {
   align-items: flex-start;
   justify-content: center;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+#gameOverOverlay {
+  padding: max(12px, env(safe-area-inset-top)) 12px max(24px, env(safe-area-inset-bottom));
 }
 
 .screen-overlay.hidden,
@@ -667,6 +700,20 @@ h3 {
 
 .dialog.compact {
   padding: 24px 18px 18px;
+}
+
+#gameOverOverlay .result-dialog {
+  overflow: visible;
+  margin: 0 auto;
+  padding: 18px 14px 14px;
+}
+
+#gameOverOverlay .eyebrow {
+  margin-bottom: 2px;
+}
+
+#gameOverOverlay h2 {
+  font-size: clamp(22px, 7vw, 28px);
 }
 
 .home-dialog {
@@ -882,6 +929,32 @@ h3 {
 
 .result-shards {
   margin: -4px 0 14px;
+}
+
+#gameOverOverlay .result-grid {
+  gap: 6px;
+  margin: 10px 0 10px;
+}
+
+#gameOverOverlay .result-grid div,
+#gameOverOverlay .result-shards {
+  padding: 8px 9px;
+  border-radius: 16px;
+}
+
+#gameOverOverlay .result-grid strong,
+#gameOverOverlay .result-shards strong {
+  margin-top: 2px;
+  font-size: clamp(16px, 5vw, 19px);
+}
+
+#gameOverOverlay .result-shards {
+  margin: -2px 0 8px;
+}
+
+#gameOverOverlay .unlock-notice {
+  margin: 8px 0;
+  padding: 9px 10px;
 }
 
 .unlock-notice {
@@ -1169,6 +1242,37 @@ h3 {
   to {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+}
+
+@media (max-height: 680px) {
+  #gameOverOverlay {
+    padding: max(8px, env(safe-area-inset-top)) 10px max(16px, env(safe-area-inset-bottom));
+  }
+
+  #gameOverOverlay .result-dialog {
+    padding: 14px 12px 12px;
+    border-radius: 24px;
+  }
+
+  #gameOverOverlay .result-grid {
+    gap: 5px;
+    margin: 8px 0;
+  }
+
+  #gameOverOverlay .result-grid div,
+  #gameOverOverlay .result-shards {
+    padding: 7px 8px;
+  }
+
+  #gameOverOverlay .result-grid span,
+  #gameOverOverlay .result-shards span {
+    font-size: 10px;
+  }
+
+  #gameOverOverlay .control-row {
+    gap: 6px;
+    padding: 6px;
   }
 }
 

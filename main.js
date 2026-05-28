@@ -4258,6 +4258,7 @@
       }
       this.configureResultButtons(victory);
       this.dom.gameOverOverlay.classList.remove("hidden");
+      this.dom.gameOverOverlay.scrollTop = 0;
       this.floatingTexts.push(new FloatingText(`+${reward.coins}灵石`, this.width / 2, this.wallY - 110, "#fff1bd", { size: 18, life: 1.2, kind: "crit" }));
       for (let i = 0; i < 18; i += 1) {
         this.addParticle(this.width / 2, this.wallY - 90, "#fff1bd", rand(-80, 80), rand(-120, -25), rand(2, 4), rand(0.55, 1), "coin");
