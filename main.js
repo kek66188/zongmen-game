@@ -3,9 +3,9 @@
 
   const DEBUG_BALANCE = false;
   const DEBUG_BOUNDS = false;
-  const UI_SAFE_TOP = 86;
-  const UI_SAFE_BOTTOM = 120;
-  const BATTLE_TOP_GAP = 12;
+  const UI_SAFE_TOP = 54;
+  const UI_SAFE_BOTTOM = 96;
+  const BATTLE_TOP_GAP = 8;
   const LEVEL_CONFIG = {
     level1: {
       id: "level1",
@@ -3021,7 +3021,7 @@
 
       this.width = 360;
       this.height = 560;
-      this.wallHeight = 76;
+      this.wallHeight = 62;
       this.wallY = this.height - this.wallHeight;
       this.uiSafeTop = UI_SAFE_TOP;
       this.uiSafeBottom = UI_SAFE_BOTTOM;
@@ -3314,13 +3314,13 @@
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       this.width = Math.max(280, rect.width || 360);
       this.height = Math.max(260, rect.height || 520);
-      this.uiSafeTop = clamp(this.height * 0.16, 46, UI_SAFE_TOP);
-      this.uiSafeBottom = clamp(this.height * 0.18, 80, UI_SAFE_BOTTOM);
+      this.uiSafeTop = clamp(this.height * 0.08, 32, UI_SAFE_TOP);
+      this.uiSafeBottom = clamp(this.height * 0.13, 70, UI_SAFE_BOTTOM);
       this.battleTop = this.uiSafeTop + BATTLE_TOP_GAP;
-      this.wallHeight = clamp(this.height * 0.14, 58, 86);
+      this.wallHeight = clamp(this.height * 0.12, 52, 76);
       const maxWallY = this.height - this.wallHeight;
       const minWallY = Math.min(maxWallY, this.battleTop + 120);
-      this.wallY = clamp(this.height - this.uiSafeBottom + 20, minWallY, maxWallY);
+      this.wallY = clamp(this.height - this.uiSafeBottom + 14, minWallY, maxWallY);
       this.wallHeight = this.height - this.wallY;
       this.battleBottom = this.wallY - 8;
       this.canvas.width = Math.floor(this.width * dpr);
