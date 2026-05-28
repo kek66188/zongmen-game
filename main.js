@@ -383,7 +383,7 @@
     "筑基妖潮", "疾影来袭", "石甲破阵", "毒雾山谷", "妖火焚林",
     "灵脉震荡", "夜叉窥门", "护盾妖阵", "群妖叩关", "筑基终劫",
     "金丹魔影", "飞妖掠空", "咒师结阵", "玄甲压境", "雷云妖潮",
-    "血月山门", "远袭妖师", "双阵夹击", "万妖试炼", "金丹终战",
+    "血月山门", "咒纹妖师", "双阵夹击", "万妖试炼", "金丹终战",
     "元婴大劫", "妖王前锋", "冥雾围山", "破盾巨潮", "天魔压境",
     "灵墙将碎", "四方妖阵", "妖王亲临", "山门死守", "万妖终劫",
   ];
@@ -747,10 +747,6 @@
       visual: "caster",
       body: "#34254d",
       eye: "#ff6b57",
-      ranged: true,
-      stopRate: 0.58,
-      castInterval: 2.6,
-      castDamageMult: 0.85,
     },
     xuanArmor: {
       name: "玄甲巨妖",
@@ -860,10 +856,6 @@
       body: "#3a2854",
       eye: "#fff1bd",
       boss: true,
-      ranged: true,
-      stopRate: 0.46,
-      castInterval: 2.4,
-      castDamageMult: 1.15,
       summonTypes: ["caster", "poison"],
       summonInterval: 7,
       phaseShieldRate: 0.55,
@@ -883,10 +875,6 @@
       body: "#4a2627",
       eye: "#fff1bd",
       boss: true,
-      ranged: true,
-      stopRate: 0.43,
-      castInterval: 2.2,
-      castDamageMult: 1.25,
       summonTypes: ["yaksha", "shield"],
       summonInterval: 6.4,
       phaseSummons: [
@@ -1504,7 +1492,6 @@
       this.hitPulse = 0;
       this.burnVisualUntil = 0;
       this.visualSeed = rand(0, Math.PI * 2);
-      this.castTimer = rand(1.2, config.castInterval || 3);
       this.specialTimer = rand(2.5, config.summonInterval || 5);
       this.phaseFlags = {};
       this.targetable = options.targetable === true || this.y >= game.battleTop + this.radius;
@@ -1523,19 +1510,7 @@
       if (game.elapsed < this.stunUntil) speed = 0;
       else if (game.elapsed < this.slowUntil) speed *= this.slowFactor;
       speed *= game.getEnemyAuraSpeedBonus(this);
-
-      const stopY = this.config.ranged
-        ? game.battleTop + (game.wallY - game.battleTop) * (this.config.stopRate || 0.58)
-        : Infinity;
-      if (this.config.ranged && this.targetable && this.y >= stopY) {
-        this.castTimer -= dt;
-        if (this.castTimer <= 0) {
-          game.enemyCastWallSpell(this);
-          this.castTimer = this.config.castInterval || 3;
-        }
-      } else {
-        this.y += speed * dt;
-      }
+      this.y += speed * dt;
 
       if (this.config.explodeNearWall && this.y + this.radius >= game.wallY - 26) {
         game.explodeEnemyNearWall(this);
@@ -3621,16 +3596,6 @@
         this.wallHp <= this.maxWallHp * this.currentLevelConfig.emergencyHealThreshold
       ) {
         this.triggerEmergencyHeal();
-      }
-    }
-
-    enemyCastWallSpell(enemy) {
-      if (!enemy || enemy.dead) return;
-      const amount = Math.max(1, Math.round(enemy.damage * (enemy.config.castDamageMult || 0.8)));
-      this.damageWall(amount, enemy.x, this.wallY - 18);
-      this.floatingTexts.push(new FloatingText("咒", enemy.x, enemy.y - enemy.radius - 10, "#fff1bd", { size: 15, life: 0.8 }));
-      for (let i = 0; i < 8; i += 1) {
-        this.addParticle(enemy.x, enemy.y, i % 2 ? "#bfa8ff" : "#fff1bd", rand(-45, 45), rand(-65, 5), rand(1.5, 3.5), rand(0.28, 0.55), "thunder");
       }
     }
 
