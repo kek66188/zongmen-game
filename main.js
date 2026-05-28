@@ -2263,7 +2263,8 @@
       }
       if (this.kind === "poison") {
         this.tickTimer = (this.tickTimer || 0) + dt;
-        if (this.tickTimer >= 0.5) {
+        const touchingWall = this.y + this.radius >= game.wallY - 10;
+        if (touchingWall && this.tickTimer >= 0.5) {
           this.tickTimer = 0;
           game.damageWall(this.wallDamage || 1, this.x, game.wallY - 18);
         }
