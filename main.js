@@ -1460,6 +1460,130 @@
     return saveSave(save);
   }
 
+  function normalizeSaveCode(code) {
+    return String(code || "")
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .replace(/^ZM/, "")
+      .slice(0, 8)
+      .replace(/^(.{4})(.{1,4})$/, "ZM-$1-$2")
+      .replace(/^$/, "");
+  }
+
+  function isValidSaveCode(code) {
+    return /^ZM-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/.test(String(code || "").toUpperCase());
+  }
+
+  function collectSaveData(sourceSave) {
+    const save = reconcileSaveProgress(normalizeSave(sourceSave || loadSave()));
+    const highestCleared = save.records.highestClearedLevel || 0;
+    return {
+      saveVersion: SAVE_VERSION,
+      exportedAt: Date.now(),
+      spiritStone: save.coins || 0,
+      jade: save.jade || 0,
+      highestClearedLevel: highestCleared,
+      highestUnlockedLevel: Math.min(40, highestCleared + 1),
+      selectedLevel: save.selectedLevelId || getHighestUnlockedLevelId(save),
+      bestKills: save.records.bestKills || 0,
+      bestSurvivalTime: save.records.bestSurvivalTime || 0,
+      highestPlayerLevel: save.records.highestPlayerLevel || save.records.bestLevel || 1,
+      clearCount: save.records.clearCount || 0,
+      finalCleared: save.records.finalCleared === true,
+      upgrades: save.talents || {},
+      gems: save.gems || {},
+      levels: save.levels || {},
+      records: save.records || {},
+      redeemedCodes: save.redeemedCodes || [],
+      lastDailyRewardDate: save.lastDailyRewardDate || "",
+      timeScale: save.settings?.timeScale === 2 ? 2 : 1,
+      soundEnabled: save.settings?.soundEnabled !== false,
+      totalRechargeTest: save.totalRechargeTest || 0,
+    };
+  }
+
+  function applySaveData(saveData) {
+    if (!saveData || typeof saveData !== "object") throw new Error("云存档数据格式错误");
+    const records = {
+      ...(saveData.records && typeof saveData.records === "object" ? saveData.records : {}),
+      bestKills: Number(saveData.bestKills) || 0,
+      bestSurvivalTime: Number(saveData.bestSurvivalTime) || 0,
+      bestLevel: Number(saveData.highestPlayerLevel) || Number(saveData.bestLevel) || 1,
+      highestPlayerLevel: Number(saveData.highestPlayerLevel) || Number(saveData.bestLevel) || 1,
+      clearCount: Number(saveData.clearCount) || 0,
+      highestClearedLevel: Number(saveData.highestClearedLevel) || 0,
+      finalCleared: saveData.finalCleared === true,
+    };
+    const source = {
+      version: Number(saveData.saveVersion) || SAVE_VERSION,
+      coins: Number(saveData.spiritStone ?? saveData.coins) || 0,
+      jade: Number(saveData.jade) || 0,
+      selectedLevelId: saveData.selectedLevel || saveData.selectedLevelId || "level1",
+      gems: saveData.gems || {},
+      talents: saveData.upgrades || saveData.talents || {},
+      levels: saveData.levels || null,
+      records,
+      redeemedCodes: Array.isArray(saveData.redeemedCodes) ? saveData.redeemedCodes : [],
+      lastDailyRewardDate: typeof saveData.lastDailyRewardDate === "string" ? saveData.lastDailyRewardDate : "",
+      totalRechargeTest: Number(saveData.totalRechargeTest) || 0,
+      settings: {
+        soundEnabled: saveData.soundEnabled !== false,
+        timeScale: Number(saveData.timeScale) === 2 ? 2 : 1,
+      },
+    };
+    return saveSave(reconcileSaveProgress(normalizeSave(source)));
+  }
+
+  async function readJsonResponse(response) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (_err) {
+      // GitHub Pages returns an HTML 404 for /api/*.
+    }
+    if (!response.ok) {
+      const fallback = response.status === 404
+        ? "云存档服务未启用，请部署到 Vercel 后使用。"
+        : `云存档请求失败（${response.status}）`;
+      throw new Error(data?.error || fallback);
+    }
+    if (!data || data.ok === false) throw new Error(data?.error || "云存档服务返回异常");
+    return data;
+  }
+
+  async function uploadCloudSave(saveData = collectSaveData()) {
+    const bytes = new Blob([JSON.stringify(saveData)]).size;
+    if (bytes > 100 * 1024) throw new Error("存档过大，暂时无法上传云存档。");
+    let response;
+    try {
+      response = await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ saveData }),
+      });
+    } catch (_err) {
+      throw new Error("云存档服务未启用，请部署到 Vercel 后使用。");
+    }
+    return readJsonResponse(response);
+  }
+
+  async function loadCloudSaveByCode(code) {
+    const normalized = normalizeSaveCode(code);
+    if (!isValidSaveCode(normalized)) throw new Error("存档码格式不正确，请输入类似 ZM-8F3K-29D7 的格式。");
+    let response;
+    try {
+      response = await fetch(`/api/load?code=${encodeURIComponent(normalized)}`);
+    } catch (_err) {
+      throw new Error("云存档服务未启用，请部署到 Vercel 后使用。");
+    }
+    return readJsonResponse(response);
+  }
+
+  function showCloudSavePanel() {
+    if (window.hongyunGame) window.hongyunGame.showSaveInfo();
+  }
+
   const getMetaBonuses = (save) => {
     const data = normalizeSave(save);
     const gems = data.gems;
@@ -3208,6 +3332,7 @@
         skillStrip: document.getElementById("skillStrip"),
         homeOverlay: document.getElementById("homeOverlay"),
         cultivationOverlay: document.getElementById("cultivationOverlay"),
+        saveInfoOverlay: document.getElementById("saveInfoOverlay"),
         upgradeOverlay: document.getElementById("upgradeOverlay"),
         upgradeOptions: document.getElementById("upgradeOptions"),
         gameOverOverlay: document.getElementById("gameOverOverlay"),
@@ -3237,6 +3362,13 @@
         cultivationBtn: document.getElementById("cultivationBtn"),
         soundToggleBtn: document.getElementById("soundToggleBtn"),
         saveInfoBtn: document.getElementById("saveInfoBtn"),
+        saveInfoGrid: document.getElementById("saveInfoGrid"),
+        uploadCloudSaveBtn: document.getElementById("uploadCloudSaveBtn"),
+        loadCloudSaveBtn: document.getElementById("loadCloudSaveBtn"),
+        cloudSaveCodeInput: document.getElementById("cloudSaveCodeInput"),
+        cloudSaveResult: document.getElementById("cloudSaveResult"),
+        copyCloudCodeBtn: document.getElementById("copyCloudCodeBtn"),
+        closeSaveInfoBtn: document.getElementById("closeSaveInfoBtn"),
         backHomeBtn: document.getElementById("backHomeBtn"),
         resetSaveBtn: document.getElementById("resetSaveBtn"),
         pauseBtn: document.getElementById("pauseBtn"),
@@ -3292,6 +3424,13 @@
       this.dom.cultivationBtn.addEventListener("click", () => this.openCultivation());
       this.dom.soundToggleBtn.addEventListener("click", () => this.toggleSound());
       this.dom.saveInfoBtn.addEventListener("click", () => this.showSaveInfo());
+      this.dom.closeSaveInfoBtn.addEventListener("click", () => this.closeSaveInfo());
+      this.dom.uploadCloudSaveBtn.addEventListener("click", () => this.handleUploadCloudSave());
+      this.dom.loadCloudSaveBtn.addEventListener("click", () => this.handleLoadCloudSave());
+      this.dom.copyCloudCodeBtn.addEventListener("click", () => this.copyCloudCode());
+      this.dom.cloudSaveCodeInput.addEventListener("input", () => {
+        this.dom.cloudSaveCodeInput.value = normalizeSaveCode(this.dom.cloudSaveCodeInput.value);
+      });
       this.dom.backHomeBtn.addEventListener("click", () => this.showHome());
       this.dom.resultHomeBtn.addEventListener("click", () => this.showHome());
       this.dom.resetSaveBtn.addEventListener("click", () => this.resetSave());
@@ -3432,6 +3571,7 @@
       this.state = "playing";
       this.dom.homeOverlay.classList.add("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
+      this.dom.saveInfoOverlay.classList.add("hidden");
       this.dom.gameOverOverlay.classList.add("hidden");
       this.dom.upgradeOverlay.classList.add("hidden");
       this.dom.pauseBtn.textContent = "调息";
@@ -3485,6 +3625,7 @@
       this.saveManager.save();
       this.dom.homeOverlay.classList.remove("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
+      this.dom.saveInfoOverlay.classList.add("hidden");
       this.dom.gameOverOverlay.classList.add("hidden");
       this.dom.upgradeOverlay.classList.add("hidden");
       this.dom.pauseBtn.disabled = false;
@@ -3523,25 +3664,108 @@
     }
 
     showSaveInfo() {
+      this.renderSaveInfo();
+      this.setCloudResult("");
+      this.lastCloudCode = "";
+      this.dom.copyCloudCodeBtn.classList.add("hidden");
+      this.dom.saveInfoOverlay.classList.remove("hidden");
+    }
+
+    closeSaveInfo() {
+      this.dom.saveInfoOverlay.classList.add("hidden");
+    }
+
+    renderSaveInfo() {
       const save = this.saveManager.data;
       const highestCleared = save.records.highestClearedLevel || 0;
       const highestUnlocked = Math.min(40, highestCleared + 1);
       const totalTalentLevel = Object.values(save.talents || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
-      const info = [
-        `存档版本：${SAVE_VERSION}`,
-        `localStorage：${isLocalStorageAvailable() ? "可用" : "不可用"}`,
-        `灵石：${save.coins || 0}`,
-        `仙玉：${save.jade || 0}`,
-        `最高通关：第 ${highestCleared} 关`,
-        `最高解锁：第 ${highestUnlocked} 关`,
-        `当前选择：第 ${getLevelById(this.selectedLevelId).order} 关`,
-        `宗门强化总等级：${totalTalentLevel}`,
-        `礼包码记录：${(save.redeemedCodes || []).length} 个`,
-        `每日奖励日期：${save.lastDailyRewardDate || "未领取"}`,
-        `速度设置：${this.timeScale}x`,
-        `模拟充值：${save.totalRechargeTest || 0}`,
-      ].join("\n");
-      window.alert(info);
+      const items = [
+        ["存档版本", SAVE_VERSION],
+        ["localStorage", isLocalStorageAvailable() ? "可用" : "不可用"],
+        ["灵石", save.coins || 0],
+        ["仙玉", save.jade || 0],
+        ["最高通关", `第 ${highestCleared} 关`],
+        ["最高解锁", `第 ${highestUnlocked} 关`],
+        ["当前选择", `第 ${getLevelById(this.selectedLevelId).order} 关`],
+        ["强化总等级", totalTalentLevel],
+        ["礼包码记录", `${(save.redeemedCodes || []).length} 个`],
+        ["每日奖励", save.lastDailyRewardDate || "未领取"],
+        ["速度设置", `${this.timeScale}x`],
+        ["模拟充值", save.totalRechargeTest || 0],
+      ];
+      this.dom.saveInfoGrid.innerHTML = items
+        .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
+        .join("");
+    }
+
+    setCloudResult(message, code = "") {
+      if (!message) {
+        this.dom.cloudSaveResult.textContent = "";
+        this.dom.cloudSaveResult.classList.add("hidden");
+        return;
+      }
+      this.dom.cloudSaveResult.innerHTML = code
+        ? `${message}<strong>${code}</strong>换手机或清缓存后，可用该存档码恢复进度。`
+        : message;
+      this.dom.cloudSaveResult.classList.remove("hidden");
+    }
+
+    async handleUploadCloudSave() {
+      this.dom.uploadCloudSaveBtn.disabled = true;
+      this.setCloudResult("正在上传云存档...");
+      try {
+        const result = await uploadCloudSave(collectSaveData(this.saveManager.data));
+        this.lastCloudCode = result.code;
+        this.dom.cloudSaveCodeInput.value = result.code;
+        this.dom.copyCloudCodeBtn.classList.remove("hidden");
+        this.setCloudResult("云存档已上传\n请保存你的存档码：", result.code);
+      } catch (err) {
+        this.setCloudResult(err.message || "云存档上传失败");
+      } finally {
+        this.dom.uploadCloudSaveBtn.disabled = false;
+      }
+    }
+
+    async handleLoadCloudSave() {
+      const code = normalizeSaveCode(this.dom.cloudSaveCodeInput.value);
+      this.dom.cloudSaveCodeInput.value = code;
+      this.dom.loadCloudSaveBtn.disabled = true;
+      this.setCloudResult("正在读取云存档...");
+      try {
+        const result = await loadCloudSaveByCode(code);
+        const ok = window.confirm("读取云存档会覆盖当前本地存档，请确认已经备份当前进度。\n\n确认覆盖？");
+        if (!ok) {
+          this.setCloudResult("已取消读取云存档。");
+          return;
+        }
+        this.saveManager.data = applySaveData(result.saveData);
+        this.timeScale = this.saveManager.data.settings.timeScale === 2 ? 2 : 1;
+        this.selectedLevelId = getSavedSelectedLevelId(this.saveManager.data);
+        this.currentLevelConfig = getLevelById(this.selectedLevelId);
+        this.reset();
+        this.renderTimeScale();
+        this.renderHome();
+        this.renderCultivation();
+        this.renderSaveInfo();
+        this.setCloudResult(`云存档读取成功：${result.code}`);
+        this.showToast("云存档读取成功");
+      } catch (err) {
+        this.setCloudResult(err.message || "云存档读取失败");
+      } finally {
+        this.dom.loadCloudSaveBtn.disabled = false;
+      }
+    }
+
+    async copyCloudCode() {
+      const code = this.lastCloudCode || normalizeSaveCode(this.dom.cloudSaveCodeInput.value);
+      if (!code) return;
+      try {
+        await navigator.clipboard.writeText(code);
+        this.showToast("存档码已复制");
+      } catch (_err) {
+        this.setCloudResult(`请手动复制存档码：`, code);
+      }
     }
 
     resetSave() {
@@ -5120,5 +5344,6 @@
   window.addEventListener("DOMContentLoaded", () => {
     window.hongyunGame = new Game();
     window.getMetaBonuses = () => window.hongyunGame.saveManager.getMetaBonuses();
+    window.showCloudSavePanel = showCloudSavePanel;
   });
 })();

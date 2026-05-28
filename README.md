@@ -270,6 +270,53 @@ zmsw_saveVersion
 
 首页提供“存档信息”按钮，可查看 localStorage 是否可用、灵石、仙玉、最高通关、最高解锁、宗门强化总等级、速度设置和当前存档版本。
 
+## 手动云存档
+
+游戏新增“手动云存档”功能，不需要账号、手机号或密码。玩家在“存档信息”面板里点击“上传云存档”，服务端会返回一个类似 `ZM-8F3K-29D7` 的存档码。换手机或清缓存后，在同一面板输入存档码并点击“读取云存档”，确认覆盖本地进度后即可恢复。
+
+云存档 API：
+
+```text
+POST /api/save
+GET  /api/load?code=ZM-XXXX-XXXX
+GET  /api/health
+```
+
+云端存储使用 Vercel KV / Upstash Redis REST API。需要在 Vercel 项目环境变量里配置：
+
+```text
+KV_REST_API_URL
+KV_REST_API_TOKEN
+```
+
+如果没有配置环境变量，接口会返回：
+
+```json
+{
+  "ok": false,
+  "error": "云存档服务未配置 KV_REST_API_URL / KV_REST_API_TOKEN"
+}
+```
+
+GitHub Pages 只能托管静态文件，不能运行 `api/save.js`、`api/load.js`、`api/health.js` 这些 Serverless Functions。因此纯 GitHub Pages 地址仍然可以正常游玩和使用本地 localStorage 存档，但云存档会提示“云存档服务未启用，请部署到 Vercel 后使用。”朋友要使用云存档，应访问 Vercel 部署后的游戏地址。
+
+Vercel 部署步骤：
+
+```bash
+vercel
+```
+
+或在 Vercel 控制台导入 GitHub 仓库 `kek66188/zongmen-game`，然后在 Project Settings -> Environment Variables 添加 `KV_REST_API_URL` 和 `KV_REST_API_TOKEN`，重新部署。
+
+测试云存档：
+
+1. 打开 Vercel 部署地址。
+2. 进入“存档信息”。
+3. 点击“上传云存档”，记录返回的 `ZM-XXXX-XXXX`。
+4. 换浏览器或清理本地存档。
+5. 输入存档码，点击“读取云存档”。
+6. 确认覆盖后刷新页面，检查灵石、关卡和宗门强化是否恢复。
+
 然后在首页选择第 10、20、30、40 关，分别验证黑角妖将、筑基妖帅、金丹魔修和万妖王。
 
 如果以后需要做账号同步，需要新增后端服务、用户注册/登录、数据库、存档上传/下载接口和防作弊校验。

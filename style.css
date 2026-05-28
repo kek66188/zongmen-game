@@ -620,7 +620,8 @@ h3 {
 
 .screen-overlay.scrollable,
 #homeOverlay,
-#gameOverOverlay {
+#gameOverOverlay,
+#saveInfoOverlay {
   align-items: flex-start;
   justify-content: center;
   overflow-y: auto;
@@ -630,6 +631,10 @@ h3 {
 
 #gameOverOverlay {
   padding: max(12px, env(safe-area-inset-top)) 12px max(24px, env(safe-area-inset-bottom));
+}
+
+#saveInfoOverlay {
+  padding: max(14px, env(safe-area-inset-top)) 12px max(20px, env(safe-area-inset-bottom));
 }
 
 .screen-overlay.hidden,
@@ -714,6 +719,104 @@ h3 {
 
 #gameOverOverlay h2 {
   font-size: clamp(22px, 7vw, 28px);
+}
+
+.save-dialog {
+  overflow: visible;
+  margin: 0 auto;
+}
+
+.save-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.save-info-grid div,
+.cloud-save-box,
+.cloud-save-result {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(191, 238, 228, 0.34);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(243, 255, 249, 0.2), rgba(159, 217, 207, 0.1)),
+    rgba(31, 86, 87, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+.save-info-grid span {
+  display: block;
+  color: rgba(244, 255, 248, 0.68);
+  font-size: 11px;
+}
+
+.save-info-grid strong {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--gold-soft);
+  font-size: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cloud-save-box {
+  display: grid;
+  gap: 9px;
+  margin: 12px 0;
+}
+
+.cloud-save-tip {
+  margin: 0;
+  color: rgba(244, 255, 248, 0.74);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.cloud-code-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.cloud-code-input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid rgba(245, 215, 138, 0.44);
+  border-radius: 999px;
+  outline: none;
+  color: var(--jade-white);
+  background:
+    linear-gradient(135deg, rgba(243, 255, 249, 0.2), rgba(159, 217, 207, 0.08)),
+    rgba(23, 63, 66, 0.46);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  font: inherit;
+  text-transform: uppercase;
+}
+
+.cloud-code-input::placeholder {
+  color: rgba(244, 255, 248, 0.45);
+}
+
+.cloud-save-result {
+  color: var(--jade-white);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.cloud-save-result strong {
+  display: block;
+  margin: 6px 0;
+  color: var(--gold-soft);
+  font-size: clamp(20px, 7vw, 28px);
+  letter-spacing: 0;
+  text-align: center;
 }
 
 .home-dialog {
@@ -1273,6 +1376,11 @@ h3 {
   #gameOverOverlay .control-row {
     gap: 6px;
     padding: 6px;
+  }
+
+  .save-info-grid,
+  .cloud-code-row {
+    grid-template-columns: 1fr;
   }
 }
 

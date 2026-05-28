@@ -148,6 +148,28 @@
         </div>
       </section>
 
+      <section class="screen-overlay scrollable hidden" id="saveInfoOverlay" aria-live="polite">
+        <div class="dialog compact save-dialog">
+          <p class="eyebrow">本地与云端</p>
+          <h2>存档信息</h2>
+          <div class="save-info-grid" id="saveInfoGrid"></div>
+
+          <section class="cloud-save-box">
+            <div class="panel-title">云存档</div>
+            <p class="cloud-save-tip">无需账号。上传后请自己保存存档码，换手机或清缓存后可用它恢复进度。</p>
+            <button type="button" class="primary-button" id="uploadCloudSaveBtn">上传云存档</button>
+            <div class="cloud-code-row">
+              <input id="cloudSaveCodeInput" class="cloud-code-input" type="text" inputmode="text" autocomplete="off" placeholder="请输入存档码" />
+              <button type="button" class="ghost-button" id="loadCloudSaveBtn">读取云存档</button>
+            </div>
+            <div class="cloud-save-result hidden" id="cloudSaveResult"></div>
+            <button type="button" class="ghost-button hidden" id="copyCloudCodeBtn">复制存档码</button>
+          </section>
+
+          <button type="button" class="ghost-button" id="closeSaveInfoBtn">返回山门</button>
+        </div>
+      </section>
+
       <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
     </main>
 
