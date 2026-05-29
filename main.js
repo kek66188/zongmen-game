@@ -11,7 +11,7 @@
       id: "level1",
       order: 1,
       name: "山门初守",
-      description: "妖潮初现，守住宗门山门。",
+      description: "妖潮初现，守住取经山门。",
       duration: 120,
       maxEnemies: 80,
       wallHp: 160,
@@ -34,7 +34,7 @@
         { time: 40, text: "巨妖来袭" },
         { time: 70, text: "妖潮汹涌" },
         { time: 95, text: "最后冲击" },
-        { time: 110, text: "宗门决战" },
+        { time: 110, text: "山门决战" },
       ],
       spawnProfiles: [
         { start: 0, end: 20, intervalMin: 1.3, intervalMax: 1.6, extraChance: 0, weights: { imp: 1 } },
@@ -84,7 +84,7 @@
       id: "level3",
       order: 3,
       name: "巨妖压境",
-      description: "巨妖踏破山路，宗门防线承压。",
+      description: "巨妖踏破山路，山门防线承压。",
       duration: 150,
       maxEnemies: 95,
       wallHp: 165,
@@ -286,7 +286,7 @@
         { time: 40, text: "四面妖影" },
         { time: 85, text: "山门告急" },
         { time: 130, text: "妖潮漫山" },
-        { time: 165, text: "死守宗门" },
+        { time: 165, text: "死守山门" },
       ],
       spawnProfiles: [
         { start: 0, end: 40, intervalMin: 1.22, intervalMax: 1.45, extraChance: 0.04, weights: { imp: 0.68, runner: 0.18, shield: 0.1, brute: 0.04 } },
@@ -335,8 +335,8 @@
     level10: {
       id: "level10",
       order: 10,
-      name: "宗门决战",
-      description: "最终妖潮降临，守住此战即护宗成功。",
+      name: "西行决战",
+      description: "最终妖潮降临，守住此战即镇妖成功。",
       duration: 210,
       maxEnemies: 130,
       wallHp: 180,
@@ -357,9 +357,9 @@
         { time: 0, text: "终战开启" },
         { time: 45, text: "妖军倾巢" },
         { time: 95, text: "万妖压境" },
-        { time: 145, text: "宗门血战" },
+        { time: 145, text: "山门血战" },
         { time: 180, text: "最后防线" },
-        { time: 200, text: "护宗一击" },
+        { time: 200, text: "护山一击" },
       ],
       spawnProfiles: [
         { start: 0, end: 45, intervalMin: 1.18, intervalMax: 1.4, extraChance: 0.06, weights: { imp: 0.55, runner: 0.18, shield: 0.14, brute: 0.13 } },
@@ -576,7 +576,7 @@
       { time: 40, text: "巨妖来袭" },
       { time: 70, text: "妖潮汹涌" },
       { time: 95, text: "最后冲击" },
-      { time: 110, text: "宗门决战" },
+      { time: 110, text: "山门决战" },
     ],
     spawnProfiles: [
       { start: 0, end: 20, intervalMin: 1.3, intervalMax: 1.6, extraChance: 0, weights: { foxDemon: 1 } },
@@ -612,6 +612,7 @@
     companions: "zmsw_companions",
     companionProgress: "zmsw_companionProgress",
     pendingCompanionInvites: "zmsw_pendingCompanionInvites",
+    journeyTraining: "zmsw_journeyTraining",
   };
   const HIGHEST_CLEARED_KEY = SAVE_KEYS.highestClearedLevel;
   const LEGACY_HIGHEST_CLEARED_KEY = "highestClearedLevel";
@@ -2639,6 +2640,135 @@
     },
   };
 
+  const JOURNEY_TRAINING_DEFS = {
+    barrier: {
+      name: "山门结界",
+      max: 80,
+      baseCost: 100,
+      current: (level) => `结界生命 +${level * 5}`,
+      next: (level) => `结界生命 +${(level + 1) * 5}`,
+      applies: "所有角色开局结界最大生命。",
+    },
+    weapon: {
+      name: "兵器精通",
+      max: 60,
+      baseCost: 120,
+      current: (level) => `主武器技能伤害 +${(level * 1.5).toFixed(1)}%`,
+      next: (level) => `主武器技能伤害 +${((level + 1) * 1.5).toFixed(1)}%`,
+      applies: "适用于：金箍棒影 / 禅杖佛光 / 钉耙横扫 / 月牙铲斩。",
+    },
+    spell: {
+      name: "法术精通",
+      max: 60,
+      baseCost: 120,
+      current: (level) => `范围法术伤害 +${(level * 1.5).toFixed(1)}%`,
+      next: (level) => `范围法术伤害 +${((level + 1) * 1.5).toFixed(1)}%`,
+      applies: "适用于：火眼金睛 / 莲火佛印 / 妖火乱耙 / 赤砂爆。",
+    },
+    control: {
+      name: "镇妖控制",
+      max: 50,
+      baseCost: 130,
+      current: (level) => `控制伤害 +${level}%，控制效果 +${(level * 0.5).toFixed(1)}%`,
+      next: (level) => `控制伤害 +${level + 1}%，控制效果 +${((level + 1) * 0.5).toFixed(1)}%`,
+      applies: "适用于：定身、梵音、吞势、流沙等迟缓与控制。",
+    },
+    thunder: {
+      name: "天威感应",
+      max: 50,
+      baseCost: 150,
+      current: (level) => `天威伤害 +${(level * 1.5).toFixed(1)}%，弹射保留 +${Math.min(level * 0.2, 12).toFixed(1)}%`,
+      next: (level) => `天威伤害 +${((level + 1) * 1.5).toFixed(1)}%，弹射保留 +${Math.min((level + 1) * 0.2, 12).toFixed(1)}%`,
+      applies: "适用于：筋斗雷 / 金刚雷音 / 震地雷耙 / 卷帘雷击。",
+    },
+    formation: {
+      name: "阵法修行",
+      max: 50,
+      baseCost: 150,
+      current: (level) => `阵法伤害 +${(level * 1.5).toFixed(1)}%，持续时间 +${(level * 0.2).toFixed(1)}%`,
+      next: (level) => `阵法伤害 +${((level + 1) * 1.5).toFixed(1)}%，持续时间 +${((level + 1) * 0.2).toFixed(1)}%`,
+      applies: "适用于：齐天战阵 / 金莲法阵 / 土行耙阵 / 弱水法阵。",
+    },
+    agility: {
+      name: "行者身法",
+      max: 40,
+      baseCost: 180,
+      current: (level) => `所有技能冷却 -${(level * 0.35).toFixed(2)}%`,
+      next: (level) => `所有技能冷却 -${((level + 1) * 0.35).toFixed(2)}%`,
+      applies: "冷却倍率最低为 0.75。",
+    },
+    demonSlayer: {
+      name: "降妖心法",
+      max: 50,
+      baseCost: 220,
+      current: (level) => `对精英和 Boss 伤害 +${level}%`,
+      next: (level) => `对精英和 Boss 伤害 +${level + 1}%`,
+      applies: "对精英妖怪、Boss 妖王额外生效。",
+    },
+    spiritGain: {
+      name: "聚灵行囊",
+      max: 50,
+      baseCost: 160,
+      current: (level) => `通关灵石 +${level * 2}%`,
+      next: (level) => `通关灵石 +${(level + 1) * 2}%`,
+      applies: "影响战斗结算获得的灵石。",
+    },
+    protection: {
+      name: "护法金光",
+      max: 50,
+      baseCost: 180,
+      current: (level) => `结界受到伤害 -${(level * 0.4).toFixed(1)}%`,
+      next: (level) => `结界受到伤害 -${((level + 1) * 0.4).toFixed(1)}%`,
+      applies: "最高可提供 40% 结界减伤。",
+    },
+  };
+
+  const createDefaultJourneyTraining = () => Object.fromEntries(
+    Object.keys(JOURNEY_TRAINING_DEFS).map((id) => [id, 0]),
+  );
+
+  const getJourneyTrainingNextCost = (id, level) => {
+    const def = JOURNEY_TRAINING_DEFS[id];
+    if (!def) return 0;
+    return Math.floor(def.baseCost * Math.pow(1.18, Math.max(0, level)));
+  };
+
+  const journeyTrainingAliases = {
+    barrier: ["barrier", "wall", "castle", "wallHp", "wallFoundation", "wallFortify"],
+    weapon: ["weapon", "sword", "swordDamage", "feijian", "swordComprehension"],
+    spell: ["spell", "fire", "fireDamage", "fireMastery"],
+    control: ["control", "ice", "slow", "frost", "frostSkill", "iceMastery"],
+    thunder: ["thunder", "thunderDamage", "thunderManual", "thunderMastery"],
+    formation: ["formation", "array", "swordArray", "formationOld", "swordArrayAtlas", "swordArrayMastery"],
+    agility: ["agility", "cooldown", "speed", "agilityOld"],
+    demonSlayer: ["demonSlayer", "eliteBossDamage", "bossDamage"],
+    spiritGain: ["spiritGain", "coinGain", "rewardGain", "battleInsight"],
+    protection: ["protection", "damageReduction", "wallDamageReduction", "guard"],
+  };
+
+  const getLegacyJourneyLevel = (source, aliases) => {
+    if (!source || typeof source !== "object") return 0;
+    let level = 0;
+    for (const key of aliases) {
+      const value = Number(source[key]);
+      if (Number.isFinite(value)) level = Math.max(level, Math.floor(value));
+    }
+    return level;
+  };
+
+  const normalizeJourneyTraining = (source = {}, legacy = {}) => {
+    const normalized = createDefaultJourneyTraining();
+    for (const [id, def] of Object.entries(JOURNEY_TRAINING_DEFS)) {
+      const current = Number(source?.[id]);
+      const migrated = getLegacyJourneyLevel(legacy, journeyTrainingAliases[id] || [id]);
+      normalized[id] = clamp(Math.max(
+        Number.isFinite(current) ? Math.floor(current) : 0,
+        migrated,
+      ), 0, def.max);
+    }
+    return normalized;
+  };
+
   const HERO_IDS = ["wukong", "tangseng", "bajie", "shaseng"];
   const HERO_ALIASES = { tang: "tangseng", tangseng: "tangseng" };
   const normalizeHeroId = (id) => HERO_ALIASES[id] || id;
@@ -2941,6 +3071,7 @@
       battleInsight: 0,
       startSpirit: 0,
     },
+    journeyTraining: createDefaultJourneyTraining(),
     records: {
       bestKills: 0,
       bestSurvivalTime: 0,
@@ -3022,6 +3153,10 @@
         ? clamp(Math.floor(level), 0, TALENT_DEFS[id].max)
         : 0;
     }
+    save.journeyTraining = normalizeJourneyTraining(
+      source.journeyTraining || {},
+      { ...(source.upgrades || {}), ...(source.talents || {}) },
+    );
 
     const records = source.records || {};
     save.records.bestKills = Number.isFinite(records.bestKills) ? Math.max(0, Math.floor(records.bestKills)) : 0;
@@ -3192,6 +3327,11 @@
         if (Number.isFinite(level)) save.talents[talentId] = clamp(Math.floor(level), 0, TALENT_DEFS[talentId].max);
       }
     }
+    const mirroredJourneyTraining = loadJSON(SAVE_KEYS.journeyTraining, null);
+    save.journeyTraining = normalizeJourneyTraining(
+      mirroredJourneyTraining || save.journeyTraining,
+      { ...(mirroredUpgrades || {}), ...(save.talents || {}) },
+    );
 
     const redeemed = loadJSON(SAVE_KEYS.redeemedCodes, null);
     if (Array.isArray(redeemed)) {
@@ -3239,6 +3379,7 @@
       }
     }
     save.records.finalCleared = save.records.finalCleared === true || save.records.highestClearedLevel >= 40 || save.levels.level40?.cleared === true;
+    save.journeyTraining = normalizeJourneyTraining(save.journeyTraining || {}, save.talents || {});
     if (save.records.finalCleared && save.levels.level40) {
       save.levels.level40.unlocked = true;
       save.levels.level40.cleared = true;
@@ -3271,6 +3412,7 @@
     saveNumber(SAVE_KEYS.clearCount, data.records.clearCount || 0);
     saveBool(SAVE_KEYS.finalCleared, data.records.finalCleared === true);
     saveJSON(SAVE_KEYS.upgrades, data.talents || {});
+    saveJSON(SAVE_KEYS.journeyTraining, data.journeyTraining || {});
     saveJSON(SAVE_KEYS.redeemedCodes, data.redeemedCodes || []);
     saveString(SAVE_KEYS.lastDailyRewardDate, data.lastDailyRewardDate || "");
     saveNumber(SAVE_KEYS.timeScale, data.settings?.timeScale === 2 ? 2 : 1);
@@ -3321,6 +3463,7 @@
       clearCount: save.records.clearCount || 0,
       finalCleared: save.records.finalCleared === true,
       upgrades: save.talents || {},
+      journeyTraining: save.journeyTraining || {},
       gems: save.gems || {},
       levels: save.levels || {},
       records: save.records || {},
@@ -3366,6 +3509,7 @@
       selectedLevelId: saveData.selectedLevel || saveData.selectedLevelId || "level1",
       gems: saveData.gems || {},
       talents: saveData.upgrades || saveData.talents || {},
+      journeyTraining: saveData.journeyTraining || {},
       levels: saveData.levels || null,
       records,
       redeemedCodes: Array.isArray(saveData.redeemedCodes) ? saveData.redeemedCodes : [],
@@ -3505,6 +3649,7 @@
     const data = normalizeSave(save);
     const gems = data.gems;
     const talents = data.talents;
+    const training = data.journeyTraining || createDefaultJourneyTraining();
     const runes = getRuneBonuses(data);
     const heroId = HERO_IDS.includes(data.selectedHero) ? data.selectedHero : "wukong";
     const hero = HERO_DEFS[heroId] || HERO_DEFS.wukong;
@@ -3522,23 +3667,35 @@
     const tangRare = heroId === "tangseng" ? Math.floor(heroLevel / 5) * 0.005 : 0;
     return {
       damageMultiplier: (1 + gems.attack.level * 0.03) * (heroBonuses.damageMultiplier || 1) * levelDamage,
-      cooldownMultiplier: (1 - Math.min(gems.cooldown.level * 0.02, 0.4)) * (heroBonuses.cooldownMultiplier || 1) * runes.cooldownMultiplier,
-      maxHpBonus: gems.wall.level * 10 + talents.wallFortify * 15 + (runes.maxHpBonus || 0),
+      cooldownMultiplier: (1 - Math.min(gems.cooldown.level * 0.02, 0.4)) *
+        Math.max(0.75, 1 - training.agility * 0.0035) *
+        (heroBonuses.cooldownMultiplier || 1) *
+        runes.cooldownMultiplier,
+      maxHpBonus: gems.wall.level * 10 + training.barrier * 5 + (runes.maxHpBonus || 0),
       maxHpMultiplier: (heroBonuses.maxHpMultiplier || 1) * bajieWall,
       critChance: Math.min(gems.crit.level * 0.02 + (heroBonuses.critChance || 0) + (runes.critChance || 0), 0.65),
       critDamageMultiplier: 2 + (heroBonuses.critDamageBonus || 0) + (heroId === "wukong" ? (heroLevel - 1) * 0.02 : 0),
       expMultiplier: 1 + gems.exp.level * 0.05 + talents.battleInsight * 0.03 + (runes.expMultiplier || 0),
-      swordDamageMultiplier: 1 + talents.swordDamage * 0.05,
-      fireRangeMultiplier: 1 + talents.fireMastery * 0.04 + (heroBonuses.fireRangeMultiplier ? heroBonuses.fireRangeMultiplier - 1 : 0) + (runes.fireRange || 0) + bajieRange,
-      iceSlowBonus: talents.iceMastery * 0.03 + (heroBonuses.iceSlowBonus || 0) + shasengSlow,
-      thunderDamageMultiplier: 1 + talents.thunderMastery * 0.05,
-      swordArrayDamageMultiplier: 1 + talents.swordArrayMastery * 0.05 + (heroBonuses.arrayDamageMultiplier ? heroBonuses.arrayDamageMultiplier - 1 : 0),
+      swordDamageMultiplier: 1 + training.weapon * 0.015,
+      weaponDamageMultiplier: 1 + training.weapon * 0.015,
+      spellDamageMultiplier: 1 + training.spell * 0.015,
+      fireRangeMultiplier: 1 + (heroBonuses.fireRangeMultiplier ? heroBonuses.fireRangeMultiplier - 1 : 0) + (runes.fireRange || 0) + bajieRange,
+      controlDamageMultiplier: 1 + training.control * 0.01,
+      controlPowerBonus: training.control * 0.005,
+      iceSlowBonus: (heroBonuses.iceSlowBonus || 0) + shasengSlow,
+      thunderDamageMultiplier: 1 + training.thunder * 0.015,
+      thunderBounceRetention: Math.min(0.84, 0.72 + training.thunder * 0.002),
+      swordArrayDamageMultiplier: 1 + training.formation * 0.015 + (heroBonuses.arrayDamageMultiplier ? heroBonuses.arrayDamageMultiplier - 1 : 0),
+      formationDamageMultiplier: 1 + training.formation * 0.015,
+      formationDurationMultiplier: 1 + training.formation * 0.002,
       startExp: talents.startSpirit * 5,
       swordPierceBonus: (runes.swordPierce || 0) + (heroId === "wukong" ? breakthrough : 0),
       thunderBounceBonus: runes.thunderBounce || 0,
-      wallDamageReduction: Math.min(0.55, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0) + (heroId === "bajie" ? breakthrough * 0.03 : 0)),
+      wallDamageReduction: Math.min(0.55, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0) + Math.min(0.4, training.protection * 0.004) + (heroId === "bajie" ? breakthrough * 0.03 : 0)),
       retaliationDamage: runes.retaliation || 0,
-      coinMultiplier: runes.coinMultiplier || 0,
+      coinMultiplier: (runes.coinMultiplier || 0) + training.spiritGain * 0.02,
+      spiritStoneRewardMultiplier: 1 + training.spiritGain * 0.02,
+      eliteBossDamageMultiplier: 1 + training.demonSlayer * 0.01,
       rareChanceBonus: (heroBonuses.rareChanceBonus || 0) + tangRare,
       regenPerSecond: (heroBonuses.regenPerSecond || 0) * tangScale,
       shieldChance: heroBonuses.shieldChance || 0,
@@ -3613,6 +3770,20 @@
       this.data.talents[id] += 1;
       this.save();
       return { ok: true, message: `${def.name} 修至 ${this.data.talents[id]} 级` };
+    }
+
+    upgradeJourneyTraining(id) {
+      const def = JOURNEY_TRAINING_DEFS[id];
+      if (!def) return { ok: false, message: "修行项不存在" };
+      this.data.journeyTraining = normalizeJourneyTraining(this.data.journeyTraining || {}, this.data.talents || {});
+      const level = this.data.journeyTraining[id] || 0;
+      if (level >= def.max) return { ok: false, message: "此项修行已圆满" };
+      const cost = getJourneyTrainingNextCost(id, level);
+      if (this.data.coins < cost) return { ok: false, message: "灵石不足" };
+      this.data.coins -= cost;
+      this.data.journeyTraining[id] = level + 1;
+      this.save();
+      return { ok: true, message: `${def.name} 修至 Lv.${this.data.journeyTraining[id]}` };
     }
 
     selectHero(id) {
@@ -3743,7 +3914,8 @@
       const seconds = Math.floor(Math.min(survivalTime, levelConfig.duration));
       const clearReward = victory ? (levelConfig.clearReward || (50 + levelConfig.order * 15 + (levelConfig.boss ? 100 : 0))) : 0;
       const baseCoins = kills + Math.floor(seconds / 10) * 2 + clearReward;
-      const coins = Math.floor(baseCoins * (levelConfig.rewardMultiplier || 1) * (1 + (getRuneBonuses(this.data).coinMultiplier || 0)));
+      const rewardBonus = buildBattleModifiers(this.data).coinMultiplier || 0;
+      const coins = Math.floor(baseCoins * (levelConfig.rewardMultiplier || 1) * (1 + rewardBonus));
       const clearShardBonus = victory ? getLevelExtraClearShards(levelConfig.order) : 0;
       const shardCount = Math.floor(kills / 30) + (victory ? 2 : 0) + clearShardBonus;
       const drops = {};
@@ -6295,7 +6467,7 @@
           enabled: false,
           level: 0,
           baseDamage: 26,
-          damageMult: 1,
+          damageMult: meta.spellDamageMultiplier || 1,
           baseCooldown: 2.2,
           cooldownMult: 1,
           baseRange: 58,
@@ -6307,12 +6479,12 @@
           enabled: false,
           level: 0,
           baseDamage: 18,
-          damageMult: 1,
+          damageMult: meta.controlDamageMultiplier || 1,
           baseCooldown: 2.7,
           cooldownMult: 1,
           baseRange: 52,
           rangeMult: 1,
-          slowPower: Math.min(0.82, 0.32 + meta.iceSlowBonus),
+          slowPower: Math.min(0.82, 0.32 + meta.iceSlowBonus + (meta.controlPowerBonus || 0)),
           slowDuration: 2.5,
           baseSpeed: 330,
         }),
@@ -6335,7 +6507,7 @@
           cooldownMult: 1,
           baseRange: 76,
           rangeMult: 1,
-          duration: 3,
+          duration: 3 * (meta.formationDurationMultiplier || 1),
         }),
       };
     }
@@ -6569,7 +6741,7 @@
       const save = this.saveManager.data;
       const highestCleared = save.records.highestClearedLevel || 0;
       const highestUnlocked = Math.min(40, highestCleared + 1);
-      const totalTalentLevel = Object.values(save.talents || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+      const totalTrainingLevel = Object.values(save.journeyTraining || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
       const items = [
         ["存档版本", SAVE_VERSION],
         ["localStorage", isLocalStorageAvailable() ? "可用" : "不可用"],
@@ -6582,7 +6754,7 @@
         ["助战伙伴", (save.companions.invited || []).map((id) => COMPANION_DEFS[id]?.name).filter(Boolean).join("、") || "暂无"],
         ["已装备符文", `${(save.runes.equipped || []).length}/3`],
         ["妖怪图鉴", `${Object.keys(save.bestiary.seen || {}).length} 种`],
-        ["强化总等级", totalTalentLevel],
+        ["修行总等级", totalTrainingLevel],
         ["礼包码记录", `${(save.redeemedCodes || []).length} 个`],
         ["每日奖励", save.lastDailyRewardDate || "未领取"],
         ["速度设置", `${this.timeScale}x`],
@@ -7205,8 +7377,8 @@
       this.emergencyHealUsed = true;
       const amount = this.currentLevelConfig.emergencyHealAmount;
       this.wallHp = Math.min(this.maxWallHp, this.wallHp + amount);
-      this.floatingTexts.push(new FloatingText(`宗门护阵激活 +${amount}`, this.width / 2, this.wallY - 48, "#d7fff5", { size: 16, life: 1.2 }));
-      this.showToast(`宗门护阵激活 +${amount}`);
+      this.floatingTexts.push(new FloatingText(`护山结界激活 +${amount}`, this.width / 2, this.wallY - 48, "#d7fff5", { size: 16, life: 1.2 }));
+      this.showToast(`护山结界激活 +${amount}`);
       for (let i = 0; i < 28; i += 1) {
         const angle = (Math.PI * 2 * i) / 28;
         const speed = rand(40, 115);
@@ -7231,6 +7403,9 @@
       if (enemy.config?.swordDamageTaken && source === "sword") amount *= enemy.config.swordDamageTaken;
       if (enemy.config?.flying && source === "array") amount *= enemy.config.arrayDamageTaken || 0.3;
       if (source === "array") amount *= this.metaBonuses.dotDamageMultiplier || 1;
+      if (enemy.elite || enemy.isBoss || enemy.config?.category === "elite" || enemy.config?.category === "boss") {
+        amount *= this.metaBonuses.eliteBossDamageMultiplier || 1;
+      }
       if (this.iceVulnerabilityBonus > 0 && this.elapsed < enemy.slowUntil) {
         amount *= 1 + this.iceVulnerabilityBonus;
       }
@@ -7618,7 +7793,7 @@
           });
         }
         this.lightningStrike(current, damage, skill.stun);
-        damage *= 0.72;
+        damage *= this.metaBonuses.thunderBounceRetention || 0.72;
         previous = current;
         current = this.findNearestEnemy(current.x, current.y, 118, hit);
       }
@@ -8782,10 +8957,14 @@
 
     renderTalentList() {
       this.dom.talentList.innerHTML = "";
-      for (const [id, def] of Object.entries(TALENT_DEFS)) {
-        const level = this.saveManager.data.talents[id];
+      this.saveManager.data.journeyTraining = normalizeJourneyTraining(
+        this.saveManager.data.journeyTraining || {},
+        this.saveManager.data.talents || {},
+      );
+      for (const [id, def] of Object.entries(JOURNEY_TRAINING_DEFS)) {
+        const level = this.saveManager.data.journeyTraining[id] || 0;
         const maxed = level >= def.max;
-        const cost = maxed ? 0 : getTalentNextCost(level);
+        const cost = maxed ? 0 : getJourneyTrainingNextCost(id, level);
         const card = document.createElement("article");
         card.className = "growth-card";
         card.innerHTML = `
@@ -8795,19 +8974,20 @@
           </div>
           <div class="growth-meta">
             <div><span>当前功效</span><strong>${def.current(level)}</strong></div>
-            <div><span>下阶功效</span><strong>${maxed ? "已圆满" : def.current(level + 1)}</strong></div>
+            <div><span>下阶功效</span><strong>${maxed ? "已圆满" : def.next(level)}</strong></div>
             <div><span>修炼消耗</span><strong>${maxed ? "-" : `${cost} 灵石`}</strong></div>
             <div><span>当前灵石</span><strong>${this.saveManager.data.coins}</strong></div>
           </div>
+          <p class="growth-note">${def.applies}</p>
         `;
         const button = document.createElement("button");
         button.type = "button";
         const canUpgrade = !maxed && this.saveManager.data.coins >= cost;
         button.className = `growth-button ${maxed ? "maxed" : ""} ${canUpgrade ? "can-upgrade" : ""}`;
         button.disabled = maxed;
-        button.textContent = maxed ? "已圆满" : "修炼功法";
+        button.textContent = maxed ? "已圆满" : "修行升级";
         button.addEventListener("click", () => {
-          const result = this.saveManager.upgradeTalent(id);
+          const result = this.saveManager.upgradeJourneyTraining(id);
           this.showToast(result.message);
           this.renderHome();
           this.renderCultivation();

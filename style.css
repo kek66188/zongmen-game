@@ -1480,6 +1480,13 @@ h3 {
   line-height: 1.35;
 }
 
+.growth-note {
+  margin: 0;
+  color: rgba(232, 247, 239, 0.78);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .growth-button:not(.can-upgrade):not(.maxed) {
   color: rgba(244, 255, 248, 0.54);
   border-color: rgba(191, 238, 228, 0.22);
