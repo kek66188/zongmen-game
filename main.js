@@ -607,6 +607,11 @@
     lastDailyRewardDate: "zmsw_lastDailyRewardDate",
     timeScale: "zmsw_timeScale",
     totalRechargeTest: "zmsw_totalRechargeTest",
+    selectedHero: "zmsw_selectedHero",
+    heroProgress: "zmsw_heroProgress",
+    companions: "zmsw_companions",
+    companionProgress: "zmsw_companionProgress",
+    pendingCompanionInvites: "zmsw_pendingCompanionInvites",
   };
   const HIGHEST_CLEARED_KEY = SAVE_KEYS.highestClearedLevel;
   const LEGACY_HIGHEST_CLEARED_KEY = "highestClearedLevel";
@@ -1485,6 +1490,999 @@
     traits: config.traits || [],
   }]));
 
+  ENEMY_TYPES.yellowRobeGoblin = {
+    key: "yellowRobeGoblin",
+    type: "yellowRobeGoblin",
+    name: "黄袍小怪",
+    category: "normal",
+    unlockLevel: 1,
+    hp: 48,
+    baseHp: 48,
+    speed: 38,
+    baseSpeed: 38,
+    damage: 6,
+    baseDamage: 6,
+    exp: 5,
+    radius: 17,
+    visual: "yellowRobeGoblin",
+    traits: ["图鉴素材", "黄袍小妖"],
+    description: "戴着镇字符帽的独眼小妖，常混在妖潮里探路。",
+    lore: "戴着镇字符帽的独眼小妖，常混在妖潮里探路。",
+  };
+  CANONICAL_ENEMY_TYPES.yellowRobeGoblin = ENEMY_TYPES.yellowRobeGoblin;
+  ENEMY_TYPES.goblin = { ...ENEMY_TYPES.yellowRobeGoblin, key: "goblin", aliasOf: "yellowRobeGoblin", type: "yellowRobeGoblin" };
+  ENEMY_KEY_ALIASES.goblin = "yellowRobeGoblin";
+  ENEMY_KEY_ALIASES.yellowRobeGoblin = "yellowRobeGoblin";
+  ENEMY_KEY_ALIASES.waterDragon = "waterApe";
+  MONSTER_BOOK.yellowRobeGoblin = {
+    name: "黄袍小怪",
+    title: "黄袍独眼小妖",
+    description: "戴着镇字符帽的独眼小妖，常混在妖潮里探路。",
+    unlockLevel: 1,
+    category: "normal",
+    traits: ["图鉴素材", "黄袍小妖"],
+  };
+
+  const MONSTER_SPRITES = {
+    foxDemon: { sprite: "./assets/monsters/fox-demon.png", portraitScale: 1.04, battleScale: 0.42 },
+    shrimpDemon: { sprite: "./assets/monsters/shrimp-demon.png", portraitScale: 1.02, battleScale: 0.44 },
+    boarDragon: { sprite: "./assets/monsters/boar-dragon.png", portraitScale: 1.02, battleScale: 0.5 },
+    frogDemon: { sprite: "./assets/monsters/frog-demon.png", portraitScale: 1.02, battleScale: 0.46 },
+    lampGranny: { sprite: "./assets/monsters/lamp-granny.png", portraitScale: 1.02, battleScale: 0.46 },
+    stoneArmor: { sprite: "./assets/monsters/stone-armor.png", portraitScale: 1.02, battleScale: 0.5 },
+    yaksha: { sprite: "./assets/monsters/yaksha.png", portraitScale: 1.03, battleScale: 0.48 },
+    wingDemon: { sprite: "./assets/monsters/wing-demon.png", portraitScale: 1.04, battleScale: 0.48 },
+    boneDemon: { sprite: "./assets/monsters/bone-demon.png", portraitScale: 1.02, battleScale: 0.46 },
+    bullVanguard: { sprite: "./assets/monsters/bull-vanguard.png", portraitScale: 1.08, battleScale: 0.58 },
+    waterApe: { sprite: "./assets/monsters/water-dragon.png", portraitScale: 1.08, battleScale: 0.56 },
+    yellowRobeGoblin: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.03, battleScale: 0.42 },
+    bossBlackWind: { sprite: "./assets/monsters/yaksha.png", portraitScale: 1.22, battleScale: 0.9 },
+    bossYellowWind: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.25, battleScale: 0.9 },
+    bossBoneLady: { sprite: "./assets/monsters/bone-demon.png", portraitScale: 1.25, battleScale: 0.9 },
+    bossBullKing: { sprite: "./assets/monsters/bull-vanguard.png", portraitScale: 1.28, battleScale: 0.95 },
+  };
+  for (const [id, spriteInfo] of Object.entries(MONSTER_SPRITES)) {
+    if (CANONICAL_ENEMY_TYPES[id]) Object.assign(CANONICAL_ENEMY_TYPES[id], spriteInfo);
+    if (ENEMY_TYPES[id]) Object.assign(ENEMY_TYPES[id], spriteInfo);
+    if (MONSTER_BOOK[id]) Object.assign(MONSTER_BOOK[id], { sprite: spriteInfo.sprite });
+  }
+  for (const [legacy, canonical] of Object.entries(ENEMY_KEY_ALIASES)) {
+    if (ENEMY_TYPES[legacy] && MONSTER_SPRITES[canonical]) Object.assign(ENEMY_TYPES[legacy], MONSTER_SPRITES[canonical]);
+  }
+
+  const MONSTER_IMAGE_CACHE = new Map();
+
+  function getMonsterSpriteRecord(key) {
+    const normalized = normalizeEnemyType(key) || key;
+    const config = ENEMY_TYPES[normalized] || CANONICAL_ENEMY_TYPES[normalized];
+    const src = config?.sprite || MONSTER_SPRITES[normalized]?.sprite;
+    if (!src) return null;
+    if (MONSTER_IMAGE_CACHE.has(src)) return MONSTER_IMAGE_CACHE.get(src);
+    const record = { src, image: new Image(), loaded: false, error: false, warned: false };
+    record.image.onload = () => {
+      record.loaded = true;
+      if (window.hongyunGame?.state === "codex") window.hongyunGame.renderCodex();
+    };
+    record.image.onerror = () => {
+      record.error = true;
+      if (!record.warned) {
+        record.warned = true;
+        console.warn("Monster sprite failed to load:", src);
+      }
+    };
+    record.image.src = src;
+    MONSTER_IMAGE_CACHE.set(src, record);
+    return record;
+  }
+
+  function drawMonsterSpriteImage(ctx, key, x, y, scale = 1, mode = "battle", state = {}) {
+    const normalized = normalizeEnemyType(key) || key;
+    const config = ENEMY_TYPES[normalized] || CANONICAL_ENEMY_TYPES[normalized] || {};
+    const record = getMonsterSpriteRecord(normalized);
+    if (!record || record.error || !record.loaded) return false;
+    const spriteScale = mode === "gallery" ? (config.portraitScale || 1) : (config.battleScale || 0.42);
+    const baseSize = mode === "gallery" ? 94 : 180;
+    const size = baseSize * spriteScale * scale;
+    const t = state.time || performance.now() / 1000;
+
+    ctx.save();
+    ctx.translate(x, y);
+    if (mode === "battle") {
+      monsterMist(ctx, "rgba(23, 63, 66, 0.22)", size * 0.78, t);
+    }
+    ctx.drawImage(record.image, -size / 2, -size * 0.76, size, size);
+    if (state.hitPulse > 0) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.55, state.hitPulse);
+      ctx.globalCompositeOperation = "screen";
+      ctx.fillStyle = "#fff1bd";
+      ctx.fillRect(-size / 2, -size * 0.76, size, size);
+      ctx.restore();
+    }
+    ctx.restore();
+    return true;
+  }
+
+  function monsterRoundRectPath(ctx, x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+  }
+
+  function monsterMist(ctx, color = "rgba(22, 47, 47, 0.28)", width = 44, t = 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.72;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(0, 18, width * (0.8 + Math.sin(t * 2) * 0.03), 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.38;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(-width * 0.48 + i * width * 0.34, 12 + i);
+      ctx.quadraticCurveTo(-width * 0.22 + i * width * 0.34, 8 + Math.sin(t * 2 + i) * 2, width * 0.04 + i * width * 0.34, 13 - i);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function monsterInkStroke(ctx, color = "rgba(18, 45, 44, 0.72)", width = 2) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.stroke();
+  }
+
+  function monsterEyes(ctx, x1, y1, x2, y2, mode = "dot", size = 2) {
+    ctx.save();
+    ctx.fillStyle = "#ff5b4f";
+    ctx.strokeStyle = "#ff5b4f";
+    ctx.shadowColor = "#ff5b4f";
+    ctx.shadowBlur = 5;
+    if (mode === "slash") {
+      ctx.lineWidth = Math.max(1.5, size);
+      ctx.beginPath();
+      ctx.moveTo(x1 - size * 2, y1 - size * 0.5);
+      ctx.lineTo(x1 + size * 1.6, y1);
+      ctx.moveTo(x2 + size * 2, y2 - size * 0.5);
+      ctx.lineTo(x2 - size * 1.6, y2);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(x1, y1, size, 0, Math.PI * 2);
+      ctx.arc(x2, y2, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawFoxPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(129, 70, 55, 0.24)", gallery ? 58 : 42, t);
+
+    const tailSwing = Math.sin(t * 2.4) * (gallery ? 5 : 3);
+    ctx.save();
+    ctx.translate(-8, -2);
+    ctx.rotate((tailSwing - 10) * Math.PI / 180);
+    const tailGrad = ctx.createLinearGradient(-46, -28, 4, 8);
+    tailGrad.addColorStop(0, "#fff1bd");
+    tailGrad.addColorStop(0.25, "#f0aa73");
+    tailGrad.addColorStop(1, "#bd6a42");
+    ctx.fillStyle = tailGrad;
+    ctx.beginPath();
+    ctx.moveTo(-4, 10);
+    ctx.bezierCurveTo(-48, 14, -54, -30, -23, -38);
+    ctx.bezierCurveTo(6, -45, 9, -20, -13, -12);
+    ctx.bezierCurveTo(-25, -8, -21, 9, -4, 10);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(101, 60, 43, 0.65)", 1.7);
+    ctx.restore();
+
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#c76f3f";
+    ctx.beginPath();
+    ctx.moveTo(-18, -22);
+    ctx.bezierCurveTo(-22, -2, -18, 18, 0, 22);
+    ctx.bezierCurveTo(18, 18, 23, -1, 18, -22);
+    ctx.bezierCurveTo(10, -29, -9, -29, -18, -22);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(91, 53, 39, 0.72)", 1.9);
+
+    ctx.fillStyle = "#f6c089";
+    ctx.beginPath();
+    ctx.moveTo(-15, -26);
+    ctx.lineTo(-28, -52);
+    ctx.quadraticCurveTo(-14, -45, -7, -29);
+    ctx.moveTo(15, -26);
+    ctx.lineTo(28, -52);
+    ctx.quadraticCurveTo(14, -45, 7, -29);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(91, 53, 39, 0.66)", 1.4);
+
+    ctx.fillStyle = "#fff0cf";
+    ctx.beginPath();
+    ctx.ellipse(0, -5, 13, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e8f7ef";
+    ctx.beginPath();
+    ctx.ellipse(0, 10, 10, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterEyes(ctx, -6, -10, 6, -10, "slash", gallery ? 2.4 : 1.8);
+    ctx.fillStyle = "#643c34";
+    ctx.beginPath();
+    ctx.arc(0, -4, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (gallery) {
+      ctx.fillStyle = "rgba(232, 247, 239, 0.78)";
+      ctx.beginPath();
+      ctx.moveTo(-12, 7);
+      ctx.quadraticCurveTo(0, 18, 12, 7);
+      ctx.lineTo(9, 26);
+      ctx.quadraticCurveTo(0, 31, -9, 26);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "rgba(245, 215, 138, 0.7)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-7, 18);
+      ctx.lineTo(7, 18);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255, 190, 92, 0.52)";
+      for (let i = 0; i < 3; i += 1) {
+        const px = -34 + i * 34 + Math.sin(t * 2 + i) * 2;
+        const py = -24 + Math.cos(t * 2.2 + i) * 5;
+        ctx.beginPath();
+        ctx.arc(px, py, 3.2 - i * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawDogDemonPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(18, 31, 32, 0.28)", mode === "gallery" ? 58 : 42, t);
+    ctx.rotate(-0.08);
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#1c3031";
+    ctx.beginPath();
+    ctx.moveTo(-22, -18);
+    ctx.bezierCurveTo(-27, 4, -13, 21, 8, 19);
+    ctx.bezierCurveTo(25, 17, 28, -4, 16, -23);
+    ctx.bezierCurveTo(7, -34, -13, -32, -22, -18);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(2, 18, 20, 0.74)", 2);
+    ctx.fillStyle = "#121f20";
+    ctx.beginPath();
+    ctx.moveTo(-15, -29);
+    ctx.lineTo(-31, -47);
+    ctx.lineTo(-24, -20);
+    ctx.moveTo(11, -30);
+    ctx.lineTo(24, -49);
+    ctx.lineTo(22, -20);
+    ctx.fill();
+    ctx.fillStyle = "#8d6b4f";
+    ctx.beginPath();
+    ctx.moveTo(-15, 4);
+    ctx.quadraticCurveTo(0, 17, 17, 4);
+    ctx.lineTo(12, 26);
+    ctx.quadraticCurveTo(0, 32, -12, 26);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(-12, 12);
+    ctx.lineTo(12, 12);
+    ctx.stroke();
+    monsterEyes(ctx, -7, -14, 8, -14, "slash", 2);
+    ctx.strokeStyle = "rgba(18, 31, 32, 0.78)";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-18, 7);
+    ctx.lineTo(-30, 18);
+    ctx.moveTo(18, 5);
+    ctx.lineTo(32, 14);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawShrimpPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.rotate(-0.18 + Math.sin(t * 5) * 0.025);
+    monsterMist(ctx, "rgba(93, 150, 150, 0.24)", gallery ? 62 : 43, t);
+    ctx.strokeStyle = "rgba(159, 217, 207, 0.45)";
+    ctx.lineWidth = 1.4;
+    for (let i = 0; i < 3; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(-34 + i * 12, 22 + i);
+      ctx.quadraticCurveTo(-12 + i * 11, 16 + Math.sin(t * 2 + i) * 2, 16 + i * 10, 22);
+      ctx.stroke();
+    }
+
+    const shell = hit > 0 ? "#fff1bd" : "#dd7041";
+    for (let i = 0; i < 6; i += 1) {
+      const px = -24 + i * 9;
+      const py = Math.sin(i * 0.9) * 8 - i * 0.9;
+      ctx.fillStyle = i % 2 ? "#f09a55" : shell;
+      ctx.beginPath();
+      ctx.ellipse(px, py, 8.5, 13, 0.65, 0, Math.PI * 2);
+      ctx.fill();
+      monsterInkStroke(ctx, "rgba(122, 55, 38, 0.62)", 1.1);
+    }
+    ctx.fillStyle = "#f3b077";
+    ctx.beginPath();
+    ctx.ellipse(28, -9, 13, 11, 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(122, 55, 38, 0.7)", 1.4);
+    monsterEyes(ctx, 24, -13, 34, -13, "dot", 1.8);
+
+    ctx.strokeStyle = "#f5b078";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(35, -15);
+    ctx.quadraticCurveTo(58, -39, 73, -26 + Math.sin(t * 2) * 3);
+    ctx.moveTo(34, -10);
+    ctx.quadraticCurveTo(60, -19, 74, -6 + Math.cos(t * 2.2) * 3);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#db653c";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(23, 0);
+    ctx.quadraticCurveTo(35, 9, 47, 2);
+    ctx.moveTo(45, 2);
+    ctx.lineTo(55, -5);
+    ctx.moveTo(45, 2);
+    ctx.lineTo(55, 9);
+    ctx.moveTo(12, 11);
+    ctx.quadraticCurveTo(23, 21, 35, 16);
+    ctx.stroke();
+
+    if (gallery) {
+      ctx.strokeStyle = "rgba(168, 65, 45, 0.55)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 5; i += 1) {
+        ctx.beginPath();
+        ctx.moveTo(-19 + i * 8, 11);
+        ctx.lineTo(-14 + i * 8, 23);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawBoarDragonPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(89, 61, 43, 0.25)", gallery ? 70 : 50, t);
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#b47a64";
+    ctx.beginPath();
+    ctx.moveTo(-31, -14);
+    ctx.bezierCurveTo(-44, 7, -22, 28, 7, 25);
+    ctx.bezierCurveTo(38, 22, 48, -4, 28, -24);
+    ctx.bezierCurveTo(8, -42, -21, -35, -31, -14);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(82, 50, 39, 0.7)", 2);
+
+    ctx.fillStyle = "#c98a73";
+    ctx.beginPath();
+    ctx.ellipse(3, -9, 20, 17, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(82, 50, 39, 0.65)", 1.5);
+    ctx.fillStyle = "#f1b69f";
+    ctx.beginPath();
+    ctx.ellipse(1, -2, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#5d392f";
+    ctx.beginPath();
+    ctx.arc(-4, -2, 1.8, 0, Math.PI * 2);
+    ctx.arc(6, -2, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    monsterEyes(ctx, -10, -15, 13, -15, "dot", 2);
+
+    ctx.fillStyle = "#fff1bd";
+    ctx.beginPath();
+    ctx.moveTo(-15, 2);
+    ctx.quadraticCurveTo(-24, 11, -17, 16);
+    ctx.quadraticCurveTo(-12, 10, -10, 3);
+    ctx.moveTo(16, 1);
+    ctx.quadraticCurveTo(27, 10, 20, 16);
+    ctx.quadraticCurveTo(14, 10, 11, 3);
+    ctx.fill();
+
+    ctx.strokeStyle = "#e8d09b";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-12, -5);
+    ctx.quadraticCurveTo(-36, -17, -48, -1 + Math.sin(t * 2) * 2);
+    ctx.moveTo(14, -5);
+    ctx.quadraticCurveTo(39, -19, 50, -3 + Math.cos(t * 2) * 2);
+    ctx.stroke();
+
+    if (gallery) {
+      ctx.fillStyle = "#6e8f84";
+      for (let i = 0; i < 5; i += 1) {
+        ctx.beginPath();
+        ctx.moveTo(-22 + i * 10, -28 - Math.sin(i) * 2);
+        ctx.lineTo(-15 + i * 10, -39);
+        ctx.lineTo(-8 + i * 10, -27);
+        ctx.fill();
+      }
+      ctx.strokeStyle = "rgba(83, 103, 93, 0.68)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-28, -21);
+      ctx.quadraticCurveTo(-5, -31, 25, -22);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawFrogPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    const squat = Math.sin(t * 5) * (gallery ? 1.3 : 1.8);
+    ctx.save();
+    ctx.translate(x, y + squat);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(52, 108, 72, 0.25)", gallery ? 62 : 46, t);
+    if (gallery) {
+      ctx.fillStyle = "rgba(117, 164, 89, 0.5)";
+      ctx.beginPath();
+      ctx.ellipse(0, 22, 39, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(31, 86, 87, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, 22);
+      ctx.lineTo(28, 15);
+      ctx.stroke();
+    }
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#4d9a62";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 24, 24, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(35, 77, 50, 0.7)", 1.8);
+    ctx.fillStyle = "#f3fff9";
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 15, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#78bd70";
+    ctx.beginPath();
+    ctx.arc(-13, -21, 9, 0, Math.PI * 2);
+    ctx.arc(13, -21, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#f4fff8";
+    ctx.beginPath();
+    ctx.arc(-13, -21, 6, 0, Math.PI * 2);
+    ctx.arc(13, -21, 6, 0, Math.PI * 2);
+    ctx.fill();
+    monsterEyes(ctx, -13, -21, 13, -21, "dot", 2.1);
+    ctx.strokeStyle = "rgba(34, 73, 53, 0.65)";
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(-19, 13);
+    ctx.quadraticCurveTo(-36, 21, -25, 28);
+    ctx.moveTo(19, 13);
+    ctx.quadraticCurveTo(36, 21, 25, 28);
+    ctx.stroke();
+    if (gallery) {
+      ctx.fillStyle = "rgba(232, 247, 239, 0.72)";
+      ctx.beginPath();
+      ctx.moveTo(-10, -2);
+      ctx.quadraticCurveTo(0, 4, 10, -2);
+      ctx.lineTo(8, 12);
+      ctx.quadraticCurveTo(0, 17, -8, 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "rgba(245, 215, 138, 0.55)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-7, 5);
+      ctx.lineTo(7, 5);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawLampGrannyPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(108, 59, 41, 0.24)", gallery ? 58 : 42, t);
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#6f3f38";
+    ctx.beginPath();
+    ctx.moveTo(-18, -18);
+    ctx.bezierCurveTo(-26, -1, -23, 20, -4, 24);
+    ctx.bezierCurveTo(17, 26, 24, 3, 13, -18);
+    ctx.bezierCurveTo(5, -31, -10, -31, -18, -18);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(64, 38, 35, 0.75)", 1.8);
+    ctx.fillStyle = "#d7b88c";
+    ctx.beginPath();
+    ctx.ellipse(-3, -20, 12, 11, -0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(88, 62, 53, 0.58)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-12, -23);
+    ctx.quadraticCurveTo(-2, -30, 9, -23);
+    ctx.stroke();
+    monsterEyes(ctx, -7, -20, 4, -20, "dot", 1.5);
+    ctx.strokeStyle = "#5e3d31";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-7, -14);
+    ctx.quadraticCurveTo(-2, -11, 4, -14);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#7c4b37";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(12, -4);
+    ctx.quadraticCurveTo(30, -11, 39, -25);
+    ctx.stroke();
+    ctx.fillStyle = "#7d4f2f";
+    ctx.beginPath();
+    ctx.ellipse(44, -28, 11, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffb35f";
+    ctx.shadowColor = "#ff9f43";
+    ctx.shadowBlur = gallery ? 14 : 8;
+    ctx.beginPath();
+    ctx.moveTo(44, -56);
+    ctx.bezierCurveTo(30, -39, 39, -28, 44, -29);
+    ctx.bezierCurveTo(58, -34, 52, -45, 44, -56);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    if (gallery) {
+      ctx.fillStyle = "rgba(255, 191, 94, 0.5)";
+      for (let i = 0; i < 5; i += 1) {
+        ctx.beginPath();
+        ctx.arc(30 + Math.sin(t + i) * 25, -42 + Math.cos(t * 1.5 + i) * 14, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawStoneArmorPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    const rock = hit > 0 ? "#fff1bd" : "#74807d";
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(74, 90, 86, 0.26)", gallery ? 64 : 45, t);
+    const stones = [
+      [-10, -32, 18, 14, -0.2],
+      [10, -28, 17, 13, 0.35],
+      [-16, -10, 21, 19, 0.18],
+      [9, -8, 24, 20, -0.12],
+      [-4, 14, 28, 18, 0.05],
+    ];
+    stones.forEach(([sx, sy, sw, sh, rot], index) => {
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(rot);
+      ctx.fillStyle = index % 2 ? "#66756f" : rock;
+      ctx.beginPath();
+      ctx.moveTo(-sw, -sh * 0.55);
+      ctx.lineTo(-sw * 0.32, -sh);
+      ctx.lineTo(sw * 0.74, -sh * 0.7);
+      ctx.lineTo(sw, sh * 0.1);
+      ctx.lineTo(sw * 0.3, sh);
+      ctx.lineTo(-sw * 0.82, sh * 0.72);
+      ctx.closePath();
+      ctx.fill();
+      monsterInkStroke(ctx, "rgba(35, 55, 54, 0.72)", 1.5);
+      ctx.restore();
+    });
+    ctx.strokeStyle = hit > 0 ? "#fff1bd" : "rgba(23, 63, 66, 0.86)";
+    ctx.lineWidth = gallery ? 2 : 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-18, -17);
+    ctx.lineTo(-3, -5);
+    ctx.lineTo(-12, 7);
+    ctx.moveTo(14, -20);
+    ctx.lineTo(5, -8);
+    ctx.lineTo(21, 1);
+    ctx.moveTo(-1, 8);
+    ctx.lineTo(13, 20);
+    ctx.stroke();
+    monsterEyes(ctx, -8, -18, 9, -16, "dot", 2.1);
+    if (gallery) {
+      ctx.strokeStyle = "rgba(243, 255, 249, 0.42)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-29, 4);
+      ctx.quadraticCurveTo(-44, 10, -42, 22);
+      ctx.moveTo(30, 1);
+      ctx.quadraticCurveTo(48, 7, 45, 21);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawYakshaPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(48, 31, 65, 0.32)", gallery ? 64 : 44, t);
+    ctx.fillStyle = "rgba(20, 17, 26, 0.62)";
+    ctx.beginPath();
+    ctx.moveTo(-29, -20);
+    ctx.quadraticCurveTo(-43, 8, -26, 31);
+    ctx.quadraticCurveTo(-3, 18, 24, 31);
+    ctx.quadraticCurveTo(42, 4, 25, -22);
+    ctx.quadraticCurveTo(0, -10, -29, -20);
+    ctx.fill();
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#4d315f";
+    ctx.beginPath();
+    ctx.moveTo(-17, -24);
+    ctx.bezierCurveTo(-28, -5, -20, 22, 0, 23);
+    ctx.bezierCurveTo(23, 22, 29, -6, 16, -25);
+    ctx.bezierCurveTo(8, -34, -8, -34, -17, -24);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(27, 17, 34, 0.78)", 2);
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-12, -31);
+    ctx.quadraticCurveTo(-26, -50, -32, -28);
+    ctx.moveTo(12, -31);
+    ctx.quadraticCurveTo(27, -50, 32, -28);
+    ctx.stroke();
+    monsterEyes(ctx, -7, -17, 8, -17, "slash", 2.2);
+    ctx.strokeStyle = "#241524";
+    ctx.lineWidth = gallery ? 4.5 : 3.5;
+    ctx.beginPath();
+    ctx.moveTo(-19, 2);
+    ctx.quadraticCurveTo(-39, 4, -45, -7);
+    ctx.moveTo(20, 0);
+    ctx.quadraticCurveTo(41, 3, 47, -10);
+    ctx.stroke();
+    ctx.strokeStyle = "#f3fff9";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-44, -7);
+    ctx.lineTo(-49, -16);
+    ctx.moveTo(47, -10);
+    ctx.lineTo(53, -19);
+    ctx.stroke();
+    if (gallery) {
+      ctx.strokeStyle = "rgba(146, 92, 168, 0.45)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-37, -28);
+      ctx.quadraticCurveTo(-62, -7, -44, 16);
+      ctx.moveTo(37, -27);
+      ctx.quadraticCurveTo(61, -5, 42, 17);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawWingDemonPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    const flap = Math.sin(t * 7) * (gallery ? 8 : 5);
+    ctx.save();
+    ctx.translate(x, y - 6 + Math.sin(t * 3) * 2);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(28, 60, 62, 0.18)", gallery ? 58 : 38, t);
+    ctx.fillStyle = "rgba(17, 38, 42, 0.82)";
+    ctx.beginPath();
+    ctx.moveTo(-8, -15);
+    ctx.bezierCurveTo(-38, -42 - flap, -55, -2 - flap, -22, 7);
+    ctx.quadraticCurveTo(-7, -3, -2, -13);
+    ctx.moveTo(8, -15);
+    ctx.bezierCurveTo(38, -42 - flap, 55, -2 - flap, 22, 7);
+    ctx.quadraticCurveTo(7, -3, 2, -13);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(10, 29, 31, 0.72)", 1.4);
+    ctx.strokeStyle = "rgba(159, 217, 207, 0.34)";
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(-8, -10);
+    ctx.lineTo(-35, -18 - flap * 0.4);
+    ctx.moveTo(8, -10);
+    ctx.lineTo(35, -18 - flap * 0.4);
+    ctx.stroke();
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#274e51";
+    ctx.beginPath();
+    ctx.ellipse(0, -9, 11, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(10, 29, 31, 0.72)", 1.3);
+    ctx.fillStyle = "#e9b85f";
+    ctx.beginPath();
+    ctx.moveTo(-3, -20);
+    ctx.lineTo(0, -28);
+    ctx.lineTo(4, -20);
+    ctx.fill();
+    monsterEyes(ctx, -4, -13, 4, -13, "dot", 1.6);
+    ctx.strokeStyle = "#152d30";
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.moveTo(-5, 8);
+    ctx.lineTo(-12, 18);
+    ctx.moveTo(5, 8);
+    ctx.lineTo(12, 18);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawCurseMagePortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(84, 54, 114, 0.26)", mode === "gallery" ? 58 : 42, t);
+    ctx.strokeStyle = "rgba(198, 135, 255, 0.42)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 30 + Math.sin(t * 3) * 2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = "#3f315a";
+    ctx.beginPath();
+    ctx.moveTo(-17, -20);
+    ctx.quadraticCurveTo(0, -35, 17, -20);
+    ctx.lineTo(23, 24);
+    ctx.quadraticCurveTo(0, 34, -23, 24);
+    ctx.closePath();
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(36, 24, 50, 0.75)", 1.8);
+    monsterEyes(ctx, -6, -16, 6, -16, "dot", 1.8);
+    ctx.strokeStyle = "#fff1bd";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(19, -20);
+    ctx.lineTo(36, -43);
+    ctx.stroke();
+    ctx.fillStyle = "#fff1bd";
+    ctx.fillRect(-32, -5, 12, 17);
+    ctx.strokeStyle = "#d54b55";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-29, 0);
+    ctx.lineTo(-23, 0);
+    ctx.moveTo(-29, 5);
+    ctx.lineTo(-24, 9);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBoneDemonPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(228, 236, 224, 0.18)", mode === "gallery" ? 58 : 40, t);
+    ctx.fillStyle = "#e8f7ef";
+    ctx.beginPath();
+    ctx.ellipse(0, -25, 14, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(72, 80, 76, 0.66)", 1.4);
+    monsterEyes(ctx, -5, -27, 5, -27, "dot", 1.8);
+    ctx.strokeStyle = "#e8f7ef";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(0, -12);
+    ctx.lineTo(0, 18);
+    ctx.moveTo(-17, -1);
+    ctx.lineTo(17, -1);
+    ctx.moveTo(-14, 9);
+    ctx.lineTo(14, 9);
+    ctx.moveTo(-7, 18);
+    ctx.lineTo(-16, 30);
+    ctx.moveTo(7, 18);
+    ctx.lineTo(16, 30);
+    ctx.stroke();
+    ctx.strokeStyle = "#d84e45";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-19, -8);
+    ctx.quadraticCurveTo(0, 2 + Math.sin(t * 4) * 2, 20, -10);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBlackWindPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(16, 27, 31, 0.28)", mode === "gallery" ? 66 : 48, t);
+    ctx.strokeStyle = "rgba(18, 31, 32, 0.82)";
+    ctx.lineWidth = mode === "gallery" ? 11 : 8;
+    ctx.lineCap = "round";
+    for (let i = 0; i < 4; i += 1) {
+      ctx.beginPath();
+      ctx.arc(0, -8, 13 + i * 7, t * 1.7 + i, t * 1.7 + i + Math.PI * 1.25);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#18262a";
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 22, 24, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    monsterEyes(ctx, -7, -13, 8, -13, "slash", 2.3);
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(-9, -29);
+    ctx.quadraticCurveTo(-20, -42, -24, -25);
+    ctx.moveTo(9, -29);
+    ctx.quadraticCurveTo(20, -42, 24, -25);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBullVanguardPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(95, 46, 40, 0.28)", mode === "gallery" ? 78 : 54, t);
+    ctx.fillStyle = state.hitPulse > 0 ? "#fff1bd" : "#6a332b";
+    ctx.beginPath();
+    ctx.moveTo(-25, -19);
+    ctx.bezierCurveTo(-40, 3, -31, 30, 0, 32);
+    ctx.bezierCurveTo(32, 30, 41, 3, 25, -19);
+    ctx.bezierCurveTo(14, -35, -14, -35, -25, -19);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(61, 24, 20, 0.78)", 2.2);
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(-15, -30);
+    ctx.quadraticCurveTo(-42, -53, -47, -20);
+    ctx.moveTo(15, -30);
+    ctx.quadraticCurveTo(42, -53, 47, -20);
+    ctx.stroke();
+    monsterEyes(ctx, -8, -17, 8, -17, "slash", 2.3);
+    ctx.fillStyle = "#8e5044";
+    ctx.beginPath();
+    ctx.ellipse(0, -7, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-18, -3);
+    ctx.quadraticCurveTo(0, 8, 18, -3);
+    ctx.moveTo(-15, 10);
+    ctx.lineTo(15, 22);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawMonsterIllustration(ctx, key, x, y, scale = 1, mode = "battle", state = {}) {
+    const normalized = normalizeEnemyType(key) || "foxDemon";
+    const t = state.time || performance.now() / 1000;
+    const hitPulse = state.hitPulse || 0;
+    if (drawMonsterSpriteImage(ctx, normalized, x, y, scale, mode, state)) return;
+    ctx.save();
+    if (hitPulse > 0) {
+      ctx.shadowColor = "#fff1bd";
+      ctx.shadowBlur = mode === "gallery" ? 18 : 8;
+    }
+    if (normalized === "bossBlackWind") {
+      drawBlackWindPortrait(ctx, x, y + 2, scale * 1.2, mode, { ...state, time: t });
+      drawYakshaPortrait(ctx, x, y + 4, scale * 0.78, mode, state);
+    } else if (normalized === "bossYellowWind") {
+      drawBlackWindPortrait(ctx, x, y + 2, scale * 1.12, mode, { ...state, time: t, hitPulse });
+      drawLampGrannyPortrait(ctx, x, y + 4, scale * 0.72, mode, state);
+    } else if (normalized === "bossBoneLady") {
+      drawBoneDemonPortrait(ctx, x, y + 3, scale * 1.32, mode, state);
+      drawCurseMagePortrait(ctx, x, y - 2, scale * 0.82, mode, state);
+    } else if (normalized === "bossBullKing") {
+      drawBullVanguardPortrait(ctx, x, y + 2, scale * 1.42, mode, state);
+    } else {
+      switch (normalized) {
+        case "foxDemon":
+          drawFoxPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "dogDemon":
+          drawDogDemonPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "shrimpDemon":
+          drawShrimpPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "boarDragon":
+          drawBoarDragonPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "frogDemon":
+          drawFrogPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "lampGranny":
+          drawLampGrannyPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "stoneArmor":
+          drawStoneArmorPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "yaksha":
+          drawYakshaPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "wingDemon":
+          drawWingDemonPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "curseMage":
+          drawCurseMagePortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "nineTailShade":
+          drawFoxPortrait(ctx, x - 1, y, scale * 1.04, mode, { ...state, time: t, hitPulse });
+          if (mode === "gallery") {
+            ctx.save();
+            ctx.globalAlpha = 0.35;
+            drawFoxPortrait(ctx, x + 14, y - 2, scale * 0.9, mode, { ...state, time: t + 0.7 });
+            ctx.restore();
+          }
+          break;
+        case "waterApe":
+          drawFrogPortrait(ctx, x - 4, y + 3, scale * 1.04, mode, state);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.scale(scale, scale);
+          ctx.strokeStyle = "rgba(159, 217, 207, 0.55)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 5, 34 + Math.sin(t * 3) * 3, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+          break;
+        case "blackWind":
+          drawBlackWindPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "boneDemon":
+          drawBoneDemonPortrait(ctx, x, y, scale, mode, state);
+          break;
+        case "bullVanguard":
+          drawBullVanguardPortrait(ctx, x, y, scale, mode, state);
+          break;
+        default:
+          drawFoxPortrait(ctx, x, y, scale, mode, state);
+      }
+    }
+    ctx.restore();
+  }
+
   const SKILL_ORDER = ["sword", "fire", "ice", "thunder", "array"];
   const SKILL_LABELS = {
     sword: "飞剑",
@@ -1581,62 +2579,133 @@
     },
   };
 
+  const HERO_IDS = ["wukong", "tangseng", "bajie", "shaseng"];
+  const HERO_ALIASES = { tang: "tangseng", tangseng: "tangseng" };
+  const normalizeHeroId = (id) => HERO_ALIASES[id] || id;
+  const HERO_MAX_LEVEL = 50;
   const HERO_DEFS = {
     wukong: {
+      key: "wukong",
       name: "孙悟空",
-      role: "高爆发 / 连击 / 分身",
+      title: "齐天大圣",
+      role: "高爆发 / 暴击 / 连击 / 分身",
+      shortRole: "暴击连击",
+      weapon: "如意金箍棒",
       initialSkills: ["sword", "thunder"],
-      passive: "暴击率 +8%，每 7 秒触发残影追击。",
-      playstyle: "攻速快，爆点密，适合主动清怪。",
-      color: "#d79b43",
-      accent: "#ff6b57",
-      labels: { sword: "如意金箍棒", thunder: "火眼雷引", array: "毫毛分身" },
-      icons: { sword: "棒", thunder: "雷", array: "影" },
-      bonuses: { critChance: 0.08, damageMultiplier: 1.08 },
+      activeSkills: ["金箍棒影", "毫毛分身"],
+      passive: "暴击率 +8%，暴击伤害 +20%，每隔一段时间触发残影追击。",
+      playstyle: "攻速快，爆发高，适合主动清怪。",
+      color: "#f0b23a",
+      accent: "#e84b35",
+      labels: { sword: "金箍棒影", thunder: "火眼雷引", array: "毫毛分身", fire: "金焰符", ice: "定身灵光" },
+      icons: { sword: "棒", thunder: "雷", array: "影", fire: "焰", ice: "定" },
+      bonuses: { critChance: 0.08, critDamageBonus: 0.2, damageMultiplier: 1.04 },
     },
-    tang: {
+    tangseng: {
+      key: "tangseng",
       name: "唐僧",
-      role: "辅助 / 控制 / 回复 / 佛法光环",
+      title: "旃檀功德佛",
+      role: "辅助 / 回复 / 佛光 / 稳健",
+      shortRole: "佛光回复",
+      weapon: "禅杖 / 佛光",
       initialSkills: ["ice", "array"],
-      passive: "冷却 -6%，升级时稀有机缘略增，护阵缓慢回元。",
+      activeSkills: ["禅杖佛光", "紧箍梵音"],
+      passive: "城墙周期回复，稀有升级概率提高，受击有小概率触发佛光护盾。",
       playstyle: "生存强，节奏稳，适合持久战。",
       color: "#fff1bd",
       accent: "#d7fff5",
-      labels: { ice: "紧箍梵音", array: "禅杖佛光", sword: "禅杖击妖" },
-      icons: { ice: "梵", array: "佛", sword: "杖" },
-      bonuses: { cooldownMultiplier: 0.94, rareChanceBonus: 0.08, regenPerSecond: 0.12 },
+      labels: { ice: "紧箍梵音", array: "禅杖佛光", sword: "佛珠击妖", fire: "莲火符", thunder: "梵雷" },
+      icons: { ice: "梵", array: "佛", sword: "珠", fire: "莲", thunder: "梵" },
+      bonuses: { cooldownMultiplier: 0.96, rareChanceBonus: 0.08, regenPerSecond: 0.12, shieldChance: 0.08 },
     },
     bajie: {
+      key: "bajie",
       name: "猪八戒",
-      role: "肉盾 / 范围 / 控场",
+      title: "天蓬元帅",
+      role: "肉盾 / 范围 / 击退 / 抗压",
+      shortRole: "抗压范围",
+      weapon: "九齿钉耙",
       initialSkills: ["fire", "array"],
-      passive: "结界血量 +25%，受到撞击伤害 -12%。",
+      activeSkills: ["钉耙横扫", "震地退妖"],
+      passive: "城墙最大血量 +20%，怪物撞墙伤害降低 10%，范围技能半径 +8%。",
       playstyle: "抗压强，范围横扫，适合妖潮堆叠。",
       color: "#d9a35d",
       accent: "#6f4d32",
-      labels: { fire: "九齿钉耙横扫", array: "饕餮吞势", sword: "钉耙重击" },
-      icons: { fire: "耙", array: "吞", sword: "钉" },
-      bonuses: { maxHpMultiplier: 1.25, wallDamageReduction: 0.12, fireRangeMultiplier: 1.08 },
+      labels: { fire: "九齿钉耙横扫", array: "震地退妖", sword: "钉耙重击", ice: "土墙缓行", thunder: "天蓬震雷" },
+      icons: { fire: "耙", array: "震", sword: "钉", ice: "土", thunder: "震" },
+      bonuses: { maxHpMultiplier: 1.2, wallDamageReduction: 0.1, fireRangeMultiplier: 1.08 },
     },
     shaseng: {
+      key: "shaseng",
       name: "沙僧",
-      role: "均衡 / 持续输出 / 水系减速",
+      title: "卷帘大将",
+      role: "均衡 / 持续伤害 / 减速 / 控场",
+      shortRole: "流沙控场",
+      weapon: "月牙铲",
       initialSkills: ["sword", "ice"],
-      passive: "减速效果 +10%，持续伤害 +8%。",
+      activeSkills: ["月牙铲斩", "流沙困阵"],
+      passive: "减速效果 +15%，持续伤害 +10%，控制持续时间 +10%。",
       playstyle: "控场稳定，适合拖慢妖群推进。",
       color: "#6bb8c7",
       accent: "#315b57",
-      labels: { sword: "月牙铲斩", ice: "流沙困阵", array: "流沙法阵" },
-      icons: { sword: "铲", ice: "沙", array: "阵" },
-      bonuses: { iceSlowBonus: 0.1, arrayDamageMultiplier: 1.08 },
+      labels: { sword: "月牙铲斩", ice: "流沙困阵", array: "流沙法阵", fire: "水火符", thunder: "沙雷" },
+      icons: { sword: "铲", ice: "沙", array: "阵", fire: "水", thunder: "雷" },
+      bonuses: { iceSlowBonus: 0.15, arrayDamageMultiplier: 1.06, dotDamageMultiplier: 1.1, controlDurationMultiplier: 1.1 },
     },
   };
+  HERO_DEFS.tang = HERO_DEFS.tangseng;
 
   const COMPANION_DEFS = {
-    wukong: { name: "孙悟空", skill: "分身突袭", cooldown: 8, desc: "金红分身冲击妖群，造成连段伤害。", color: "#f5b04e" },
-    tang: { name: "唐僧", skill: "佛光普照", cooldown: 11, desc: "回复结界，并短暂提升全体技能伤害。", color: "#fff1bd" },
-    bajie: { name: "猪八戒", skill: "钉耙震地", cooldown: 10, desc: "震退城门前妖群并造成范围伤害。", color: "#d9a35d" },
-    shaseng: { name: "沙僧", skill: "流沙牵引", cooldown: 9, desc: "生成流沙旋涡，减速并牵引妖怪。", color: "#7fd1d8" },
+    wukong: { name: "孙悟空", skill: "分身突袭", cooldown: 18, desc: "生成金色残影冲向妖群，造成范围伤害。", color: "#f5b04e" },
+    tangseng: { name: "唐僧", skill: "佛光普照", cooldown: 22, desc: "回复城墙，并短暂提升全体技能伤害。", color: "#fff1bd" },
+    bajie: { name: "猪八戒", skill: "钉耙震地", cooldown: 20, desc: "震退城门前妖群并造成范围伤害。", color: "#d9a35d" },
+    shaseng: { name: "沙僧", skill: "流沙牵引", cooldown: 20, desc: "生成流沙旋涡，减速并牵引妖怪。", color: "#7fd1d8" },
+  };
+  COMPANION_DEFS.tang = COMPANION_DEFS.tangseng;
+  const getHeroExpNeed = (level) => Math.floor(100 * Math.pow(1.18, Math.max(1, level) - 1));
+  const getHeroBreakthroughStage = (level) => Math.floor(Math.max(1, level) / 10);
+  const getHeroLevelCap = (breakthrough = 0) => Math.min(HERO_MAX_LEVEL, Math.max(0, breakthrough) * 10 + 10);
+  const getHeroBreakthroughCost = (stage) => 1000 * stage * stage;
+  const getCompanionUpgradeCost = (level) => Math.floor(300 * Math.pow(1.22, Math.max(1, level) - 1));
+  const normalizeHeroProgress = (hero = {}) => ({
+    level: clamp(Math.floor(Number(hero.level) || 1), 1, HERO_MAX_LEVEL),
+    exp: Math.max(0, Math.floor(Number(hero.exp) || 0)),
+    breakthrough: clamp(Math.floor(Number(hero.breakthrough) || 0), 0, 4),
+    wins: Math.max(0, Math.floor(Number(hero.wins) || 0)),
+  });
+  const getHeroLevelStatus = (hero) => {
+    const data = normalizeHeroProgress(hero);
+    const cap = getHeroLevelCap(data.breakthrough);
+    const stage = getHeroBreakthroughStage(data.level);
+    const blocked = data.level >= cap && data.level < HERO_MAX_LEVEL;
+    return {
+      ...data,
+      cap,
+      blocked,
+      need: getHeroExpNeed(data.level),
+      breakthroughStage: Math.max(1, stage),
+      breakthroughCost: getHeroBreakthroughCost(Math.max(1, stage)),
+    };
+  };
+  const addHeroExpToProgress = (hero, amount) => {
+    const result = { beforeLevel: hero.level || 1, afterLevel: hero.level || 1, expGain: Math.max(0, Math.floor(amount || 0)), leveled: false, blocked: false };
+    hero.exp = Math.max(0, Math.floor(hero.exp || 0)) + result.expGain;
+    hero.level = clamp(Math.floor(hero.level || 1), 1, HERO_MAX_LEVEL);
+    hero.breakthrough = clamp(Math.floor(hero.breakthrough || 0), 0, 4);
+    while (hero.level < HERO_MAX_LEVEL) {
+      const cap = getHeroLevelCap(hero.breakthrough);
+      if (hero.level >= cap) {
+        result.blocked = true;
+        break;
+      }
+      const need = getHeroExpNeed(hero.level);
+      if (hero.exp < need) break;
+      hero.exp -= need;
+      hero.level += 1;
+      result.leveled = true;
+    }
+    result.afterLevel = hero.level;
+    return result;
   };
 
   const RUNE_QUALITIES = {
@@ -1832,12 +2901,13 @@
       soundEnabled: true,
       timeScale: readTimeScaleSetting(),
     },
-    selectedHero: "wukong",
-    heroes: Object.fromEntries(Object.keys(HERO_DEFS).map((id) => [id, { level: 1, exp: 0, wins: 0 }])),
+    selectedHero: "",
+    heroes: Object.fromEntries(HERO_IDS.map((id) => [id, { level: 1, exp: 0, breakthrough: 0, wins: 0 }])),
     companions: {
       invited: [],
       pendingInvites: [],
     },
+    companionProgress: Object.fromEntries(HERO_IDS.map((id) => [id, { level: 1 }])),
     runes: {
       owned: [],
       equipped: [],
@@ -1965,20 +3035,22 @@
       : [];
     save.lastDailyRewardDate = typeof source.lastDailyRewardDate === "string" ? source.lastDailyRewardDate : "";
     save.totalRechargeTest = Number.isFinite(source.totalRechargeTest) ? Math.max(0, Math.floor(source.totalRechargeTest)) : 0;
-    save.selectedHero = HERO_DEFS[source.selectedHero] ? source.selectedHero : "wukong";
+    const rawSelectedHero = normalizeHeroId(source.selectedHero || loadString(SAVE_KEYS.selectedHero, ""));
+    save.selectedHero = HERO_DEFS[rawSelectedHero] ? rawSelectedHero : "";
     const sourceHeroes = source.heroes && typeof source.heroes === "object" ? source.heroes : {};
-    for (const id of Object.keys(HERO_DEFS)) {
-      const hero = sourceHeroes[id] || {};
-      save.heroes[id] = {
-        level: Number.isFinite(hero.level) ? clamp(Math.floor(hero.level), 1, 60) : 1,
-        exp: Number.isFinite(hero.exp) ? Math.max(0, Math.floor(hero.exp)) : 0,
-        wins: Number.isFinite(hero.wins) ? Math.max(0, Math.floor(hero.wins)) : 0,
-      };
+    for (const id of HERO_IDS) {
+      const hero = sourceHeroes[id] || (id === "tangseng" ? sourceHeroes.tang : null) || {};
+      save.heroes[id] = normalizeHeroProgress(hero);
     }
     const invited = Array.isArray(source.companions?.invited) ? source.companions.invited : [];
     const pendingInvites = Array.isArray(source.companions?.pendingInvites) ? source.companions.pendingInvites : [];
-    save.companions.invited = Array.from(new Set(invited.filter((id) => HERO_DEFS[id] && id !== save.selectedHero))).slice(0, 3);
+    save.companions.invited = Array.from(new Set(invited.map(normalizeHeroId).filter((id) => HERO_IDS.includes(id) && id !== save.selectedHero))).slice(0, 3);
     save.companions.pendingInvites = Array.from(new Set(pendingInvites.map((value) => Number(value)).filter((value) => [10, 20, 30].includes(value))));
+    const sourceCompanionProgress = source.companionProgress && typeof source.companionProgress === "object" ? source.companionProgress : {};
+    for (const id of HERO_IDS) {
+      const progress = sourceCompanionProgress[id] || (id === "tangseng" ? sourceCompanionProgress.tang : null) || {};
+      save.companionProgress[id] = { level: clamp(Math.floor(Number(progress.level) || 1), 1, 20) };
+    }
     const sourceRunes = source.runes && typeof source.runes === "object" ? source.runes : {};
     save.runes.owned = Array.isArray(sourceRunes.owned)
       ? sourceRunes.owned
@@ -2068,6 +3140,28 @@
     if (hasStorageValue(SAVE_KEYS.lastDailyRewardDate)) save.lastDailyRewardDate = loadString(SAVE_KEYS.lastDailyRewardDate, "");
     save.settings.timeScale = loadNumber(SAVE_KEYS.timeScale, save.settings.timeScale) === 2 ? 2 : 1;
     save.totalRechargeTest = loadMigratedNumber(SAVE_KEYS.totalRechargeTest, save.totalRechargeTest, ["totalRechargeTest"]);
+    const mirroredHero = normalizeHeroId(loadString(SAVE_KEYS.selectedHero, save.selectedHero || ""));
+    if (HERO_DEFS[mirroredHero]) save.selectedHero = mirroredHero;
+    const mirroredHeroProgress = loadJSON(SAVE_KEYS.heroProgress, null);
+    if (mirroredHeroProgress && typeof mirroredHeroProgress === "object") {
+      for (const id of HERO_IDS) save.heroes[id] = normalizeHeroProgress(mirroredHeroProgress[id] || (id === "tangseng" ? mirroredHeroProgress.tang : null) || save.heroes[id]);
+    }
+    const mirroredCompanions = loadJSON(SAVE_KEYS.companions, null);
+    if (Array.isArray(mirroredCompanions)) {
+      save.companions.invited = Array.from(new Set(mirroredCompanions.map(normalizeHeroId).filter((id) => HERO_IDS.includes(id) && id !== save.selectedHero))).slice(0, 3);
+    }
+    const mirroredCompanionProgress = loadJSON(SAVE_KEYS.companionProgress, null);
+    if (mirroredCompanionProgress && typeof mirroredCompanionProgress === "object") {
+      for (const id of HERO_IDS) {
+        const progress = mirroredCompanionProgress[id] || (id === "tangseng" ? mirroredCompanionProgress.tang : null) || save.companionProgress[id];
+        save.companionProgress[id] = { level: clamp(Math.floor(Number(progress?.level) || 1), 1, 20) };
+      }
+    }
+    const mirroredPending = loadJSON(SAVE_KEYS.pendingCompanionInvites, null);
+    if (Array.isArray(mirroredPending)) save.companions.pendingInvites = Array.from(new Set(mirroredPending.map(Number).filter((value) => [10, 20, 30].includes(value))));
+    else if (Number.isFinite(Number(mirroredPending)) && Number(mirroredPending) > 0) {
+      save.companions.pendingInvites = [10, 20, 30].slice(0, clamp(Math.floor(Number(mirroredPending)), 0, 3));
+    }
     return save;
   }
 
@@ -2091,8 +3185,14 @@
     }
     if (!save.levels[save.selectedLevelId]?.unlocked) save.selectedLevelId = getHighestUnlockedLevelId(save);
     save.records.bestLevel = Math.max(save.records.bestLevel || 1, save.records.highestPlayerLevel || 1);
-    if (!HERO_DEFS[save.selectedHero]) save.selectedHero = "wukong";
-    save.companions.invited = Array.from(new Set((save.companions.invited || []).filter((id) => HERO_DEFS[id] && id !== save.selectedHero))).slice(0, 3);
+    save.selectedHero = normalizeHeroId(save.selectedHero || "");
+    if (!HERO_IDS.includes(save.selectedHero)) save.selectedHero = "";
+    for (const id of HERO_IDS) {
+      save.heroes[id] = normalizeHeroProgress(save.heroes[id]);
+      const companionLevel = Number(save.companionProgress?.[id]?.level);
+      save.companionProgress[id] = { level: clamp(Math.floor(Number.isFinite(companionLevel) ? companionLevel : 1), 1, 20) };
+    }
+    save.companions.invited = Array.from(new Set((save.companions.invited || []).map(normalizeHeroId).filter((id) => HERO_IDS.includes(id) && id !== save.selectedHero))).slice(0, 3);
     save.companions.pendingInvites = Array.from(new Set((save.companions.pendingInvites || []).filter((order) => [10, 20, 30].includes(order))));
     return save;
   }
@@ -2115,6 +3215,11 @@
     saveString(SAVE_KEYS.lastDailyRewardDate, data.lastDailyRewardDate || "");
     saveNumber(SAVE_KEYS.timeScale, data.settings?.timeScale === 2 ? 2 : 1);
     saveNumber(SAVE_KEYS.totalRechargeTest, data.totalRechargeTest || 0);
+    saveString(SAVE_KEYS.selectedHero, data.selectedHero || "");
+    saveJSON(SAVE_KEYS.heroProgress, data.heroes || {});
+    saveJSON(SAVE_KEYS.companions, data.companions?.invited || []);
+    saveJSON(SAVE_KEYS.companionProgress, data.companionProgress || {});
+    saveJSON(SAVE_KEYS.pendingCompanionInvites, data.companions?.pendingInvites || []);
     return data;
   }
 
@@ -2164,9 +3269,12 @@
       timeScale: save.settings?.timeScale === 2 ? 2 : 1,
       soundEnabled: save.settings?.soundEnabled !== false,
       totalRechargeTest: save.totalRechargeTest || 0,
-      selectedHero: save.selectedHero || "wukong",
+      selectedHero: save.selectedHero || "",
+      heroProgress: save.heroes || {},
       heroes: save.heroes || {},
       companions: save.companions || { invited: [], pendingInvites: [] },
+      companionProgress: save.companionProgress || {},
+      pendingCompanionInvites: save.companions?.pendingInvites || [],
       runes: save.runes || { owned: [], equipped: [] },
       bestiary: save.bestiary || { seen: {} },
       achievements: save.achievements || { unlocked: {} },
@@ -2185,6 +3293,12 @@
       highestClearedLevel: Number(saveData.highestClearedLevel) || 0,
       finalCleared: saveData.finalCleared === true,
     };
+    const cloudCompanions = Array.isArray(saveData.companions)
+      ? { invited: saveData.companions, pendingInvites: saveData.pendingCompanionInvites || [] }
+      : {
+        ...(saveData.companions && typeof saveData.companions === "object" ? saveData.companions : {}),
+        pendingInvites: saveData.companions?.pendingInvites || saveData.pendingCompanionInvites || [],
+      };
     const source = {
       version: Number(saveData.saveVersion) || SAVE_VERSION,
       coins: Number(saveData.spiritStone ?? saveData.coins) || 0,
@@ -2201,9 +3315,10 @@
         soundEnabled: saveData.soundEnabled !== false,
         timeScale: Number(saveData.timeScale) === 2 ? 2 : 1,
       },
-      selectedHero: saveData.selectedHero || "wukong",
-      heroes: saveData.heroes || {},
-      companions: saveData.companions || { invited: [], pendingInvites: [] },
+      selectedHero: normalizeHeroId(saveData.selectedHero || ""),
+      heroes: saveData.heroProgress || saveData.heroes || {},
+      companions: cloudCompanions,
+      companionProgress: saveData.companionProgress || {},
       runes: saveData.runes || { owned: [], equipped: [] },
       bestiary: saveData.bestiary || { seen: {} },
       achievements: saveData.achievements || { unlocked: {} },
@@ -2326,36 +3441,56 @@
     return bonuses;
   }
 
-  const getMetaBonuses = (save) => {
+  function buildBattleModifiers(save) {
     const data = normalizeSave(save);
     const gems = data.gems;
     const talents = data.talents;
     const runes = getRuneBonuses(data);
-    const hero = HERO_DEFS[data.selectedHero] || HERO_DEFS.wukong;
+    const heroId = HERO_IDS.includes(data.selectedHero) ? data.selectedHero : "wukong";
+    const hero = HERO_DEFS[heroId] || HERO_DEFS.wukong;
+    const heroState = normalizeHeroProgress(data.heroes?.[heroId]);
+    const heroLevel = heroState.level || 1;
+    const breakthrough = heroState.breakthrough || 0;
     const heroBonuses = hero.bonuses || {};
+    const levelDamage = heroId === "wukong" ? 1.04 : 1;
+    const wukongShadow = heroId === "wukong" ? 1 + Math.floor((heroLevel - 1) / 5) * 0.1 : 1;
+    const tangScale = heroId === "tangseng" ? 1 + (heroLevel - 1) * 0.02 : 1;
+    const bajieWall = heroId === "bajie" ? 1 + (heroLevel - 1) * 0.015 : 1;
+    const shasengDot = heroId === "shaseng" ? 1 + (heroLevel - 1) * 0.02 : 1;
+    const shasengSlow = heroId === "shaseng" ? Math.floor(heroLevel / 5) * 0.02 : 0;
+    const bajieRange = heroId === "bajie" ? Math.floor(heroLevel / 5) * 0.05 : 0;
+    const tangRare = heroId === "tangseng" ? Math.floor(heroLevel / 5) * 0.005 : 0;
     return {
-      damageMultiplier: (1 + gems.attack.level * 0.03) * (heroBonuses.damageMultiplier || 1),
+      damageMultiplier: (1 + gems.attack.level * 0.03) * (heroBonuses.damageMultiplier || 1) * levelDamage,
       cooldownMultiplier: (1 - Math.min(gems.cooldown.level * 0.02, 0.4)) * (heroBonuses.cooldownMultiplier || 1) * runes.cooldownMultiplier,
       maxHpBonus: gems.wall.level * 10 + talents.wallFortify * 15 + (runes.maxHpBonus || 0),
-      maxHpMultiplier: heroBonuses.maxHpMultiplier || 1,
+      maxHpMultiplier: (heroBonuses.maxHpMultiplier || 1) * bajieWall,
       critChance: Math.min(gems.crit.level * 0.02 + (heroBonuses.critChance || 0) + (runes.critChance || 0), 0.65),
-      critDamageMultiplier: 2,
+      critDamageMultiplier: 2 + (heroBonuses.critDamageBonus || 0) + (heroId === "wukong" ? (heroLevel - 1) * 0.02 : 0),
       expMultiplier: 1 + gems.exp.level * 0.05 + talents.battleInsight * 0.03 + (runes.expMultiplier || 0),
       swordDamageMultiplier: 1 + talents.swordDamage * 0.05,
-      fireRangeMultiplier: 1 + talents.fireMastery * 0.04 + (heroBonuses.fireRangeMultiplier ? heroBonuses.fireRangeMultiplier - 1 : 0) + (runes.fireRange || 0),
-      iceSlowBonus: talents.iceMastery * 0.03 + (heroBonuses.iceSlowBonus || 0),
+      fireRangeMultiplier: 1 + talents.fireMastery * 0.04 + (heroBonuses.fireRangeMultiplier ? heroBonuses.fireRangeMultiplier - 1 : 0) + (runes.fireRange || 0) + bajieRange,
+      iceSlowBonus: talents.iceMastery * 0.03 + (heroBonuses.iceSlowBonus || 0) + shasengSlow,
       thunderDamageMultiplier: 1 + talents.thunderMastery * 0.05,
       swordArrayDamageMultiplier: 1 + talents.swordArrayMastery * 0.05 + (heroBonuses.arrayDamageMultiplier ? heroBonuses.arrayDamageMultiplier - 1 : 0),
       startExp: talents.startSpirit * 5,
-      swordPierceBonus: runes.swordPierce || 0,
+      swordPierceBonus: (runes.swordPierce || 0) + (heroId === "wukong" ? breakthrough : 0),
       thunderBounceBonus: runes.thunderBounce || 0,
-      wallDamageReduction: Math.min(0.55, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0)),
+      wallDamageReduction: Math.min(0.55, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0) + (heroId === "bajie" ? breakthrough * 0.03 : 0)),
       retaliationDamage: runes.retaliation || 0,
       coinMultiplier: runes.coinMultiplier || 0,
-      rareChanceBonus: heroBonuses.rareChanceBonus || 0,
-      regenPerSecond: heroBonuses.regenPerSecond || 0,
+      rareChanceBonus: (heroBonuses.rareChanceBonus || 0) + tangRare,
+      regenPerSecond: (heroBonuses.regenPerSecond || 0) * tangScale,
+      shieldChance: heroBonuses.shieldChance || 0,
+      shieldStrength: heroId === "tangseng" ? 1 + breakthrough * 0.1 : 1,
+      dotDamageMultiplier: (heroBonuses.dotDamageMultiplier || 1) * shasengDot,
+      controlDurationMultiplier: (heroBonuses.controlDurationMultiplier || 1) + (heroId === "shaseng" ? breakthrough : 0),
+      shadowDamageMultiplier: wukongShadow,
+      heroSpecific: { heroId, heroLevel, breakthrough },
     };
-  };
+  }
+
+  const getMetaBonuses = buildBattleModifiers;
 
   class SaveManager {
     constructor() {
@@ -2390,6 +3525,10 @@
 
     getMetaBonuses() {
       return getMetaBonuses(this.data);
+    }
+
+    getBattleModifiers() {
+      return buildBattleModifiers(this.data);
     }
 
     upgradeGem(id) {
@@ -2434,6 +3573,62 @@
       this.data.companions.pendingInvites = (this.data.companions.pendingInvites || []).slice(1);
       this.save();
       return { ok: true, message: `${COMPANION_DEFS[id].name}加入助战` };
+    }
+
+    selectHero(id) {
+      const heroId = normalizeHeroId(id);
+      if (!HERO_IDS.includes(heroId)) return { ok: false, message: "角色不存在" };
+      this.data.selectedHero = heroId;
+      this.data.heroes[heroId] = normalizeHeroProgress(this.data.heroes[heroId]);
+      this.data.companions.invited = (this.data.companions.invited || []).map(normalizeHeroId).filter((item) => item !== heroId);
+      this.save();
+      return { ok: true, message: `已选择${HERO_DEFS[heroId].name}` };
+    }
+
+    breakthroughHero(id) {
+      const heroId = normalizeHeroId(id);
+      if (!HERO_IDS.includes(heroId)) return { ok: false, message: "角色不存在" };
+      const hero = normalizeHeroProgress(this.data.heroes[heroId]);
+      this.data.heroes[heroId] = hero;
+      const status = getHeroLevelStatus(hero);
+      if (!status.blocked) return { ok: false, message: "尚未到突破关口" };
+      if (this.data.coins < status.breakthroughCost) return { ok: false, message: "灵石不足" };
+      this.data.coins -= status.breakthroughCost;
+      hero.breakthrough += 1;
+      const result = addHeroExpToProgress(hero, 0);
+      this.save();
+      return { ok: true, message: `${HERO_DEFS[heroId].name}突破成功`, level: result.afterLevel };
+    }
+
+    inviteCompanion(id) {
+      const heroId = normalizeHeroId(id);
+      if (!HERO_IDS.includes(heroId) || heroId === this.data.selectedHero) return { ok: false, message: "该角色不能助战" };
+      const invited = this.data.companions.invited || [];
+      if (invited.includes(heroId)) return { ok: false, message: "已经邀请过该伙伴" };
+      if (invited.length >= 3) return { ok: false, message: "助战阵容已满" };
+      if (!(this.data.companions.pendingInvites || []).length) return { ok: false, message: "暂无伙伴邀请机会" };
+      invited.push(heroId);
+      this.data.companions.invited = invited;
+      this.data.companions.pendingInvites = (this.data.companions.pendingInvites || []).slice(1);
+      this.data.companionProgress[heroId] = this.data.companionProgress[heroId] || { level: 1 };
+      this.save();
+      return { ok: true, message: `${COMPANION_DEFS[heroId].name}加入助战` };
+    }
+
+    upgradeCompanion(id) {
+      const heroId = normalizeHeroId(id);
+      if (!HERO_IDS.includes(heroId)) return { ok: false, message: "伙伴不存在" };
+      if (!(this.data.companions.invited || []).includes(heroId)) return { ok: false, message: "尚未邀请该伙伴" };
+      const progress = this.data.companionProgress[heroId] || { level: 1 };
+      const level = clamp(Math.floor(progress.level || 1), 1, 20);
+      if (level >= 20) return { ok: false, message: "伙伴助战已满级" };
+      const cost = getCompanionUpgradeCost(level);
+      if (this.data.coins < cost) return { ok: false, message: "灵石不足" };
+      this.data.coins -= cost;
+      progress.level = level + 1;
+      this.data.companionProgress[heroId] = progress;
+      this.save();
+      return { ok: true, message: `${COMPANION_DEFS[heroId].name}助战升至 Lv.${progress.level}` };
     }
 
     addRune(rune) {
@@ -2521,18 +3716,12 @@
         if (levelConfig.order >= 40) this.data.records.finalCleared = true;
         levelRecord.cleared = true;
         levelRecord.clearCount += 1;
-        const hero = this.data.heroes[this.data.selectedHero];
-        if (hero) {
-          hero.wins += 1;
-          hero.exp += 20 + levelConfig.order * 3;
-          hero.level = Math.min(60, 1 + Math.floor(hero.exp / 120));
-        }
         const rune = createRuneDrop(!!levelConfig.boss);
         this.data.runes.owned.push(rune);
         if (this.data.runes.equipped.length < 3) this.data.runes.equipped.push(rune.uid);
         runeDrops.push(rune);
         if ([10, 20, 30].includes(levelConfig.order)) {
-          const eligible = Object.keys(COMPANION_DEFS).filter((id) => id !== this.data.selectedHero && !(this.data.companions.invited || []).includes(id));
+          const eligible = HERO_IDS.filter((id) => id !== this.data.selectedHero && !(this.data.companions.invited || []).includes(id));
           if (eligible.length && !this.data.companions.pendingInvites.includes(levelConfig.order)) {
             this.data.companions.pendingInvites.push(levelConfig.order);
             pendingCompanionInvite = true;
@@ -2543,6 +3732,23 @@
           this.data.levels[nextLevel.id].unlocked = true;
           unlockedLevel = nextLevel;
         }
+      }
+      const heroId = normalizeHeroId(this.data.selectedHero || "");
+      let heroExpGain = 0;
+      let heroLevelBefore = 1;
+      let heroLevelAfter = 1;
+      let heroNeedBreakthrough = false;
+      if (HERO_IDS.includes(heroId)) {
+        const hero = normalizeHeroProgress(this.data.heroes[heroId]);
+        this.data.heroes[heroId] = hero;
+        if (victory) hero.wins += 1;
+        heroLevelBefore = hero.level;
+        heroExpGain = kills * 2 + levelConfig.order * 20;
+        if (victory) heroExpGain += 100 + levelConfig.order * 10;
+        if (victory && levelConfig.order % 10 === 0) heroExpGain += 150;
+        const heroResult = addHeroExpToProgress(hero, heroExpGain);
+        heroLevelAfter = heroResult.afterLevel;
+        heroNeedBreakthrough = heroResult.blocked;
       }
       this.updateAchievements(victory ? levelConfig.order : 0);
       this.save();
@@ -2559,6 +3765,11 @@
         unlockedLevelId: unlockedLevel?.id || null,
         unlockedLevelName: unlockedLevel?.name || "",
         pendingCompanionInvite,
+        heroExpGain,
+        heroLevelBefore,
+        heroLevelAfter,
+        heroNeedBreakthrough,
+        heroName: HERO_DEFS[heroId]?.name || "",
       };
     }
   }
@@ -2798,6 +4009,17 @@
     }
 
     drawJourneyEnemy(ctx, game, t) {
+      const key = normalizeEnemyType(this.type || this.visual);
+      if (MONSTER_BOOK[key]) {
+        const baseScale = this.isBoss ? this.radius / 42 : this.radius / 28;
+        drawMonsterIllustration(ctx, key, 0, 0, baseScale, "battle", {
+          time: t,
+          hitPulse: this.hitPulse,
+          shield: this.shield,
+          enemy: this,
+        });
+        return true;
+      }
       const visual = this.visual;
       if (visual === "foxDemon" || visual === "fox" || visual === "splitFox") return this.drawFoxEnemy(ctx, t, visual === "splitFox");
       if (visual === "dogDemon") return this.drawDogDemon(ctx, t);
@@ -4859,6 +6081,7 @@
         resultCoins: document.getElementById("resultCoins"),
         resultTotalCoins: document.getElementById("resultTotalCoins"),
         resultShards: document.getElementById("resultShards"),
+        resultHeroExp: document.getElementById("resultHeroExp"),
         resultUnlockNotice: document.getElementById("resultUnlockNotice"),
         homeCoins: document.getElementById("homeCoins"),
         selectedTrialText: document.getElementById("selectedTrialText"),
@@ -4878,6 +6101,8 @@
         clearCount: document.getElementById("clearCount"),
         totalRuns: document.getElementById("totalRuns"),
         startBtn: document.getElementById("startBtn"),
+        heroBtn: document.getElementById("heroBtn"),
+        companionBtn: document.getElementById("companionBtn"),
         cultivationBtn: document.getElementById("cultivationBtn"),
         runeBtn: document.getElementById("runeBtn"),
         codexBtn: document.getElementById("codexBtn"),
@@ -4927,6 +6152,7 @@
       this.wallHitFlash = 0;
       this.lastVibrate = 0;
       this.timeScale = this.saveManager.data.settings.timeScale === 2 ? 2 : 1;
+      this.monsterGalleryMode = new URLSearchParams(window.location.search).get("monsterGallery") === "1";
       this.selectedLevelId = getSavedSelectedLevelId(this.saveManager.data);
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
 
@@ -4939,6 +6165,7 @@
       this.renderRunes();
       this.renderCodex();
       this.renderAchievements();
+      if (this.monsterGalleryMode) this.openCodex();
       requestAnimationFrame((time) => this.loop(time));
     }
 
@@ -4950,6 +6177,10 @@
       this.dom.restartBtn.addEventListener("click", () => this.start());
       this.dom.pauseBtn.addEventListener("click", () => this.togglePause());
       this.dom.speedBtn.addEventListener("click", () => this.toggleTimeScale());
+      this.dom.heroBtn?.addEventListener("click", () => {
+        this.dom.heroList?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      this.dom.companionBtn?.addEventListener("click", () => this.openCompanions());
       this.dom.cultivationBtn.addEventListener("click", () => this.openCultivation());
       this.dom.runeBtn.addEventListener("click", () => this.openRunes());
       this.dom.codexBtn.addEventListener("click", () => this.openCodex());
@@ -5048,7 +6279,7 @@
       this.metaBonuses = this.saveManager.getMetaBonuses();
       this.heroId = this.saveManager.data.selectedHero || "wukong";
       this.heroDef = HERO_DEFS[this.heroId] || HERO_DEFS.wukong;
-      this.companionIds = [...(this.saveManager.data.companions.invited || [])];
+      this.companionIds = [...(this.saveManager.data.companions.invited || [])].map(normalizeHeroId).filter((id) => HERO_IDS.includes(id));
       this.companionTimers = Object.fromEntries(this.companionIds.map((id) => [id, rand(1.2, 3.2)]));
       this.heroShadowTimer = 4.5;
       this.heroRegenTimer = 1;
@@ -5110,6 +6341,11 @@
     }
 
     start() {
+      if (!this.saveManager.data.selectedHero) {
+        this.showToast("请先选择取经主角");
+        this.renderHeroList();
+        return;
+      }
       const levelState = this.saveManager.data.levels[this.selectedLevelId];
       if (!levelState?.unlocked) {
         this.showToast("请先通关上一关");
@@ -5150,6 +6386,10 @@
       const result = this.lastResult;
       if (!result) {
         this.start();
+        return;
+      }
+      if (result.pendingCompanionInvite) {
+        this.showCompanionInvite();
         return;
       }
       if (!result.victory) {
@@ -5701,19 +6941,28 @@
         }
       }
       for (const id of this.companionIds || []) {
-        const def = COMPANION_DEFS[id];
+        const companionId = normalizeHeroId(id);
+        const def = COMPANION_DEFS[companionId];
         if (!def) continue;
-        this.companionTimers[id] = (this.companionTimers[id] || def.cooldown) - dt;
+        const level = this.getCompanionLevel(id);
+        const cooldown = def.cooldown * Math.max(0.82, 1 - (level - 1) * 0.006);
+        this.companionTimers[id] = (this.companionTimers[id] || cooldown) - dt;
         if (this.companionTimers[id] > 0) continue;
-        this.companionTimers[id] += def.cooldown;
+        this.companionTimers[id] += cooldown;
         this.castCompanionSkill(id);
       }
+    }
+
+    getCompanionLevel(id) {
+      const heroId = normalizeHeroId(id);
+      const progress = this.saveManager.data.companionProgress?.[heroId] || { level: 1 };
+      return clamp(Math.floor(progress.level || 1), 1, 20);
     }
 
     castHeroShadow() {
       const target = this.findClosestToWall();
       if (!target) return;
-      const damage = this.skills.sword.baseDamage * this.skills.sword.damageMult * 1.15;
+      const damage = this.skills.sword.baseDamage * this.skills.sword.damageMult * 1.15 * (this.metaBonuses.shadowDamageMultiplier || 1);
       this.damageEnemy(target, damage, "sword", { x: target.x, y: target.y - 8 });
       this.spawnSlash(target.x, target.y, -Math.PI / 2);
       this.floatingTexts.push(new FloatingText("残影追击", target.x, target.y - 24, "#fff1bd", { size: 14, life: 0.8 }));
@@ -5723,25 +6972,29 @@
     }
 
     castCompanionSkill(id) {
+      id = normalizeHeroId(id);
       const def = COMPANION_DEFS[id];
       if (!def) return;
+      const level = this.getCompanionLevel(id);
+      const power = 1 + (level - 1) * 0.08;
       const target = this.findDenseTarget() || this.findClosestToWall();
-      if (id !== "tang" && !target) return;
+      if (id !== "tangseng" && !target) return;
       this.floatingTexts.push(new FloatingText(def.skill, this.width / 2, this.battleTop + 56, def.color, { size: 18, life: 1, kind: "crit" }));
       if (id === "wukong") {
-        const radius = 86;
+        const radius = 86 + Math.floor(level / 5) * 8;
+        const damage = 34 * power;
         for (const enemy of this.enemies) {
           if (!this.isEnemyTargetable(enemy)) continue;
           if (distSq(target.x, target.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
-            this.damageEnemy(enemy, 34, "sword", { x: enemy.x, y: enemy.y, silent: false });
+            this.damageEnemy(enemy, damage, "sword", { x: enemy.x, y: enemy.y, silent: false });
           }
         }
         this.lightningEffects.push({ x1: target.x - 80, y1: target.y - 35, x2: target.x + 80, y2: target.y + 35, life: 0.2, age: 0, sword: true });
         this.addShake(2.5, 0.08);
-      } else if (id === "tang") {
-        const heal = Math.round(this.maxWallHp * 0.08 + 12);
+      } else if (id === "tangseng") {
+        const heal = Math.round(this.maxWallHp * (0.08 + level * 0.002) + 12 * power);
         this.wallHp = Math.min(this.maxWallHp, this.wallHp + heal);
-        this.companionBuffUntil = Math.max(this.companionBuffUntil, this.elapsed + 5);
+        this.companionBuffUntil = Math.max(this.companionBuffUntil, this.elapsed + 5 + Math.floor(level / 8));
         this.floatingTexts.push(new FloatingText(`佛光 +${heal}`, this.width / 2, this.wallY - 72, "#fff1bd", { size: 16, life: 1 }));
         for (let i = 0; i < 24; i += 1) {
           const a = (Math.PI * 2 * i) / 24;
@@ -5750,24 +7003,25 @@
       } else if (id === "bajie") {
         const centerX = this.width / 2;
         const centerY = this.wallY - 72;
-        const radius = 110;
+        const radius = 110 + Math.floor(level / 4) * 8;
         this.areaEffects.push(new AreaEffect({ kind: "quake", x: centerX, y: centerY, radius, duration: 0.45, damagePerSecond: 0, color: "rgba(217, 163, 93, 0.2)", tickSource: "array" }));
         for (const enemy of this.enemies) {
           if (!this.isEnemyTargetable(enemy)) continue;
           if (distSq(centerX, centerY, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
-            enemy.y = Math.max(this.battleTop + enemy.radius, enemy.y - 24);
-            this.damageEnemy(enemy, 32, "array", { x: enemy.x, y: enemy.y });
+            enemy.y = Math.max(this.battleTop + enemy.radius, enemy.y - (24 + level * 0.8));
+            this.damageEnemy(enemy, 32 * power, "array", { x: enemy.x, y: enemy.y });
           }
         }
         this.addShake(5, 0.12);
       } else if (id === "shaseng") {
-        const radius = 92;
-        this.areaEffects.push(new AreaEffect({ kind: "sand", x: target.x, y: target.y, radius, duration: 3, damagePerSecond: 12, color: "rgba(127, 209, 216, 0.2)", tickSource: "ice" }));
+        const radius = 92 + Math.floor(level / 4) * 7;
+        const duration = 3 + Math.floor(level / 6) * 0.45;
+        this.areaEffects.push(new AreaEffect({ kind: "sand", x: target.x, y: target.y, radius, duration, damagePerSecond: 12 * power, color: "rgba(127, 209, 216, 0.2)", tickSource: "ice" }));
         for (const enemy of this.enemies) {
           if (!this.isEnemyTargetable(enemy)) continue;
           if (distSq(target.x, target.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
-            enemy.slowUntil = Math.max(enemy.slowUntil, this.elapsed + 2.5);
-            enemy.slowFactor = Math.min(enemy.slowFactor, 0.55);
+            enemy.slowUntil = Math.max(enemy.slowUntil, this.elapsed + 2.5 + level * 0.04);
+            enemy.slowFactor = Math.min(enemy.slowFactor, Math.max(0.38, 0.55 - level * 0.006));
           }
         }
       }
@@ -5777,7 +7031,13 @@
       const protectedAmount = this.elapsed < this.currentLevelConfig.newbieProtectionSeconds
         ? amount * 0.5
         : amount;
-      const finalAmount = Math.max(1, Math.ceil(protectedAmount * (1 - (this.metaBonuses.wallDamageReduction || 0))));
+      let shieldReduction = 0;
+      if ((this.metaBonuses.shieldChance || 0) > 0 && Math.random() < this.metaBonuses.shieldChance) {
+        shieldReduction = 0.35 * (this.metaBonuses.shieldStrength || 1);
+        this.floatingTexts.push(new FloatingText("佛光护盾", x, y - 20, "#fff1bd", { size: 14, life: 0.8 }));
+        for (let i = 0; i < 10; i += 1) this.addParticle(x, y, "#fff1bd", rand(-70, 70), rand(-70, 10), rand(2, 4), rand(0.25, 0.55), "heal");
+      }
+      const finalAmount = Math.max(1, Math.ceil(protectedAmount * (1 - (this.metaBonuses.wallDamageReduction || 0)) * (1 - shieldReduction)));
       this.wallHp = Math.max(0, this.wallHp - finalAmount);
       this.wallHitFlash = 1;
       this.redFlashAlpha = Math.max(this.redFlashAlpha, 0.18);
@@ -5903,6 +7163,7 @@
       if (this.elapsed < this.companionBuffUntil) amount *= 1.16;
       if (enemy.config?.swordDamageTaken && source === "sword") amount *= enemy.config.swordDamageTaken;
       if (enemy.config?.flying && source === "array") amount *= enemy.config.arrayDamageTaken || 0.3;
+      if (source === "array") amount *= this.metaBonuses.dotDamageMultiplier || 1;
       if (this.iceVulnerabilityBonus > 0 && this.elapsed < enemy.slowUntil) {
         amount *= 1 + this.iceVulnerabilityBonus;
       }
@@ -6426,6 +7687,7 @@
         nextLevelId: victory && nextLevel ? nextLevel.id : null,
         nextLevelName: victory && nextLevel ? nextLevel.name : "",
         isFinalLevel: this.currentLevelConfig.order >= 40,
+        pendingCompanionInvite: !!reward.pendingCompanionInvite,
       };
 
       this.dom.resultEyebrow.textContent = victory ? "守住山门" : "妖潮破门";
@@ -6446,6 +7708,13 @@
       this.dom.resultCoins.textContent = reward.coins;
       this.dom.resultTotalCoins.textContent = reward.totalCoins;
       this.dom.resultShards.textContent = this.formatShardDrops(reward.drops, reward.runeDrops);
+      if (this.dom.resultHeroExp) {
+        const heroLabel = reward.heroName || "角色";
+        const levelText = reward.heroLevelAfter > reward.heroLevelBefore
+          ? `${heroLabel}提升至 Lv.${reward.heroLevelAfter}`
+          : `${heroLabel} +${reward.heroExpGain} 经验`;
+        this.dom.resultHeroExp.textContent = reward.heroNeedBreakthrough ? `${levelText}，需要突破后继续升级` : levelText;
+      }
       if (victory && this.currentLevelConfig.id === "level40") {
         this.dom.resultUnlockNotice.textContent = "万妖退散，山门永固";
         this.dom.resultUnlockNotice.classList.remove("hidden");
@@ -6470,6 +7739,10 @@
         this.dom.resultUnlockNotice.textContent = "";
         this.dom.resultUnlockNotice.classList.add("hidden");
       }
+      if (reward.pendingCompanionInvite) {
+        this.dom.resultUnlockNotice.textContent = "获得伙伴邀请机会";
+        this.dom.resultUnlockNotice.classList.remove("hidden");
+      }
       this.configureResultButtons(victory);
       this.dom.gameOverOverlay.classList.remove("hidden");
       this.dom.gameOverOverlay.scrollTop = 0;
@@ -6482,11 +7755,6 @@
       this.renderRunes();
       this.renderCodex();
       this.renderAchievements();
-      if (reward.pendingCompanionInvite) {
-        window.setTimeout(() => {
-          if (this.state === "ended") this.showCompanionInvite();
-        }, 450);
-      }
     }
 
     configureResultButtons(victory) {
@@ -6495,6 +7763,11 @@
       this.dom.resultHomeBtn.textContent = "返回关卡";
       this.dom.replayLevelBtn.classList.toggle("hidden", !victory);
       if (victory) {
+        if (result.pendingCompanionInvite) {
+          this.dom.againBtn.textContent = "邀请伙伴";
+          this.dom.replayLevelBtn.textContent = "重玩本关";
+          return;
+        }
         if (result.isFinalLevel) {
           this.dom.againBtn.textContent = "返回山门";
           this.dom.replayLevelBtn.textContent = "重玩终劫";
@@ -6551,8 +7824,10 @@
       if (!this.dom.heroList) return;
       const save = this.saveManager.data;
       this.dom.heroList.innerHTML = "";
-      for (const [id, hero] of Object.entries(HERO_DEFS)) {
-        const state = save.heroes[id] || { level: 1, wins: 0 };
+      for (const id of HERO_IDS) {
+        const hero = HERO_DEFS[id];
+        const state = normalizeHeroProgress(save.heroes[id]);
+        const status = getHeroLevelStatus(state);
         const button = document.createElement("button");
         button.type = "button";
         button.className = `hero-card ${save.selectedHero === id ? "selected" : ""}`;
@@ -6562,13 +7837,16 @@
             <strong>${hero.name} · Lv.${state.level}</strong>
             <p>${hero.role}</p>
             <p>${hero.passive}</p>
+            <p>${status.blocked ? `需要突破：${status.breakthroughCost} 灵石` : `经验 ${Math.floor(state.exp)} / ${status.need}`}</p>
             <div class="hero-tags"><span>${hero.initialSkills.map((skill) => hero.labels?.[skill] || SKILL_LABELS[skill]).join("</span><span>")}</span><span>胜场 ${state.wins || 0}</span></div>
           </div>
         `;
         button.addEventListener("click", () => {
-          const result = this.saveManager.selectHero(id);
-          this.heroId = id;
-          this.heroDef = hero;
+          const result = status.blocked && save.selectedHero === id
+            ? this.saveManager.breakthroughHero(id)
+            : this.saveManager.selectHero(id);
+          this.heroId = this.saveManager.data.selectedHero || id;
+          this.heroDef = HERO_DEFS[this.heroId] || hero;
           this.showToast(result.message);
           this.renderHome();
           this.renderSkillStrip();
@@ -6608,7 +7886,7 @@
           ctx.beginPath();
           ctx.arc(w * 0.5, h * 0.3, 7, 0, Math.PI * 2);
           ctx.fill();
-        } else if (id === "tang") {
+        } else if (id === "tangseng" || id === "tang") {
           ctx.beginPath();
           ctx.arc(w * 0.5, h * 0.28, 12, Math.PI, 0);
           ctx.fill();
@@ -6685,18 +7963,29 @@
       if (!this.dom.codexList) return;
       const seen = this.saveManager.data.bestiary.seen || {};
       this.dom.codexList.innerHTML = "";
+      const galleryMode = this.monsterGalleryMode || new URLSearchParams(window.location.search).get("monsterGallery") === "1";
+      this.dom.codexList.classList.toggle("monster-gallery-mode", galleryMode);
       for (const [id, def] of Object.entries(MONSTER_BOOK)) {
-        const unlocked = !!seen[id] || (def.unlockLevel || 1) <= 1;
+        const unlocked = galleryMode || !!seen[id] || (def.unlockLevel || 1) <= 1;
+        const spritePath = def.sprite || ENEMY_TYPES[id]?.sprite || "";
+        const spriteRecord = galleryMode && spritePath ? getMonsterSpriteRecord(id) : null;
+        const spriteStatus = !spritePath ? "无素材" : spriteRecord?.error ? "加载失败" : spriteRecord?.loaded ? "已加载" : "加载中";
         const card = document.createElement("article");
-        card.className = `system-card ${unlocked ? "" : "locked"}`;
+        card.className = `system-card monster-card ${def.category === "boss" ? "boss-card" : ""} ${def.category === "elite" ? "elite-card" : ""} ${unlocked ? "" : "locked"}`;
         card.innerHTML = `
-          <canvas class="monster-portrait" aria-label="${unlocked ? def.name : "未遭遇妖怪"}"></canvas>
+          <canvas class="monster-portrait" width="132" height="132" aria-label="${unlocked ? def.name : "未遭遇妖怪"}"></canvas>
           <div class="system-copy">
             <strong>${unlocked ? def.name : "未遭遇妖怪"}</strong>
             <p>${unlocked ? (def.description || "取经路上现身的志怪妖物。") : `第 ${def.unlockLevel || 1} 关后可能出现。`}</p>
             <div class="system-tags"><span>${def.category === "boss" ? "Boss" : def.category === "elite" ? "精英" : "妖怪"}</span><span>解锁 ${def.unlockLevel || 1}</span></div>
           </div>
         `;
+        if (galleryMode) {
+          const spriteMeta = document.createElement("p");
+          spriteMeta.className = "sprite-path";
+          spriteMeta.textContent = spritePath ? `${spriteStatus} · ${spritePath}` : spriteStatus;
+          card.querySelector(".system-copy")?.appendChild(spriteMeta);
+        }
         this.dom.codexList.appendChild(card);
         this.drawMonsterPortrait(card.querySelector(".monster-portrait"), id, unlocked);
       }
@@ -6704,7 +7993,12 @@
 
     drawMonsterPortrait(canvas, id, unlocked) {
       if (!canvas) return;
-      const cssSize = 54;
+      const key = normalizeEnemyType(id);
+      const def = MONSTER_BOOK[key] || {};
+      const galleryMode = !!canvas.closest(".monster-gallery-mode");
+      const cssSize = galleryMode
+        ? (def.category === "boss" ? 148 : 132)
+        : (def.category === "boss" ? 132 : def.category === "elite" ? 118 : 108);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = cssSize * dpr;
       canvas.height = cssSize * dpr;
@@ -6713,41 +8007,72 @@
       const ctx = canvas.getContext("2d");
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, cssSize, cssSize);
-      const cx = cssSize / 2;
-      const cy = cssSize / 2;
-      const key = normalizeEnemyType(id);
 
-      const gradient = ctx.createRadialGradient(cx - 12, cy - 13, 2, cx, cy, 31);
-      gradient.addColorStop(0, "rgba(255, 241, 189, 0.34)");
-      gradient.addColorStop(0.52, "rgba(159, 217, 207, 0.18)");
-      gradient.addColorStop(1, "rgba(23, 63, 66, 0.74)");
+      const gradient = ctx.createLinearGradient(0, 0, cssSize, cssSize);
+      gradient.addColorStop(0, "rgba(243, 255, 249, 0.25)");
+      gradient.addColorStop(0.42, "rgba(159, 217, 207, 0.16)");
+      gradient.addColorStop(1, "rgba(23, 63, 66, 0.7)");
       ctx.fillStyle = gradient;
       ctx.strokeStyle = unlocked ? "rgba(255, 241, 189, 0.72)" : "rgba(191, 238, 228, 0.32)";
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 25.5, 0, Math.PI * 2);
+      ctx.lineWidth = 1.4;
+      monsterRoundRectPath(ctx, 4, 4, cssSize - 8, cssSize - 8, 24);
       ctx.fill();
       ctx.stroke();
 
-      ctx.save();
-      ctx.translate(cx, cy + 2);
+      ctx.strokeStyle = "rgba(255, 241, 189, 0.28)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(14, cssSize - 20);
+      ctx.quadraticCurveTo(cssSize * 0.5, cssSize - 30, cssSize - 14, cssSize - 20);
+      ctx.stroke();
+
       if (!unlocked) {
+        ctx.save();
         ctx.globalAlpha = 0.45;
-        this.drawPortraitMist(ctx, 18, "#0b1b1e");
-        ctx.fillStyle = "#173f42";
+        ctx.translate(cssSize / 2, cssSize * 0.58);
+        monsterMist(ctx, "#0b1b1e", cssSize * 0.36, 0);
+        ctx.fillStyle = "rgba(23, 63, 66, 0.88)";
         ctx.beginPath();
-        ctx.ellipse(0, 1, 12, 16, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -4, cssSize * 0.17, cssSize * 0.23, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#fff1bd";
-        ctx.font = "bold 21px KaiTi, SimSun, serif";
+        ctx.font = `bold ${Math.round(cssSize * 0.28)}px KaiTi, SimSun, serif`;
         ctx.textAlign = "center";
-        ctx.fillText("?", 0, 7);
+        ctx.fillText("?", 0, 6);
         ctx.restore();
         return;
       }
 
-      this.drawMonsterPortraitShape(ctx, key);
-      ctx.restore();
+      const t = performance.now() / 1000;
+      const galleryScales = {
+        foxDemon: 1.14,
+        shrimpDemon: 0.98,
+        boarDragon: 1.1,
+        frogDemon: 1.18,
+        lampGranny: 1.1,
+        stoneArmor: 1.08,
+        yaksha: 1.02,
+        wingDemon: 0.98,
+      };
+      const compactScales = {
+        foxDemon: 1.02,
+        shrimpDemon: 0.78,
+        boarDragon: 0.98,
+        frogDemon: 1.08,
+        lampGranny: 0.98,
+        stoneArmor: 0.96,
+        yaksha: 0.9,
+        wingDemon: 0.88,
+      };
+      const scale = galleryMode
+        ? (def.category === "boss" ? 1.34 : galleryScales[key] || 1.06)
+        : (def.category === "boss" ? 1.2 : compactScales[key] || 0.94);
+      const drawX = key === "foxDemon" || key === "nineTailShade"
+        ? cssSize * 0.57
+        : key === "shrimpDemon"
+          ? cssSize * 0.43
+          : cssSize / 2;
+      drawMonsterIllustration(ctx, key, drawX, cssSize * 0.65, scale, "gallery", { time: t });
     }
 
     drawMonsterPortraitShape(ctx, key) {
@@ -7140,7 +8465,7 @@
       const pending = this.saveManager.data.companions.pendingInvites || [];
       if (!pending.length || !this.dom.companionOverlay) return false;
       const invited = new Set(this.saveManager.data.companions.invited || []);
-      const eligible = Object.keys(COMPANION_DEFS).filter((id) => id !== this.saveManager.data.selectedHero && !invited.has(id));
+      const eligible = HERO_IDS.filter((id) => id !== this.saveManager.data.selectedHero && !invited.has(id));
       if (!eligible.length) return false;
       this.dom.companionList.innerHTML = "";
       for (const id of eligible) {
@@ -7158,6 +8483,7 @@
           </div>
         `;
         button.addEventListener("click", () => {
+          if (!window.confirm(`确定邀请 ${hero.name} 共同作战吗？`)) return;
           const result = this.saveManager.inviteCompanion(id);
           this.showToast(result.message);
           this.closeCompanionInvite();
@@ -7172,6 +8498,106 @@
 
     closeCompanionInvite() {
       if (this.dom.companionOverlay) this.dom.companionOverlay.classList.add("hidden");
+      if (this.state === "companions") {
+        this.state = "home";
+        this.dom.homeOverlay.classList.remove("hidden");
+      }
+      this.renderHome();
+    }
+
+    openCompanions() {
+      if (!this.dom.companionOverlay) return;
+      this.state = "companions";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.renderCompanionPanel(false);
+      this.dom.companionOverlay.classList.remove("hidden");
+    }
+
+    renderCompanionPanel(inviteOnly = false) {
+      if (!this.dom.companionList) return false;
+      const save = this.saveManager.data;
+      const invited = new Set(save.companions.invited || []);
+      const pendingCount = (save.companions.pendingInvites || []).length;
+      const ids = inviteOnly
+        ? HERO_IDS.filter((id) => id !== save.selectedHero && !invited.has(id))
+        : HERO_IDS.filter((id) => id !== save.selectedHero);
+      this.dom.companionList.innerHTML = "";
+      for (const id of ids) {
+        const hero = HERO_DEFS[id];
+        const companion = COMPANION_DEFS[id];
+        const joined = invited.has(id);
+        const progress = save.companionProgress[id] || { level: 1 };
+        const level = clamp(Math.floor(progress.level || 1), 1, 20);
+        const cost = getCompanionUpgradeCost(level);
+        const card = document.createElement("article");
+        card.className = `hero-card ${joined ? "selected" : ""}`;
+        card.innerHTML = `
+          <canvas class="hero-portrait" width="72" height="72" data-hero="${id}"></canvas>
+          <div class="hero-copy">
+            <strong>${hero.name} · ${companion.skill} · Lv.${level}</strong>
+            <p>${companion.desc}</p>
+            <div class="hero-tags"><span>${joined ? "已加入" : "未邀请"}</span><span>${hero.role}</span></div>
+            <div class="hero-actions"></div>
+          </div>
+        `;
+        const actions = card.querySelector(".hero-actions");
+        if (joined) {
+          const upgradeBtn = document.createElement("button");
+          upgradeBtn.type = "button";
+          upgradeBtn.className = "primary-button mini";
+          upgradeBtn.textContent = level >= 20 ? "已满级" : `升级 ${cost} 灵石`;
+          upgradeBtn.disabled = level >= 20;
+          upgradeBtn.addEventListener("click", () => {
+            const result = this.saveManager.upgradeCompanion(id);
+            this.showToast(result.message);
+            this.renderCompanionPanel(inviteOnly);
+            this.renderHome();
+          });
+          actions.appendChild(upgradeBtn);
+        } else {
+          const inviteBtn = document.createElement("button");
+          inviteBtn.type = "button";
+          inviteBtn.className = "ghost-button";
+          inviteBtn.textContent = pendingCount ? "邀请" : "暂无邀请";
+          inviteBtn.disabled = !pendingCount;
+          inviteBtn.addEventListener("click", () => {
+            if (!window.confirm(`确定邀请 ${hero.name} 共同作战吗？`)) return;
+            const result = this.saveManager.inviteCompanion(id);
+            this.showToast(result.message);
+            if (result.ok && this.lastResult) {
+              this.lastResult.pendingCompanionInvite = false;
+              this.configureResultButtons(this.lastResult.victory);
+              if (this.dom.resultUnlockNotice && this.lastResult.nextLevelName) {
+                this.dom.resultUnlockNotice.textContent = `伙伴已入阵，下一关已解锁：${this.lastResult.nextLevelName}`;
+                this.dom.resultUnlockNotice.classList.remove("hidden");
+              }
+            }
+            this.renderCompanionPanel(inviteOnly);
+            this.renderHome();
+            if (result.ok && inviteOnly) this.closeCompanionInvite();
+          });
+          actions.appendChild(inviteBtn);
+        }
+        this.dom.companionList.appendChild(card);
+      }
+      this.drawHeroPortraits(this.dom.companionList);
+      return ids.length > 0;
+    }
+
+    showCompanionInvite() {
+      const pending = this.saveManager.data.companions.pendingInvites || [];
+      if (!pending.length || !this.dom.companionOverlay) return false;
+      if (!this.renderCompanionPanel(true)) return false;
+      this.dom.companionOverlay.classList.remove("hidden");
+      return true;
+    }
+
+    closeCompanionInvite() {
+      if (this.dom.companionOverlay) this.dom.companionOverlay.classList.add("hidden");
+      if (this.state === "companions") {
+        this.state = "home";
+        this.dom.homeOverlay.classList.remove("hidden");
+      }
       this.renderHome();
     }
 
@@ -7332,7 +8758,7 @@
         if (!def) continue;
         const item = document.createElement("div");
         item.className = "skill-chip companion-chip";
-        item.innerHTML = `<span class="skill-icon">${def.name.slice(0, 1)}</span><strong>${def.skill}</strong><span>助战</span>`;
+        item.innerHTML = `<span class="skill-icon">${def.name.slice(0, 1)}</span><strong>${def.skill}</strong><span>助战 Lv.${this.getCompanionLevel(companionId)}</span>`;
         this.dom.skillStrip.appendChild(item);
       }
     }

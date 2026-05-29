@@ -140,7 +140,7 @@ Boss 关：
 - 命中、死亡、护盾破裂、回血、灵石结算都有粒子或文字反馈。
 - 升级卡片为玉质半透明卡片，左侧圆形技能图标，稀有和史诗有不同发光表现。
 
-所有美术都使用 Canvas 几何图形、CSS 渐变、阴影和动画完成，没有引用外部图片素材，也没有引入外部字体文件。
+背景、特效和 UI 主要使用 Canvas 几何图形、CSS 渐变、阴影和动画完成；妖怪主体使用本地原创裁切 PNG sprite，没有引用外部图片素材，也没有引入外部字体文件。
 
 ## 音效与震动
 
@@ -380,3 +380,82 @@ vercel
 然后在首页选择第 10、20、30、40 关，分别验证黑风怪、黄风妖王、白骨夫人和牛魔王。测试第 10 关伙伴邀请时，可临时解锁并通关第 10 关，结算后会弹出“邀请伙伴助战”。测试第 40 关终章时，通关第 40 关应显示“万妖退散，山门永固”。
 
 如果以后需要做账号同步，需要新增后端服务、用户注册/登录、数据库、存档上传/下载接口和防作弊校验。
+# 本次更新：西游角色、宗门、伙伴分工
+
+局外成长现在分成四层：
+
+- 宗门养成：消耗灵石升级，所有主角共享，负责山门血量、通用伤害、冷却、收益等基础盘。
+- 角色养成：孙悟空、唐僧、猪八戒、沙僧各自独立等级。当前出战角色在结算时获得角色经验，只影响该角色作为主角出战时的能力。
+- 伙伴助战：第 10 / 20 / 30 关通关后各获得 1 次伙伴邀请机会，可邀请未出战的西游角色加入助战。伙伴使用灵石升级助战等级，只负责周期性自动释放支援技能。
+- 符文系统：只负责 build 搭配，提供暴击、穿透、冷却、收益等可替换加成。
+
+四个主角：
+
+- 孙悟空：高爆发、暴击、连击、分身。初始技能为金箍棒影、毫毛分身；被动提供暴击率、暴击伤害和残影追击。
+- 唐僧：辅助、回复、佛光、稳健。初始技能为禅杖佛光、紧箍梵音；被动提供周期回复、稀有升级概率和佛光护盾。
+- 猪八戒：肉盾、范围、击退、抗压。初始技能为钉耙横扫、震地退妖；被动提高城墙血量、降低撞墙伤害并扩大范围技能。
+- 沙僧：均衡、持续伤害、减速、控场。初始技能为月牙铲斩、流沙困阵；被动提高减速、持续伤害和控制持续时间。
+
+角色经验公式在 `main.js` 的 `SaveManager.addRunResult()` 中：
+
+```javascript
+heroExpGain = kills * 2 + currentLevel * 20;
+if (victory) heroExpGain += 100 + currentLevel * 10;
+if (currentLevel % 10 === 0 && victory) heroExpGain += 150;
+```
+
+角色升级需求在 `getHeroExpNeed()` 中：
+
+```javascript
+Math.floor(100 * Math.pow(1.18, heroLevel - 1))
+```
+
+每 10 级需要突破，突破消耗在 `getHeroBreakthroughCost()` 中：
+
+```javascript
+1000 * breakthroughStage * breakthroughStage
+```
+
+伙伴助战技能：
+
+- 孙悟空伙伴：分身突袭，每 18 秒金色残影冲击怪群。
+- 唐僧伙伴：佛光普照，每 22 秒回复城墙并短暂提升全体技能伤害。
+- 猪八戒伙伴：钉耙震地，每 20 秒对城墙前大范围敌人造成伤害并击退。
+- 沙僧伙伴：流沙牵引，每 20 秒生成流沙区域，减速并牵制怪物。
+
+新增 localStorage 镜像 key：
+
+```text
+zmsw_selectedHero
+zmsw_heroProgress
+zmsw_companions
+zmsw_companionProgress
+zmsw_pendingCompanionInvites
+```
+
+主存档 `zongmen_guardian_save_v1` 和云存档导入/导出也包含这些字段。云存档中的 `collectSaveData()` / `applySaveData()` 已同步角色、伙伴、伙伴等级和待邀请次数。
+## 本次更新：妖怪图鉴插画化
+
+妖怪图鉴不再使用小圆形头像图标，改为每张卡片左侧的大尺寸妖怪插画展示区。当前版本已接入本地原创生成 PNG sprite，素材由 `tools/slice_monsters.py` 从 `assets/source/monster-gallery.png` 裁切到 `assets/monsters/`。绘制入口仍然是 `main.js` 的 `drawMonsterIllustration(ctx, key, x, y, scale, mode)`，优先使用 `ctx.drawImage()`，加载失败时回退到 Canvas 手绘占位。
+
+- `battle`：战斗内小尺寸绘制，保留耳朵、尾巴、角、翅膀、法器等识别特征。
+- `gallery`：图鉴大尺寸绘制，增加身体、衣袍、法器、妖气、水波、荷叶、火焰等细节。
+
+前 8 个重点妖怪使用独立原创绘制函数：
+
+- `drawFoxPortrait()`：狐妖，完整狐狸身体、尖耳、大尾巴、小袍和狐火。
+- `drawShrimpPortrait()`：赤虾子，弯曲虾身、分节甲壳、长须、小钳和水纹。
+- `drawBoarDragonPortrait()`：猪龙，猪鼻、獠牙、龙须、背鳞和厚重体型。
+- `drawFrogPortrait()`：蛙妖，鼓眼、白肚、蹲姿、短腿和荷叶。
+- `drawLampGrannyPortrait()`：灯花婆婆，佝偻老太身体、灯盏、火碗和火光。
+- `drawStoneArmorPortrait()`：石甲妖，石块身体、裂纹、块状手臂和石缝红眼。
+- `drawYakshaPortrait()`：夜叉，双角、利爪、披风妖气和前冲姿态。
+- `drawWingDemonPortrait()`：飞妖，张翼鸟妖/蝠妖身体、翅膀扇动、红眼和脚爪。
+
+可通过以下地址快速打开“妖怪展示”模式，查看所有妖怪的大图鉴插画：
+
+```text
+index.html?monsterGallery=1
+```
+
+本次不引入外部版权图片、字体或远程素材；怪物主体使用项目内 `assets/monsters/*.png` 本地原创 sprite，妖气、血条、受击、状态和死亡反馈仍由 Canvas 绘制。

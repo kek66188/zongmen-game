@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#081416" />
     <title>西游镇妖录</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./style.css?v=monster-sprites-20260529" />
   </head>
   <body>
     <main id="app" aria-label="西游镇妖录">
@@ -76,6 +76,8 @@
 
           <div class="button-stack">
             <button type="button" class="primary-button" id="startBtn">开始守山</button>
+            <button type="button" class="ghost-button" id="heroBtn">角色修行</button>
+            <button type="button" class="ghost-button" id="companionBtn">伙伴助战</button>
             <button type="button" class="ghost-button" id="cultivationBtn">宗门养成</button>
             <button type="button" class="ghost-button" id="runeBtn">符文玉匣</button>
             <button type="button" class="ghost-button" id="codexBtn">妖怪图鉴</button>
@@ -142,6 +144,7 @@
             <div>
               <p class="eyebrow">宗门宝库</p>
               <h2>宗门养成</h2>
+              <p class="intro">宗门强化为全角色共享加成；角色修行和伙伴助战在首页对应入口中管理。</p>
             </div>
             <div class="coin-pill">灵石 <strong id="cultivationCoins">0</strong></div>
           </div>
@@ -185,6 +188,10 @@
             <span>本局奖励</span>
             <strong id="resultShards">无</strong>
           </div>
+          <div class="result-shards">
+            <span>角色修行</span>
+            <strong id="resultHeroExp">无</strong>
+          </div>
           <div class="unlock-notice hidden" id="resultUnlockNotice"></div>
           <div class="control-row">
             <button type="button" class="primary-button" id="againBtn">再战本关</button>
@@ -219,6 +226,6 @@
       <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
     </main>
 
-    <script src="main.js" defer></script>
+    <script src="./main.js?v=monster-sprites-20260529" defer></script>
   </body>
 </html>
