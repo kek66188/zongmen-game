@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#081416" />
     <title>西游镇妖录</title>
-    <link rel="stylesheet" href="./style.css?v=boss-canvas-20260529" />
+    <link rel="stylesheet" href="./style.css?v=jade-market-20260529" />
   </head>
   <body>
     <main id="app" aria-label="西游镇妖录">
@@ -58,11 +58,11 @@
         <div class="dialog compact home-dialog">
           <p class="eyebrow">西游取经路，万妖叩山门</p>
           <h2>西游镇妖录</h2>
-          <p class="intro">选择西游角色，镇住志怪妖潮。每十关邀请一名同伴助战，收集符文，闯过四十重妖劫。</p>
+          <p class="intro">选择西游角色，镇住志怪妖潮。闯过九九八十一难，收集符文与法宝，邀请同伴助战。</p>
 
-          <div class="coin-banner">
-            <span>当前灵石</span>
-            <strong id="homeCoins">0</strong>
+          <div class="coin-banner resource-banner">
+            <span class="resource-badge">灵石 <strong id="homeCoins">0</strong></span>
+            <span class="resource-badge jade-badge">仙玉 <strong id="homeJade">0</strong></span>
           </div>
 
           <div class="panel-title">西行战绩</div>
@@ -76,10 +76,14 @@
 
           <div class="button-stack">
             <button type="button" class="primary-button" id="startBtn">开始守山</button>
+            <button type="button" class="ghost-button" id="dailyBtn">每日挑战</button>
+            <button type="button" class="ghost-button" id="endlessBtn">无尽镇妖</button>
             <button type="button" class="ghost-button" id="heroBtn">角色修行</button>
             <button type="button" class="ghost-button" id="companionBtn">伙伴助战</button>
-            <button type="button" class="ghost-button" id="cultivationBtn">西行修行</button>
+            <button type="button" class="ghost-button" id="cultivationBtn">取经根基</button>
             <button type="button" class="ghost-button" id="runeBtn">符文玉匣</button>
+            <button type="button" class="ghost-button" id="artifactBtn">法宝行囊</button>
+            <button type="button" class="ghost-button" id="marketBtn">藏宝阁</button>
             <button type="button" class="ghost-button" id="codexBtn">妖怪图鉴</button>
             <button type="button" class="ghost-button" id="achievementBtn">取经成就</button>
             <button type="button" class="ghost-button sound-toggle" id="soundToggleBtn">音效：开</button>
@@ -107,6 +111,80 @@
           <div class="rune-summary" id="runeSummary"></div>
           <div class="system-list" id="runeList"></div>
           <button type="button" class="ghost-button sticky-return" id="closeRuneBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="artifactOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">三十六难后开启</p>
+          <h2>法宝行囊</h2>
+          <div class="rune-summary" id="artifactSummary"></div>
+          <div class="system-list" id="artifactList"></div>
+          <button type="button" class="ghost-button sticky-return" id="closeArtifactBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="marketOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog market-dialog">
+          <p class="eyebrow">稀有货币</p>
+          <h2>藏宝阁</h2>
+          <div class="market-resource-row">
+            <span>灵石 <strong id="marketCoins">0</strong></span>
+            <span class="jade-badge">仙玉 <strong id="marketJade">0</strong></span>
+          </div>
+
+          <section class="market-section">
+            <div class="panel-title">仙玉兑换灵石</div>
+            <div class="system-list compact-list" id="jadeExchangeList"></div>
+          </section>
+
+          <section class="market-section">
+            <div class="panel-title">法宝碎片箱</div>
+            <div class="system-list compact-list" id="artifactChestList"></div>
+          </section>
+
+          <section class="market-section">
+            <div class="panel-title">藏宝阁推荐</div>
+            <p class="rune-summary">刷新只会更换推荐内容，不会直接购买永久攻击力。</p>
+            <button type="button" class="ghost-button" id="treasureRefreshBtn">消耗 10 仙玉刷新</button>
+            <div class="system-list compact-list" id="marketOfferList"></div>
+          </section>
+
+          <section class="market-section">
+            <div class="panel-title">礼包码兑换</div>
+            <div class="cloud-code-row">
+              <input id="redeemCodeInput" class="cloud-code-input" type="text" inputmode="text" autocomplete="off" placeholder="输入礼包码" />
+              <button type="button" class="ghost-button" id="redeemCodeBtn">兑换</button>
+            </div>
+          </section>
+
+          <button type="button" class="ghost-button sticky-return" id="closeMarketBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="dailyOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">每日一难</p>
+          <h2>每日挑战</h2>
+          <div class="rune-summary" id="dailySummary"></div>
+          <div class="system-list compact-list" id="dailyRewardList"></div>
+          <div class="control-row">
+            <button type="button" class="primary-button" id="dailyStartBtn">开始今日挑战</button>
+            <button type="button" class="ghost-button" id="closeDailyBtn">返回山门</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="endlessOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">九九劫后</p>
+          <h2>无尽镇妖</h2>
+          <div class="rune-summary" id="endlessSummary"></div>
+          <div class="system-list compact-list" id="endlessRecordList"></div>
+          <div class="control-row">
+            <button type="button" class="primary-button" id="endlessStartBtn">开始无尽</button>
+            <button type="button" class="ghost-button" id="closeEndlessBtn">返回山门</button>
+          </div>
         </div>
       </section>
 
@@ -142,9 +220,9 @@
         <div class="growth-panel">
           <div class="growth-head">
             <div>
-              <p class="eyebrow">西行修行</p>
-              <h2>西行修行</h2>
-              <p class="intro">西行修行为全角色共享加成，孙悟空、唐僧、猪八戒、沙僧均可生效。角色养成影响单个主角，伙伴养成影响助战技能，符文负责流派搭配。</p>
+              <p class="eyebrow">全局修行</p>
+              <h2>取经根基</h2>
+              <p class="intro">取经根基为全角色共享加成，孙悟空、唐僧、猪八戒、沙僧均可生效。角色养成影响单个主角，伙伴养成影响助战技能，符文负责流派搭配，法宝提供主动与被动战斗手段。</p>
             </div>
             <div class="coin-pill">灵石 <strong id="cultivationCoins">0</strong></div>
           </div>
@@ -155,7 +233,7 @@
           </section>
 
           <section class="growth-section">
-            <h3>全局修行</h3>
+            <h3>修行根基</h3>
             <div class="growth-list" id="talentList"></div>
           </section>
 
@@ -183,6 +261,7 @@
             <div><span>是否镇守</span><strong id="resultClear">否</strong></div>
             <div><span>本局灵石</span><strong id="resultCoins">0</strong></div>
             <div><span>总灵石</span><strong id="resultTotalCoins">0</strong></div>
+            <div><span>当前仙玉</span><strong id="resultJade">0</strong></div>
           </div>
           <div class="result-shards">
             <span>本局奖励</span>
@@ -194,6 +273,7 @@
           </div>
           <div class="unlock-notice hidden" id="resultUnlockNotice"></div>
           <div class="control-row">
+            <button type="button" class="primary-button hidden" id="reviveBtn">消耗 30 仙玉复活一次</button>
             <button type="button" class="primary-button" id="againBtn">再战本关</button>
             <button type="button" class="ghost-button" id="replayLevelBtn">重玩本关</button>
             <button type="button" class="ghost-button" id="resultHomeBtn">返回关卡</button>
@@ -226,6 +306,6 @@
       <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
     </main>
 
-    <script src="./main.js?v=boss-canvas-20260529" defer></script>
+    <script src="./main.js?v=jade-market-20260529" defer></script>
   </body>
 </html>

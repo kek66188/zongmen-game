@@ -3,9 +3,18 @@
 
   const DEBUG_BALANCE = false;
   const DEBUG_BOUNDS = false;
+  const USE_MONSTER_SPRITES = true;
   const UI_SAFE_TOP = 54;
   const UI_SAFE_BOTTOM = 96;
   const BATTLE_TOP_GAP = 8;
+  const MAX_MAIN_LEVEL = 81;
+  const COMPANION_INVITE_LEVELS = [9, 27, 45];
+  const ARTIFACT_UNLOCK_LEVEL = 36;
+  const RUNE_SLOT_UNLOCKS = [
+    { level: 0, slots: 3 },
+    { level: 36, slots: 4 },
+    { level: 63, slots: 5 },
+  ];
   const LEVEL_CONFIG = {
     level1: {
       id: "level1",
@@ -372,21 +381,28 @@
     },
   };
   const LEVEL_REALMS = [
-    { start: 1, end: 10, name: "花果山妖乱", phaseText: "花果山妖乱开启" },
-    { start: 11, end: 20, name: "高老庄异闻", phaseText: "高老庄妖影现形" },
-    { start: 21, end: 30, name: "流沙河妖雾", phaseText: "流沙河妖雾翻涌" },
-    { start: 31, end: 40, name: "火焰山终劫", phaseText: "火焰山万妖压境" },
+    { start: 1, end: 9, name: "花果山妖乱", phaseText: "花果山妖雾初起", intro: "花果山妖雾初起，小妖聚众扰乱山门。" },
+    { start: 10, end: 18, name: "黑风山迷雾", phaseText: "黑风山迷雾压境", intro: "黑风山迷雾压境，风中妖影渐近。" },
+    { start: 19, end: 27, name: "高老庄异闻", phaseText: "高老庄异闻开启", intro: "高老庄夜雾沉沉，猪妖与夜叉混入村道。" },
+    { start: 28, end: 36, name: "黄风岭劫难", phaseText: "黄风岭沙暴骤起", intro: "黄风岭妖风卷沙，黄风妖王暗中结阵。" },
+    { start: 37, end: 45, name: "流沙河妖潮", phaseText: "流沙河妖潮翻涌", intro: "流沙河水雾翻卷，水猿与飞妖从浪中逼近。" },
+    { start: 46, end: 54, name: "白骨岭幻境", phaseText: "白骨岭幻境迷离", intro: "白骨岭雾影重重，白骨幻相悄然围山。" },
+    { start: 55, end: 63, name: "火云洞红焰", phaseText: "火云洞红焰燃起", intro: "火云洞红焰漫天，妖火童子与精英怪潮躁动。" },
+    { start: 64, end: 72, name: "女儿国迷阵", phaseText: "女儿国迷阵展开", intro: "迷阵柔雾藏杀机，毒尾与百眼妖光扰乱阵脚。" },
+    { start: 73, end: 81, name: "火焰山终劫", phaseText: "火焰山终劫将至", intro: "火焰山终劫将至，牛魔王统万妖压境。" },
   ];
-  const LEVEL_NAMES = [
-    "石猴初镇", "林间狐影", "灵田犬嚎", "夜守山门", "小妖成群",
-    "寒潭虾影", "蛙僧叩阵", "妖雾压境", "山道伏妖", "黑风试炼",
-    "高庄妖潮", "赤虾疾影", "石甲破阵", "毒雾山谷", "灯火焚林",
-    "灵脉震荡", "夜叉窥门", "蛙僧妖阵", "群妖叩关", "水猿终劫",
-    "流沙魔影", "鸟妖掠空", "咒师结阵", "猪龙压境", "雷云妖潮",
-    "血月山门", "咒纹妖师", "九尾裂影", "万妖试炼", "白骨终战",
-    "火焰大劫", "吸灵白骨", "冥雾围山", "破盾巨潮", "牛魔前锋",
-    "灵墙将碎", "四方妖阵", "妖王亲临", "山门死守", "万妖终劫",
+  const CHAPTER_LEVEL_NAMES = [
+    ["妖雾初起", "林间狐影", "犬妖冲阵", "赤虾疾行", "猪龙叩门", "蛙妖跃潮", "灵田妖乱", "山道伏妖", "黑风前锋"],
+    ["迷雾入山", "黑风巡岭", "灯花引火", "石甲破阵", "毒雾回廊", "夜叉窥门", "妖影成群", "风口死守", "黑风怪"],
+    ["高庄异响", "猪龙横道", "石甲护阵", "夜叉疾袭", "灯火焚林", "群妖叩关", "蛙僧妖阵", "高庄围门", "高老庄妖首"],
+    ["黄沙初卷", "飞妖掠空", "咒师结阵", "风沙压境", "玄甲突进", "九尾裂影", "妖风裂阵", "岭口围杀", "黄风妖王"],
+    ["流沙初涌", "水猿踏浪", "赤虾成群", "飞翼穿雾", "咒纹水阵", "河心妖潮", "弱水迷踪", "流沙死守", "流沙河大妖"],
+    ["白骨初现", "骨影复生", "九尾幻影", "咒师白阵", "冥雾围山", "白骨妖潮", "幻境压门", "岭前死斗", "白骨夫人"],
+    ["红焰初燃", "妖火焚径", "黑风火线", "牛魔前锋", "红焰围关", "火云压阵", "法宝初鸣", "焰心死守", "红孩儿"],
+    ["迷阵初开", "花雾藏妖", "百眼妖光", "毒尾伏击", "飞妖乱阵", "骨影回环", "迷阵压门", "女国死守", "蝎子精"],
+    ["火山初劫", "牛角号令", "黑风骨阵", "万妖踏火", "四方妖阵", "灵墙将碎", "妖王前锋", "山门死守", "牛魔王"],
   ];
+  const LEVEL_NAMES = LEVEL_REALMS.flatMap((realm, chapterIndex) => CHAPTER_LEVEL_NAMES[chapterIndex].map((name) => name));
   const clampSetup = (value, min, max) => Math.max(min, Math.min(max, value));
   const ENEMY_UNLOCK_LEVEL = {
     foxDemon: 1,
@@ -404,33 +420,51 @@
     blackWind: 32,
     boneDemon: 33,
     bullVanguard: 35,
-    bossBlackWind: 10,
-    bossYellowWind: 20,
-    bossBoneLady: 30,
-    bossBullKing: 40,
+    bossBlackWind: 9,
+    bossYellowWind: 27,
+    bossBoneLady: 54,
+    bossBullKing: 81,
   };
   const BOSS_LEVELS = {
-    10: { type: "bossBlackWind", name: "黑风怪", appearText: "黑风怪来袭！" },
-    20: { type: "bossYellowWind", name: "黄风妖王", appearText: "黄风妖王来袭！" },
-    30: { type: "bossBoneLady", name: "白骨夫人", appearText: "白骨夫人现身！" },
-    40: { type: "bossBullKing", name: "牛魔王", appearText: "牛魔王降临！" },
+    9: { type: "bossBlackWind", name: "黑风前锋", appearText: "黑风前锋来袭！" },
+    18: { type: "bossBlackWind", name: "黑风怪", appearText: "黑风怪来袭！" },
+    27: { type: "bossYellowWind", name: "高老庄妖首", appearText: "高老庄妖首来袭！" },
+    36: { type: "bossYellowWind", name: "黄风妖王", appearText: "黄风妖王来袭！" },
+    45: { type: "bossYellowWind", name: "流沙河大妖", appearText: "流沙河大妖来袭！" },
+    54: { type: "bossBoneLady", name: "白骨夫人", appearText: "白骨夫人现身！" },
+    63: { type: "bossBullKing", name: "红孩儿", appearText: "红孩儿焰阵来袭！" },
+    72: { type: "bossBoneLady", name: "蝎子精", appearText: "蝎子精现身！" },
+    81: { type: "bossBullKing", name: "牛魔王", appearText: "牛魔王降临！" },
   };
   const getRealmByOrder = (order) => LEVEL_REALMS.find((realm) => order >= realm.start && order <= realm.end) || LEVEL_REALMS[0];
-  const getStageIndexByOrder = (order) => Math.floor((order - 1) / 10);
+  const getStageIndexByOrder = (order) => Math.floor((order - 1) / 9);
   const getLevelDuration = (order) => {
     if (order === 1) return 120;
-    if (order < 10) return 90;
-    if (order === 10) return 120;
-    if (order <= 20) return 120;
-    if (order <= 30) return 150;
-    if (order <= 39) return 180;
-    return 210;
+    if (order <= 9) return order % 9 === 0 ? 120 : 90;
+    if (order <= 27) return order % 9 === 0 ? 120 : 105;
+    if (order <= 54) return order % 9 === 0 ? 150 : 120 + Math.floor((order - 28) / 9) * 10;
+    if (order <= 80) return order % 9 === 0 ? 180 : 150 + Math.floor((order - 55) / 9) * 10;
+    return 180;
   };
+  function getLevelDifficulty(order) {
+    const early = order <= 27;
+    const mid = order > 27 && order <= 54;
+    const hpMultiplier = early
+      ? 1 + (order - 1) * 0.075
+      : mid
+        ? 3.05 + (order - 28) * 0.09
+        : 5.55 + (order - 55) * 0.115;
+    return {
+      hpMultiplier: Number(hpMultiplier.toFixed(2)),
+      speedMultiplier: Number((1 + Math.floor((order - 1) / 9) * 0.045).toFixed(2)),
+      damageMultiplier: Number((1 + (order - 1) * 0.042).toFixed(2)),
+      spawnMultiplier: Number((1 + (order - 1) * 0.026).toFixed(2)),
+      eliteChance: order >= 18 ? clampSetup(0.02 + Math.floor(order / 9) * 0.015, 0.02, 0.18) : order >= 9 ? 0.02 : 0,
+      bossPhaseCount: order >= 73 ? 4 : order >= 55 ? 3 : order >= 28 ? 2 : 1,
+    };
+  }
   const getLevelHpMultiplier = (order) => {
-    if (order <= 10) return 1 + (order - 1) * 0.11;
-    if (order <= 20) return 2.1 + (order - 11) * 0.155;
-    if (order <= 30) return 3.6 + (order - 21) * 0.21;
-    return 5.6 + (order - 31) * 0.32;
+    return getLevelDifficulty(order).hpMultiplier;
   };
   const getAllowedEnemyTypes = (order) => Object.entries(ENEMY_UNLOCK_LEVEL)
     .filter(([id, unlock]) => unlock <= order && !id.startsWith("boss"))
@@ -469,7 +503,7 @@
     if (order >= 32) weights.blackWind = 0.04 + segment * 0.022 + (order === 32 || order === 38 ? 0.1 : 0);
     if (order >= 33) weights.boneDemon = 0.035 + segment * 0.02 + (order === 33 ? 0.1 : 0);
     if (order >= 35) weights.bullVanguard = 0.025 + segment * 0.014 + (order === 35 || order === 38 ? 0.08 : 0);
-    if (order % 10 === 9) {
+    if (order % 9 === 0) {
       weights.boarDragon = (weights.boarDragon || 0) + 0.08;
       weights.frogDemon = (weights.frogDemon || 0) + 0.08;
     }
@@ -495,12 +529,13 @@
   };
   const buildPhases = (order, duration, boss) => {
     const realm = getRealmByOrder(order);
+    const chapterBoss = order % 9 === 0;
     const texts = [
       realm.phaseText,
-      order <= 10 ? "妖影渐密" : order <= 20 ? "异妖混入" : order <= 30 ? "魔影结阵" : "大劫压境",
+      order <= 27 ? "妖影渐密" : order <= 54 ? "异妖混入" : "大劫压境",
       order % 5 === 0 ? "精英妖潮" : "妖潮转急",
       boss ? boss.appearText : "山门承压",
-      order % 10 === 0 ? "终试死守" : "最后冲击",
+      chapterBoss ? "九九一难死守" : "最后冲击",
     ];
     return [
       { time: 0, text: texts[0] },
@@ -514,11 +549,9 @@
     const id = `level${order}`;
     const duration = getLevelDuration(order);
     const boss = BOSS_LEVELS[order] ? { ...BOSS_LEVELS[order], time: Math.round(duration * 0.58) } : null;
-    const hpMultiplier = Number(getLevelHpMultiplier(order).toFixed(2));
-    const speedMultiplier = Number((1 + Math.floor((order - 1) / 5) * 0.045).toFixed(2));
-    const enemyDamageMultiplier = Number((1 + (order - 1) * 0.055).toFixed(2));
-    const spawnMultiplier = Number((1 + (order - 1) * 0.035).toFixed(2));
-    const rewardMultiplier = Number((1 + (order - 1) * 0.09).toFixed(2));
+    const difficulty = getLevelDifficulty(order);
+    const hpMultiplier = difficulty.hpMultiplier;
+    const rewardMultiplier = Number((1 + (order - 1) * 0.045).toFixed(2));
     return {
       id,
       order,
@@ -527,15 +560,15 @@
       recommendedRealm: getRealmByOrder(order).name,
       description: `${getRealmByOrder(order).name}第 ${order} 试，妖潮随阶段逐步增强。`,
       duration,
-      maxEnemies: order === 1 ? 80 : Math.min(150, 78 + order * 2),
+      maxEnemies: order === 1 ? 80 : Math.min(150, 72 + order),
       wallHp: order === 1 ? 160 : 150 + Math.min(90, order * 3),
       startExp: order === 1 ? 8 : 8 + Math.floor(order / 3),
       baseExpNeed: order === 1 ? 15 : 15 + Math.floor(order * 1.25),
       expGrowth: Number((1.18 + Math.min(0.12, order * 0.002)).toFixed(3)),
       enemyHpMultiplier: hpMultiplier,
-      enemySpeedMultiplier: speedMultiplier,
-      enemyDamageMultiplier,
-      spawnMultiplier,
+      enemySpeedMultiplier: difficulty.speedMultiplier,
+      enemyDamageMultiplier: difficulty.damageMultiplier,
+      spawnMultiplier: difficulty.spawnMultiplier,
       rewardMultiplier,
       clearReward: 50 + order * 15 + (boss ? 100 : 0),
       unlockRequired: order === 1 ? null : `level${order - 1}`,
@@ -545,13 +578,14 @@
       enemyHpMaxMultiplier: order === 1 ? 1.6 : Number((1.16 + Math.min(0.1, order * 0.002)).toFixed(2)),
       enemySpeedMaxMultiplier: order === 1 ? 1.3 : Number((1.08 + Math.min(0.1, order * 0.002)).toFixed(2)),
       enemyTypes: getLevelEnemyTypes(order),
-      eliteChance: order >= 5 ? clampSetup(0.015 * Math.floor(order / 5), 0.02, 0.14) : 0,
+      eliteChance: difficulty.eliteChance,
+      bossPhaseCount: difficulty.bossPhaseCount,
       boss,
       phases: buildPhases(order, duration, boss),
       spawnProfiles: buildSpawnProfiles(order, duration),
     };
   };
-  for (let order = 1; order <= 40; order += 1) {
+  for (let order = 1; order <= MAX_MAIN_LEVEL; order += 1) {
     const id = `level${order}`;
     LEVEL_CONFIG[id] = {
       ...(LEVEL_CONFIG[id] || {}),
@@ -589,7 +623,7 @@
   const LEVEL_LIST = Object.values(LEVEL_CONFIG).sort((a, b) => a.order - b.order);
   const MAX_PARTICLES = 250;
   const MAX_AURA_PARTICLES = 40;
-  const SAVE_VERSION = 1;
+  const SAVE_VERSION = 2;
   const SAVE_KEY = "zongmen_guardian_save_v1";
   const SAVE_VERSION_KEY = "zmsw_saveVersion";
   const SAVE_KEYS = {
@@ -613,6 +647,16 @@
     companionProgress: "zmsw_companionProgress",
     pendingCompanionInvites: "zmsw_pendingCompanionInvites",
     journeyTraining: "zmsw_journeyTraining",
+    rootUpgrades: "zmsw_rootUpgrades",
+    runes: "zmsw_runes",
+    equippedRunes: "zmsw_equippedRunes",
+    artifacts: "zmsw_artifacts",
+    equippedArtifacts: "zmsw_equippedArtifacts",
+    monsterBook: "zmsw_monsterBook",
+    dailyChallenge: "zmsw_dailyChallenge",
+    endlessBestWave: "zmsw_endlessBestWave",
+    endlessBestKills: "zmsw_endlessBestKills",
+    endlessBestTime: "zmsw_endlessBestTime",
   };
   const HIGHEST_CLEARED_KEY = SAVE_KEYS.highestClearedLevel;
   const LEGACY_HIGHEST_CLEARED_KEY = "highestClearedLevel";
@@ -697,6 +741,42 @@
     return defaultValue;
   }
 
+  function getAllLocalSaveKeys() {
+    return Array.from(new Set([
+      SAVE_KEY,
+      SAVE_VERSION_KEY,
+      LEGACY_HIGHEST_CLEARED_KEY,
+      ...Object.values(SAVE_KEYS),
+    ]));
+  }
+
+  function clearLocalSaveKeys() {
+    for (const key of getAllLocalSaveKeys()) {
+      try {
+        localStorage.removeItem(key);
+      } catch (_err) {
+        // Clearing old progress should not block startup if one key is protected.
+      }
+    }
+  }
+
+  function hasAnyLocalSaveData() {
+    return getAllLocalSaveKeys().some((key) => key !== SAVE_VERSION_KEY && hasStorageValue(key));
+  }
+
+  function getStoredSaveVersion(rawSave) {
+    const primaryVersion = Number(rawSave?.version ?? rawSave?.saveVersion ?? 0);
+    if (rawSave && Number.isFinite(primaryVersion)) return primaryVersion;
+    const mirroredVersion = loadNumber(SAVE_VERSION_KEY, 0);
+    return Number.isFinite(mirroredVersion) ? mirroredVersion : 0;
+  }
+
+  function shouldResetLegacyLocalSave(rawSave) {
+    if (!rawSave) return hasAnyLocalSaveData();
+    if (!Number.isFinite(Number(rawSave.version ?? rawSave.saveVersion))) return true;
+    return getStoredSaveVersion(rawSave) < SAVE_VERSION;
+  }
+
   function isLocalStorageAvailable() {
     try {
       const current = localStorage.getItem(SAVE_VERSION_KEY);
@@ -716,10 +796,10 @@
   const readHighestClearedSetting = () => {
     const primary = loadMigratedNumber(HIGHEST_CLEARED_KEY, 0, [LEGACY_HIGHEST_CLEARED_KEY]);
     const legacy = loadNumber(LEGACY_HIGHEST_CLEARED_KEY, 0);
-    return clampSetup(Math.max(primary, legacy), 0, 40);
+    return clampSetup(Math.max(primary, legacy), 0, MAX_MAIN_LEVEL);
   };
   const writeHighestClearedSetting = (value) => {
-    saveNumber(HIGHEST_CLEARED_KEY, clampSetup(Math.floor(value || 0), 0, 40));
+    saveNumber(HIGHEST_CLEARED_KEY, clampSetup(Math.floor(value || 0), 0, MAX_MAIN_LEVEL));
   };
 
   const ENEMY_TYPES = {
@@ -915,7 +995,7 @@
       radius: 34,
       damage: 24,
       exp: 50,
-      unlockLevel: 10,
+      unlockLevel: 9,
       type: "boss10",
       visual: "boss",
       body: "#2a3030",
@@ -932,7 +1012,7 @@
       radius: 38,
       damage: 34,
       exp: 80,
-      unlockLevel: 20,
+      unlockLevel: 27,
       type: "boss20",
       visual: "boss",
       body: "#312f45",
@@ -951,7 +1031,7 @@
       radius: 40,
       damage: 38,
       exp: 120,
-      unlockLevel: 30,
+      unlockLevel: 54,
       type: "boss30",
       visual: "casterBoss",
       body: "#3a2854",
@@ -962,7 +1042,7 @@
       phaseShieldRate: 0.55,
       phaseShieldAmount: 260,
     },
-    boss40: {
+    boss81: {
       name: "万妖王",
       hp: 2350,
       shield: 360,
@@ -970,8 +1050,8 @@
       radius: 44,
       damage: 48,
       exp: 180,
-      unlockLevel: 40,
-      type: "boss40",
+      unlockLevel: 81,
+      type: "boss81",
       visual: "kingBoss",
       body: "#4a2627",
       eye: "#fff1bd",
@@ -1003,7 +1083,7 @@
     boss10: { name: "黑风怪", visual: "blackWindBoss", lore: "黑风山妖王，披风卷雾，召小妖冲阵。" },
     boss20: { name: "吴支祁", visual: "wuzhiqiBoss", lore: "水猿大妖，浪纹缠身，可号令护盾妖潮。" },
     boss30: { name: "白骨夫人", visual: "whiteBoneBoss", lore: "白骨幻相结阵，妖咒与幻影接连压门。" },
-    boss40: { name: "牛魔王", visual: "bullKingBoss", lore: "终章妖王，火焰山群妖共主。" },
+    boss81: { name: "牛魔王", visual: "bullKingBoss", lore: "终章妖王，火焰山群妖共主。" },
   };
   for (const [id, config] of Object.entries(ENEMY_TYPES)) {
     Object.assign(config, JOURNEY_ENEMY_SKINS[id] || {});
@@ -1309,7 +1389,7 @@
       key: "bossBlackWind",
       name: "黑风怪",
       category: "boss",
-      unlockLevel: 10,
+      unlockLevel: 9,
       hp: 360,
       speed: 18,
       damage: 24,
@@ -1330,7 +1410,7 @@
       key: "bossYellowWind",
       name: "黄风妖王",
       category: "boss",
-      unlockLevel: 20,
+      unlockLevel: 27,
       hp: 760,
       shield: 120,
       speed: 16,
@@ -1354,7 +1434,7 @@
       key: "bossBoneLady",
       name: "白骨夫人",
       category: "boss",
-      unlockLevel: 30,
+      unlockLevel: 54,
       hp: 1250,
       shield: 260,
       speed: 14,
@@ -1378,7 +1458,7 @@
       key: "bossBullKing",
       name: "牛魔王",
       category: "boss",
-      unlockLevel: 40,
+      unlockLevel: 81,
       hp: 2350,
       shield: 360,
       speed: 13,
@@ -1427,7 +1507,7 @@
     boss10: "bossBlackWind",
     boss20: "bossYellowWind",
     boss30: "bossBoneLady",
-    boss40: "bossBullKing",
+    boss81: "bossBullKing",
   };
   for (const [legacy, canonical] of Object.entries(ENEMY_KEY_ALIASES)) {
     if (ENEMY_TYPES[canonical]) {
@@ -1534,10 +1614,17 @@
     stoneArmor: { sprite: "./assets/monsters/stone-armor.png", portraitScale: 1.02, battleScale: 0.5 },
     yaksha: { sprite: "./assets/monsters/yaksha.png", portraitScale: 1.03, battleScale: 0.48 },
     wingDemon: { sprite: "./assets/monsters/wing-demon.png", portraitScale: 1.04, battleScale: 0.48 },
+    curseMage: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.02, battleScale: 0.44 },
+    nineTailShade: { sprite: "./assets/monsters/fox-demon.png", portraitScale: 1.12, battleScale: 0.48 },
     boneDemon: { sprite: "./assets/monsters/bone-demon.png", portraitScale: 1.02, battleScale: 0.46 },
+    blackWind: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.04, battleScale: 0.45 },
     bullVanguard: { sprite: "./assets/monsters/bull-vanguard.png", portraitScale: 1.08, battleScale: 0.58 },
     waterApe: { sprite: "./assets/monsters/water-dragon.png", portraitScale: 1.08, battleScale: 0.56 },
     yellowRobeGoblin: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.03, battleScale: 0.42 },
+    bossBlackWind: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.28, battleScale: 0.72 },
+    bossYellowWind: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.3, battleScale: 0.74 },
+    bossBoneLady: { sprite: "./assets/monsters/bone-demon.png", portraitScale: 1.3, battleScale: 0.74 },
+    bossBullKing: { sprite: "./assets/monsters/bull-vanguard.png", portraitScale: 1.36, battleScale: 0.8 },
   };
   for (const [id, spriteInfo] of Object.entries(MONSTER_SPRITES)) {
     if (CANONICAL_ENEMY_TYPES[id]) Object.assign(CANONICAL_ENEMY_TYPES[id], spriteInfo);
@@ -1565,7 +1652,7 @@
       record.error = true;
       if (!record.warned) {
         record.warned = true;
-        console.warn("Monster sprite failed to load:", src);
+        console.warn("缺少怪物素材：", src);
       }
     };
     record.image.src = src;
@@ -1577,7 +1664,15 @@
     const normalized = normalizeEnemyType(key) || key;
     const config = ENEMY_TYPES[normalized] || CANONICAL_ENEMY_TYPES[normalized] || {};
     const record = getMonsterSpriteRecord(normalized);
-    if (!record || record.error || !record.loaded) return false;
+    if (!record || record.error || !record.loaded) {
+      if (USE_MONSTER_SPRITES && record && !record.loaded && !record.error && !record.waitWarned) {
+        record.waitWarned = true;
+        window.setTimeout(() => {
+          if (!record.loaded && !record.error) console.warn("怪物素材仍在加载：", record.src);
+        }, 1600);
+      }
+      return false;
+    }
     const spriteScale = mode === "gallery" ? (config.portraitScale || 1) : (config.battleScale || 0.42);
     const baseSize = mode === "gallery" ? 94 : 180;
     const size = baseSize * spriteScale * scale;
@@ -2704,6 +2799,26 @@
     const t = state.time || performance.now() / 1000;
     const hitPulse = state.hitPulse || 0;
     if (drawMonsterSpriteImage(ctx, normalized, x, y, scale, mode, state)) return;
+    const spriteRecord = getMonsterSpriteRecord(normalized);
+    if (USE_MONSTER_SPRITES && spriteRecord && !spriteRecord.error) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.globalAlpha = 0.72;
+      monsterMist(ctx, "rgba(23, 63, 66, 0.28)", mode === "gallery" ? 46 * scale : 22 * scale, t);
+      ctx.fillStyle = "rgba(23, 63, 66, 0.75)";
+      ctx.strokeStyle = "rgba(255, 241, 189, 0.45)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(0, -8 * scale, 18 * scale, 24 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#fff1bd";
+      ctx.font = `${Math.max(10, 12 * scale)}px KaiTi, SimSun, serif`;
+      ctx.textAlign = "center";
+      ctx.fillText("加载中", 0, 0);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     if (hitPulse > 0) {
       ctx.shadowColor = "#fff1bd";
@@ -2950,77 +3065,53 @@
       next: (level) => `结界生命 +${(level + 1) * 5}`,
       applies: "所有角色开局结界最大生命。",
     },
-    weapon: {
-      name: "兵器精通",
-      max: 60,
+    scripture: {
+      name: "藏经心法",
+      max: 80,
       baseCost: 120,
-      current: (level) => `主武器技能伤害 +${(level * 1.5).toFixed(1)}%`,
-      next: (level) => `主武器技能伤害 +${((level + 1) * 1.5).toFixed(1)}%`,
-      applies: "适用于：金箍棒影 / 禅杖佛光 / 钉耙横扫 / 月牙铲斩。",
+      current: (level) => `全体技能伤害 +${level}%`,
+      next: (level) => `全体技能伤害 +${level + 1}%`,
+      applies: "全角色、全技能通用，孙悟空、唐僧、猪八戒、沙僧均可生效。",
     },
-    spell: {
-      name: "法术精通",
-      max: 60,
-      baseCost: 120,
-      current: (level) => `范围法术伤害 +${(level * 1.5).toFixed(1)}%`,
-      next: (level) => `范围法术伤害 +${((level + 1) * 1.5).toFixed(1)}%`,
-      applies: "适用于：火眼金睛 / 莲火佛印 / 妖火乱耙 / 赤砂爆。",
-    },
-    control: {
-      name: "镇妖控制",
-      max: 50,
-      baseCost: 130,
-      current: (level) => `控制伤害 +${level}%，控制效果 +${(level * 0.5).toFixed(1)}%`,
-      next: (level) => `控制伤害 +${level + 1}%，控制效果 +${((level + 1) * 0.5).toFixed(1)}%`,
-      applies: "适用于：定身、梵音、吞势、流沙等迟缓与控制。",
-    },
-    thunder: {
-      name: "天威感应",
-      max: 50,
-      baseCost: 150,
-      current: (level) => `天威伤害 +${(level * 1.5).toFixed(1)}%，弹射保留 +${Math.min(level * 0.2, 12).toFixed(1)}%`,
-      next: (level) => `天威伤害 +${((level + 1) * 1.5).toFixed(1)}%，弹射保留 +${Math.min((level + 1) * 0.2, 12).toFixed(1)}%`,
-      applies: "适用于：筋斗雷 / 金刚雷音 / 震地雷耙 / 卷帘雷击。",
-    },
-    formation: {
-      name: "阵法修行",
-      max: 50,
-      baseCost: 150,
-      current: (level) => `阵法伤害 +${(level * 1.5).toFixed(1)}%，持续时间 +${(level * 0.2).toFixed(1)}%`,
-      next: (level) => `阵法伤害 +${((level + 1) * 1.5).toFixed(1)}%，持续时间 +${((level + 1) * 0.2).toFixed(1)}%`,
-      applies: "适用于：齐天战阵 / 金莲法阵 / 土行耙阵 / 弱水法阵。",
-    },
-    agility: {
-      name: "行者身法",
+    cloudStep: {
+      name: "筋斗云路",
       max: 40,
       baseCost: 180,
-      current: (level) => `所有技能冷却 -${(level * 0.35).toFixed(2)}%`,
-      next: (level) => `所有技能冷却 -${((level + 1) * 0.35).toFixed(2)}%`,
+      current: (level) => `技能冷却 -${(level * 0.3).toFixed(1)}%`,
+      next: (level) => `技能冷却 -${((level + 1) * 0.3).toFixed(1)}%`,
       applies: "冷却倍率最低为 0.75。",
     },
-    demonSlayer: {
-      name: "降妖心法",
-      max: 50,
-      baseCost: 220,
-      current: (level) => `对精英和 Boss 伤害 +${level}%`,
-      next: (level) => `对精英和 Boss 伤害 +${level + 1}%`,
-      applies: "对精英妖怪、Boss 妖王额外生效。",
+    wardArray: {
+      name: "镇妖法阵",
+      max: 60,
+      baseCost: 160,
+      current: (level) => `怪物撞墙伤害 -${(level * 0.5).toFixed(1)}%`,
+      next: (level) => `怪物撞墙伤害 -${((level + 1) * 0.5).toFixed(1)}%`,
+      applies: "所有关卡结界受击减伤，最高 45%。",
     },
-    spiritGain: {
-      name: "聚灵行囊",
-      max: 50,
+    incense: {
+      name: "聚灵香火",
+      max: 60,
       baseCost: 160,
       current: (level) => `通关灵石 +${level * 2}%`,
       next: (level) => `通关灵石 +${(level + 1) * 2}%`,
       applies: "影响战斗结算获得的灵石。",
     },
-    protection: {
-      name: "护法金光",
+    bossSlayer: {
+      name: "破邪真诀",
+      max: 60,
+      baseCost: 220,
+      current: (level) => `对精英和 Boss 伤害 +${level}%`,
+      next: (level) => `对精英和 Boss 伤害 +${level + 1}%`,
+      applies: "对精英妖怪、Boss 妖王额外生效。",
+    },
+    bestiaryInsight: {
+      name: "妖鉴通明",
       max: 50,
-      baseCost: 180,
-      current: (level) => `结界受到伤害 -${(level * 0.4).toFixed(1)}%`,
-      next: (level) => `结界受到伤害 -${((level + 1) * 0.4).toFixed(1)}%`,
-      applies: "最高可提供 40% 结界减伤。",
+      baseCost: 140,
+      current: (level) => `图鉴收录奖励 +${level}%`,
+      next: (level) => `图鉴收录奖励 +${level + 1}%`,
+      applies: "首次收录妖怪和百斩奖励获得更多灵石。",
     },
   };
 
@@ -3036,15 +3127,12 @@
 
   const journeyTrainingAliases = {
     barrier: ["barrier", "wall", "castle", "wallHp", "wallFoundation", "wallFortify"],
-    weapon: ["weapon", "sword", "swordDamage", "feijian", "swordComprehension"],
-    spell: ["spell", "fire", "fireDamage", "fireMastery"],
-    control: ["control", "ice", "slow", "frost", "frostSkill", "iceMastery"],
-    thunder: ["thunder", "thunderDamage", "thunderManual", "thunderMastery"],
-    formation: ["formation", "array", "swordArray", "formationOld", "swordArrayAtlas", "swordArrayMastery"],
-    agility: ["agility", "cooldown", "speed", "agilityOld"],
-    demonSlayer: ["demonSlayer", "eliteBossDamage", "bossDamage"],
-    spiritGain: ["spiritGain", "coinGain", "rewardGain", "battleInsight"],
-    protection: ["protection", "damageReduction", "wallDamageReduction", "guard"],
+    scripture: ["scripture", "weapon", "sword", "swordDamage", "feijian", "swordComprehension", "spell", "fire", "fireDamage", "fireMastery", "control", "ice", "slow", "frost", "frostSkill", "iceMastery", "thunder", "thunderDamage", "thunderManual", "thunderMastery", "formation", "array", "swordArray", "formationOld", "swordArrayAtlas", "swordArrayMastery"],
+    cloudStep: ["cloudStep", "agility", "cooldown", "speed", "agilityOld"],
+    wardArray: ["wardArray", "protection", "damageReduction", "wallDamageReduction", "guard"],
+    incense: ["incense", "spiritGain", "coinGain", "rewardGain", "battleInsight"],
+    bossSlayer: ["bossSlayer", "demonSlayer", "eliteBossDamage", "bossDamage"],
+    bestiaryInsight: ["bestiaryInsight", "monsterBook", "codexReward"],
   };
 
   const getLegacyJourneyLevel = (source, aliases) => {
@@ -3073,7 +3161,7 @@
   const HERO_IDS = ["wukong", "tangseng", "bajie", "shaseng"];
   const HERO_ALIASES = { tang: "tangseng", tangseng: "tangseng" };
   const normalizeHeroId = (id) => HERO_ALIASES[id] || id;
-  const HERO_MAX_LEVEL = 50;
+  const HERO_MAX_LEVEL = 81;
   const HERO_DEFS = {
     wukong: {
       key: "wukong",
@@ -3161,7 +3249,7 @@
   const normalizeHeroProgress = (hero = {}) => ({
     level: clamp(Math.floor(Number(hero.level) || 1), 1, HERO_MAX_LEVEL),
     exp: Math.max(0, Math.floor(Number(hero.exp) || 0)),
-    breakthrough: clamp(Math.floor(Number(hero.breakthrough) || 0), 0, 4),
+    breakthrough: clamp(Math.floor(Number(hero.breakthrough) || 0), 0, 8),
     wins: Math.max(0, Math.floor(Number(hero.wins) || 0)),
   });
   const getHeroLevelStatus = (hero) => {
@@ -3182,7 +3270,7 @@
     const result = { beforeLevel: hero.level || 1, afterLevel: hero.level || 1, expGain: Math.max(0, Math.floor(amount || 0)), leveled: false, blocked: false };
     hero.exp = Math.max(0, Math.floor(hero.exp || 0)) + result.expGain;
     hero.level = clamp(Math.floor(hero.level || 1), 1, HERO_MAX_LEVEL);
-    hero.breakthrough = clamp(Math.floor(hero.breakthrough || 0), 0, 4);
+    hero.breakthrough = clamp(Math.floor(hero.breakthrough || 0), 0, 8);
     while (hero.level < HERO_MAX_LEVEL) {
       const cap = getHeroLevelCap(hero.breakthrough);
       if (hero.level >= cap) {
@@ -3206,6 +3294,24 @@
     spirit: { label: "灵品", mult: 2.25, color: "#f5d78a", weight: 4 },
   };
 
+  const JADE_REVIVE_COST = 30;
+  const RUNE_REROLL_COST = 20;
+  const TREASURE_REFRESH_COST = 10;
+  const JADE_EXCHANGE_PACKS = [
+    { id: "jade10", jade: 10, coins: 1000 },
+    { id: "jade50", jade: 50, coins: 6000 },
+    { id: "jade100", jade: 100, coins: 15000 },
+    { id: "jade300", jade: 300, coins: 50000 },
+  ];
+  const ARTIFACT_CHESTS = {
+    small: { id: "small", name: "小法宝碎片箱", cost: 50, min: 3, max: 5 },
+    large: { id: "large", name: "大法宝碎片箱", cost: 100, min: 8, max: 12 },
+  };
+  const GIFT_CODES = Object.fromEntries(
+    ["XY300A", "XY300B", "XY300C", "XY300D", "XY300E", "XY300F", "XY300G", "XY300H", "XY300I", "XY300J"]
+      .map((code) => [code, { jade: 300 }]),
+  );
+
   const RUNE_DEFS = {
     crit: { name: "狂击符", category: "攻击符文", desc: "暴击率提升", effect: (m) => ({ critChance: 0.04 * m }) },
     pierce: { name: "穿透符", category: "攻击符文", desc: "主武器影穿透 +1", effect: (m) => ({ swordPierce: Math.max(1, Math.round(m)) }) },
@@ -3217,14 +3323,390 @@
     gather: { name: "聚灵符", category: "机缘符文", desc: "修为获取增加", effect: (m) => ({ expMultiplier: 0.12 * m }) },
     fortune: { name: "招财符", category: "机缘符文", desc: "通关灵石增加", effect: (m) => ({ coinMultiplier: 0.12 * m }) },
     time: { name: "时轮符", category: "机缘符文", desc: "技能冷却缩短", effect: (m) => ({ cooldownMultiplier: 1 - Math.min(0.18, 0.06 * m) }) },
+    hairClone: { name: "毫毛符", category: "孙悟空符文", desc: "残影追击更强", effect: (m) => ({ shadowDamageBonus: 0.18 * m }) },
+    staffEcho: { name: "棍影符", category: "孙悟空符文", desc: "金箍棒影弹射/穿透 +1", effect: (m) => ({ swordPierce: Math.max(1, Math.round(m)) }) },
+    lotusShield: { name: "佛莲符", category: "唐僧符文", desc: "佛光额外护盾", effect: (m) => ({ maxHpBonus: Math.round(20 * m), regenBonus: 0.04 * m }) },
+    hoopStun: { name: "紧箍符", category: "唐僧符文", desc: "控制持续更久", effect: (m) => ({ controlDurationBonus: 0.08 * m }) },
+    rakeCrack: { name: "钉耙符", category: "猪八戒符文", desc: "震地裂隙伤害增强", effect: (m) => ({ formationDamageBonus: 0.12 * m }) },
+    rebound: { name: "反震符", category: "猪八戒符文", desc: "怪物撞墙时受到反伤", effect: (m) => ({ retaliation: 12 * m }) },
+    sandPull: { name: "流沙符", category: "沙僧符文", desc: "流沙阵范围扩大", effect: (m) => ({ fireRange: 0.08 * m, formationDamageBonus: 0.08 * m }) },
+    waterBind: { name: "水缚符", category: "沙僧符文", desc: "减速效果提升", effect: (m) => ({ iceSlowBonus: 0.05 * m }) },
   };
 
-  const CHAPTERS = [
-    { start: 1, end: 10, name: "第一章 花果山妖乱", intro: "花果山风起，群妖趁乱叩关。取经路第一步，从镇住山门开始。", boss: "黑风怪" },
-    { start: 11, end: 20, name: "第二章 高老庄异闻", intro: "高老庄夜雾沉沉，猪妖、夜叉与石甲妖混入村道。", boss: "吴支祁" },
-    { start: 21, end: 30, name: "第三章 流沙河妖雾", intro: "流沙河水雾翻卷，飞妖与咒师结阵，白骨幻影悄然逼近。", boss: "白骨夫人" },
-    { start: 31, end: 40, name: "第四章 火焰山终劫", intro: "火焰山妖旗连天，牛魔王集万妖压境，终章将启。", boss: "牛魔王" },
-  ];
+  const getRuneSlotCount = (save) => {
+    const cleared = Number(save?.records?.highestClearedLevel || 0);
+    return RUNE_SLOT_UNLOCKS.reduce((slots, item) => (cleared >= item.level ? item.slots : slots), 3);
+  };
+
+  const ARTIFACT_QUALITIES = {
+    common: { label: "凡品", maxLevel: 10, fragmentNeed: 30, costMult: 1, color: "#bfeee4", chestWeight: 38 },
+    fine: { label: "良品", maxLevel: 15, fragmentNeed: 30, costMult: 1, color: "#d7fff5", chestWeight: 28 },
+    superior: { label: "上品", maxLevel: 20, fragmentNeed: 50, costMult: 1.2, color: "#fff1bd", chestWeight: 18 },
+    spirit: { label: "灵品", maxLevel: 25, fragmentNeed: 70, costMult: 1.5, color: "#f5d78a", chestWeight: 11 },
+    immortal: { label: "仙品", maxLevel: 30, fragmentNeed: 100, costMult: 2, color: "#ffefb5", chestWeight: 5 },
+  };
+
+  const ARTIFACT_DEFS = {
+    goldenStaff: {
+      key: "goldenStaff",
+      name: "金箍棒",
+      type: "active",
+      quality: "immortal",
+      unlockLevel: 36,
+      baseCooldown: 65,
+      icon: "棒",
+      desc: "横扫一条直线，对路径妖怪造成大量伤害。",
+      effectLabel: "直线横扫",
+      perLevel: { damage: 0.08, range: 0.018, cooldownReduce: 0.005 },
+      base: { damage: 170, width: 64 },
+      fullBonus: "满级后命中 Boss 时额外造成一次震荡伤害。",
+    },
+    purpleBowl: {
+      key: "purpleBowl",
+      name: "紫金钵",
+      type: "active",
+      quality: "spirit",
+      unlockLevel: 36,
+      baseCooldown: 58,
+      icon: "钵",
+      desc: "吸附范围内小怪并造成持续伤害。",
+      effectLabel: "吸附持续伤害",
+      perLevel: { damage: 0.07, range: 0.02, duration: 0.018, cooldownReduce: 0.004 },
+      base: { damage: 16, radius: 112, duration: 3.2 },
+      fullBonus: "满级后吸附结束时额外爆发一次佛光伤害。",
+    },
+    palmFan: {
+      key: "palmFan",
+      name: "芭蕉扇",
+      type: "active",
+      quality: "spirit",
+      unlockLevel: 45,
+      baseCooldown: 60,
+      icon: "扇",
+      desc: "大范围击退怪物并造成风系伤害。",
+      effectLabel: "风压击退",
+      perLevel: { damage: 0.07, range: 0.018, push: 0.018, cooldownReduce: 0.004 },
+      base: { damage: 62, radius: 132, push: 52 },
+      fullBonus: "满级后对飞妖和风系怪额外增伤。",
+    },
+    tightHoop: {
+      key: "tightHoop",
+      name: "紧箍咒",
+      type: "active",
+      quality: "superior",
+      unlockLevel: 54,
+      baseCooldown: 56,
+      icon: "咒",
+      desc: "短暂控制精英怪和 Boss，普通怪眩晕更久。",
+      effectLabel: "定身控制",
+      perLevel: { damage: 0.06, duration: 0.02, cooldownReduce: 0.004 },
+      base: { damage: 42, radius: 128, duration: 2.1, bossDuration: 0.75 },
+      fullBonus: "满级后控制期间敌人受到伤害增加。",
+    },
+    demonMirror: {
+      key: "demonMirror",
+      name: "照妖镜",
+      type: "active",
+      quality: "superior",
+      unlockLevel: 63,
+      baseCooldown: 62,
+      icon: "镜",
+      desc: "暴露敌人弱点，短时间内全体敌人受到伤害增加。",
+      effectLabel: "照破弱点",
+      perLevel: { amplify: 0.008, duration: 0.025, cooldownReduce: 0.004 },
+      base: { amplify: 0.22, duration: 6 },
+      fullBonus: "满级后精英怪额外破防。",
+    },
+    kasaya: {
+      key: "kasaya",
+      name: "锦斓袈裟",
+      type: "passive",
+      quality: "spirit",
+      unlockLevel: 36,
+      icon: "袈",
+      desc: "开局获得护盾。",
+      effectLabel: "开局护盾",
+      perLevel: { shield: 0.018 },
+      base: { shield: 0.1 },
+      fullBonus: "满级后护盾破裂时释放一次佛光冲击。",
+    },
+    pureBottle: {
+      key: "pureBottle",
+      name: "净瓶",
+      type: "passive",
+      quality: "superior",
+      unlockLevel: 36,
+      icon: "瓶",
+      desc: "每隔一段时间回复结界生命。",
+      effectLabel: "定时回复",
+      perLevel: { regen: 0.04, intervalReduce: 0.018 },
+      base: { regen: 0.2, interval: 3.2 },
+      fullBonus: "满级后低血量时回复效果翻倍。",
+    },
+    fireEyes: {
+      key: "fireEyes",
+      name: "火眼金睛",
+      type: "passive",
+      quality: "immortal",
+      unlockLevel: 45,
+      icon: "眼",
+      desc: "暴击率提升，识破幻影怪。",
+      effectLabel: "暴击识破",
+      perLevel: { critChance: 0.0045, critDamage: 0.018 },
+      base: { critChance: 0.03, critDamage: 0.08 },
+      fullBonus: "满级后对白骨、幻影类妖怪额外增伤。",
+    },
+    windPearl: {
+      key: "windPearl",
+      name: "定风珠",
+      type: "passive",
+      quality: "superior",
+      unlockLevel: 54,
+      icon: "珠",
+      desc: "降低飞妖、黄风、黑风类怪物威胁。",
+      effectLabel: "定风护体",
+      perLevel: { reduction: 0.0045, slow: 0.004 },
+      base: { reduction: 0.035, slow: 0.05 },
+      fullBonus: "满级后芭蕉扇冷却降低。",
+    },
+    demonBell: {
+      key: "demonBell",
+      name: "镇妖铃",
+      type: "passive",
+      quality: "fine",
+      unlockLevel: 36,
+      icon: "铃",
+      desc: "降低精英怪伤害。",
+      effectLabel: "镇妖减伤",
+      perLevel: { reduction: 0.004, eliteDamage: 0.006 },
+      base: { reduction: 0.02, eliteDamage: 0.04 },
+      fullBonus: "满级后精英怪靠近结界时短暂减速。",
+    },
+    purpleGourd: {
+      key: "purpleGourd",
+      name: "紫金葫芦",
+      type: "passive",
+      quality: "spirit",
+      unlockLevel: 63,
+      icon: "葫",
+      desc: "击杀有概率吸取灵气，额外获得修为或灵石。",
+      effectLabel: "吸灵收益",
+      perLevel: { chance: 0.004, bonus: 0.012 },
+      base: { chance: 0.04, bonus: 0.08 },
+      fullBonus: "满级后 Boss 关结算额外获得法宝碎片。",
+    },
+  };
+
+  const createDefaultArtifacts = () => Object.fromEntries(
+    Object.keys(ARTIFACT_DEFS).map((id) => [id, { fragments: 0, level: 0, unlocked: false }]),
+  );
+
+  const createDefaultEquippedArtifacts = () => ({ active: "", passive: [] });
+
+  const getArtifactQuality = (defOrId) => {
+    const def = typeof defOrId === "string" ? ARTIFACT_DEFS[defOrId] : defOrId;
+    return ARTIFACT_QUALITIES[def?.quality] || ARTIFACT_QUALITIES.common;
+  };
+
+  const getArtifactMaxLevel = (id) => getArtifactQuality(id).maxLevel;
+  const getArtifactFragmentNeed = (id) => ARTIFACT_DEFS[id]?.fragmentNeed || getArtifactQuality(id).fragmentNeed;
+  const getArtifactUpgradeCost = (id, level) => {
+    const quality = getArtifactQuality(id);
+    const safeLevel = Math.max(1, Math.floor(level || 1));
+    return {
+      fragments: Math.ceil((5 + safeLevel * 1.5) * quality.costMult),
+      coins: Math.floor(300 * Math.pow(1.16, safeLevel - 1) * quality.costMult),
+    };
+  };
+
+  const getArtifactPower = (id, level = 1) => {
+    const def = ARTIFACT_DEFS[id] || {};
+    const quality = getArtifactQuality(def);
+    const safeLevel = clamp(Math.floor(level || 1), 1, quality.maxLevel);
+    return 1 + (safeLevel - 1) * 0.08 * quality.costMult;
+  };
+
+  const getArtifactCooldown = (id, level = 1) => {
+    const def = ARTIFACT_DEFS[id] || {};
+    const safeLevel = Math.max(1, Math.floor(level || 1));
+    const reduce = Math.min(0.35, (safeLevel - 1) * (def.perLevel?.cooldownReduce || 0));
+    return Math.max(12, (def.baseCooldown || def.cooldown || 30) * (1 - reduce));
+  };
+
+  const getArtifactEffectText = (id, level = 0, next = false) => {
+    const def = ARTIFACT_DEFS[id];
+    if (!def) return "";
+    const targetLevel = Math.max(1, Math.floor(level || 1) + (next ? 1 : 0));
+    const maxLevel = getArtifactMaxLevel(id);
+    const lv = clamp(targetLevel, 1, maxLevel);
+    const p = getArtifactPower(id, lv);
+    if (id === "goldenStaff") return `伤害 ${Math.round((def.base.damage || 0) * p)}，宽度 ${Math.round((def.base.width || 0) * (1 + (lv - 1) * (def.perLevel.range || 0)))}，冷却 ${Math.round(getArtifactCooldown(id, lv))} 秒`;
+    if (id === "purpleBowl") return `范围 ${Math.round((def.base.radius || 0) * (1 + (lv - 1) * (def.perLevel.range || 0)))}，持续 ${((def.base.duration || 0) * (1 + (lv - 1) * (def.perLevel.duration || 0))).toFixed(1)} 秒，每秒伤害 ${Math.round((def.base.damage || 0) * p)}`;
+    if (id === "palmFan") return `范围 ${Math.round((def.base.radius || 0) * (1 + (lv - 1) * (def.perLevel.range || 0)))}，伤害 ${Math.round((def.base.damage || 0) * p)}，击退 ${Math.round((def.base.push || 0) * (1 + (lv - 1) * (def.perLevel.push || 0)))}`;
+    if (id === "tightHoop") return `控制 ${((def.base.duration || 0) * (1 + (lv - 1) * (def.perLevel.duration || 0))).toFixed(1)} 秒，Boss 控制 ${((def.base.bossDuration || 0) * (1 + (lv - 1) * (def.perLevel.duration || 0))).toFixed(1)} 秒`;
+    if (id === "demonMirror") return `增伤 ${Math.round(((def.base.amplify || 0) + (lv - 1) * (def.perLevel.amplify || 0)) * 100)}%，持续 ${((def.base.duration || 0) * (1 + (lv - 1) * (def.perLevel.duration || 0))).toFixed(1)} 秒`;
+    if (id === "kasaya") return `开局护盾 ${Math.round(((def.base.shield || 0) + (lv - 1) * (def.perLevel.shield || 0)) * 100)}% 最大结界`;
+    if (id === "pureBottle") return `每次回复 ${((def.base.regen || 0) + (lv - 1) * (def.perLevel.regen || 0)).toFixed(2)} 生命/秒量级，间隔约 ${Math.max(1.6, (def.base.interval || 3) * (1 - (lv - 1) * (def.perLevel.intervalReduce || 0))).toFixed(1)} 秒`;
+    if (id === "fireEyes") return `暴击率 +${Math.round(((def.base.critChance || 0) + (lv - 1) * (def.perLevel.critChance || 0)) * 100)}%，暴击伤害 +${Math.round(((def.base.critDamage || 0) + (lv - 1) * (def.perLevel.critDamage || 0)) * 100)}%`;
+    if (id === "windPearl") return `风系/飞行威胁降低 ${Math.round(((def.base.reduction || 0) + (lv - 1) * (def.perLevel.reduction || 0)) * 100)}%`;
+    if (id === "demonBell") return `精英减伤 ${Math.round(((def.base.reduction || 0) + (lv - 1) * (def.perLevel.reduction || 0)) * 100)}%，精英/Boss 增伤 ${Math.round(((def.base.eliteDamage || 0) + (lv - 1) * (def.perLevel.eliteDamage || 0)) * 100)}%`;
+    if (id === "purpleGourd") return `吸灵概率 ${Math.round(((def.base.chance || 0) + (lv - 1) * (def.perLevel.chance || 0)) * 100)}%，收益 +${Math.round(((def.base.bonus || 0) + (lv - 1) * (def.perLevel.bonus || 0)) * 100)}%`;
+    return def.desc || "";
+  };
+
+  const normalizeArtifacts = (source = {}) => {
+    const result = createDefaultArtifacts();
+    for (const [id, def] of Object.entries(ARTIFACT_DEFS)) {
+      const item = source[id] || {};
+      const maxLevel = getArtifactMaxLevel(id);
+      result[id] = {
+        fragments: Math.max(0, Math.floor(Number(item.fragments) || 0)),
+        level: clamp(Math.floor(Number(item.level) || 0), 0, maxLevel),
+        unlocked: item.unlocked === true || Math.floor(Number(item.level) || 0) > 0,
+      };
+      if (!result[id].unlocked && result[id].level > 0) result[id].unlocked = true;
+      if (def.unlockLevel <= 36 && result[id].fragments <= 0 && !result[id].unlocked) result[id].fragments = 0;
+    }
+    return result;
+  };
+
+  const normalizeEquippedArtifacts = (source = {}, artifacts = createDefaultArtifacts()) => {
+    const active = ARTIFACT_DEFS[source.active]?.type === "active" && artifacts[source.active]?.unlocked ? source.active : "";
+    const passive = Array.isArray(source.passive)
+      ? source.passive.filter((id) => ARTIFACT_DEFS[id]?.type === "passive" && artifacts[id]?.unlocked).slice(0, 2)
+      : [];
+    return { active, passive };
+  };
+
+  const getArtifactBonuses = (save) => {
+    const artifacts = normalizeArtifacts(save?.artifacts || {});
+    const equipped = normalizeEquippedArtifacts(save?.equippedArtifacts || {}, artifacts);
+    const bonuses = {
+      maxHpBonus: 0,
+      critChance: 0,
+      critDamageBonus: 0,
+      wallDamageReduction: 0,
+      regenPerSecond: 0,
+      regenInterval: 3,
+      eliteBossDamageMultiplier: 1,
+      startShieldMultiplier: 0,
+      coinMultiplier: 0,
+      expMultiplier: 0,
+      gourdChance: 0,
+      gourdBonus: 0,
+      windSlowBonus: 0,
+    };
+    for (const id of equipped.passive || []) {
+      const level = Math.max(1, artifacts[id]?.level || 1);
+      const def = ARTIFACT_DEFS[id] || {};
+      const full = level >= getArtifactMaxLevel(id);
+      if (id === "kasaya") bonuses.startShieldMultiplier += (def.base?.shield || 0.1) + (level - 1) * (def.perLevel?.shield || 0.018);
+      if (id === "pureBottle") {
+        bonuses.regenPerSecond += (def.base?.regen || 0.2) + (level - 1) * (def.perLevel?.regen || 0.04);
+        bonuses.regenInterval = Math.min(bonuses.regenInterval, Math.max(1.6, (def.base?.interval || 3.2) * (1 - (level - 1) * (def.perLevel?.intervalReduce || 0.018))));
+      }
+      if (id === "fireEyes") {
+        bonuses.critChance += (def.base?.critChance || 0.03) + (level - 1) * (def.perLevel?.critChance || 0.0045);
+        bonuses.critDamageBonus += (def.base?.critDamage || 0.08) + (level - 1) * (def.perLevel?.critDamage || 0.018);
+        if (full) bonuses.eliteBossDamageMultiplier *= 1.08;
+      }
+      if (id === "windPearl") {
+        bonuses.wallDamageReduction += (def.base?.reduction || 0.035) + (level - 1) * (def.perLevel?.reduction || 0.0045);
+        bonuses.windSlowBonus += (def.base?.slow || 0.05) + (level - 1) * (def.perLevel?.slow || 0.004);
+      }
+      if (id === "demonBell") {
+        bonuses.wallDamageReduction += (def.base?.reduction || 0.02) + (level - 1) * (def.perLevel?.reduction || 0.004);
+        bonuses.eliteBossDamageMultiplier *= 1 + (def.base?.eliteDamage || 0.04) + (level - 1) * (def.perLevel?.eliteDamage || 0.006);
+      }
+      if (id === "purpleGourd") {
+        bonuses.gourdChance += (def.base?.chance || 0.04) + (level - 1) * (def.perLevel?.chance || 0.004);
+        bonuses.gourdBonus += (def.base?.bonus || 0.08) + (level - 1) * (def.perLevel?.bonus || 0.012);
+        bonuses.coinMultiplier += bonuses.gourdBonus * 0.35;
+        bonuses.expMultiplier += bonuses.gourdBonus * 0.25;
+      }
+    }
+    return bonuses;
+  };
+
+  const ARTIFACT_BOSS_DROP_POOLS = {
+    9: ["demonBell", "kasaya"],
+    18: ["windPearl", "palmFan"],
+    27: ["demonBell", "pureBottle"],
+    36: ["demonMirror", "tightHoop"],
+    45: ["purpleBowl", "pureBottle"],
+    54: ["fireEyes", "demonMirror"],
+    63: ["palmFan", "purpleGourd"],
+    72: ["tightHoop", "kasaya"],
+    81: ["goldenStaff", "fireEyes", "purpleGourd"],
+  };
+
+  function getWeightedArtifactId(chestId = "small", save = null) {
+    const entries = Object.entries(ARTIFACT_DEFS)
+      .filter(([, def]) => def && def.quality)
+      .map(([id, def]) => {
+        const quality = getArtifactQuality(def);
+        const current = save?.artifacts?.[id];
+        const unfinished = !current?.unlocked || (current.level || 0) < getArtifactMaxLevel(id);
+        let weight = quality.chestWeight || 1;
+        if (chestId === "small") {
+          if (def.quality === "spirit") weight *= 0.55;
+          if (def.quality === "immortal") weight *= 0.28;
+        } else if (chestId === "large") {
+          if (def.quality === "spirit") weight *= 1.65;
+          if (def.quality === "immortal") weight *= 1.35;
+          if (unfinished) weight *= 1.7;
+        }
+        return { id, weight };
+      });
+    const total = entries.reduce((sum, item) => sum + item.weight, 0);
+    let roll = Math.random() * total;
+    for (const item of entries) {
+      roll -= item.weight;
+      if (roll <= 0) return item.id;
+    }
+    return entries[0]?.id || "demonBell";
+  }
+
+  function addArtifactFragmentsToSave(save, id, amount, drops = {}) {
+    const def = ARTIFACT_DEFS[id];
+    if (!def || !amount) return drops;
+    save.artifacts = normalizeArtifacts(save.artifacts || {});
+    const artifact = save.artifacts[id] || { fragments: 0, level: 0, unlocked: false };
+    artifact.fragments = Math.max(0, Math.floor(artifact.fragments || 0) + Math.max(0, Math.floor(amount)));
+    save.artifacts[id] = artifact;
+    drops[id] = (drops[id] || 0) + Math.max(0, Math.floor(amount));
+    return drops;
+  }
+
+  function addBossArtifactDrops(save, levelOrder, firstClear, drops = {}) {
+    const pool = ARTIFACT_BOSS_DROP_POOLS[levelOrder] || Object.keys(ARTIFACT_DEFS);
+    let total = Math.floor(levelOrder / 9) + 2;
+    if (firstClear) total += 5 + Math.floor(levelOrder / 9) * 2;
+    const equipped = normalizeEquippedArtifacts(save.equippedArtifacts || {}, save.artifacts || {});
+    const gourd = save.artifacts?.purpleGourd;
+    if (equipped.passive.includes("purpleGourd") && gourd?.unlocked && gourd.level >= getArtifactMaxLevel("purpleGourd")) total += 2;
+    for (let i = 0; i < total; i += 1) {
+      const id = randomFrom(pool);
+      addArtifactFragmentsToSave(save, id, 1, drops);
+    }
+    return drops;
+  }
+
+  function addRandomLowArtifactDrop(save, drops = {}) {
+    const lowPool = Object.entries(ARTIFACT_DEFS)
+      .filter(([, def]) => ["fine", "superior"].includes(def.quality))
+      .map(([id]) => id);
+    addArtifactFragmentsToSave(save, randomFrom(lowPool.length ? lowPool : Object.keys(ARTIFACT_DEFS)), 1, drops);
+    return drops;
+  }
+
+  const CHAPTERS = LEVEL_REALMS.map((realm, index) => ({
+    start: realm.start,
+    end: realm.end,
+    name: `第${index + 1}章 ${realm.name}`,
+    intro: realm.intro,
+    boss: BOSS_LEVELS[realm.end]?.name || "妖王",
+  }));
   const getChapterByOrder = (order) => CHAPTERS.find((chapter) => order >= chapter.start && order <= chapter.end) || CHAPTERS[0];
   for (const level of LEVEL_LIST) {
     const chapter = getChapterByOrder(level.order);
@@ -3237,7 +3719,7 @@
     clear10: { name: "初破黑风", desc: "首次通关第 10 关" },
     clear20: { name: "高庄镇妖", desc: "首次通关第 20 关" },
     clear30: { name: "白骨退散", desc: "首次通关第 30 关" },
-    clear40: { name: "万妖退散", desc: "通关第 40 关" },
+    clear81: { name: "九九归真", desc: "通关第 81 关" },
     kill1000: { name: "千妖斩", desc: "累计斩妖 1000" },
     threeSuperiorRunes: { name: "符箓有成", desc: "拥有 3 个上品及以上符文" },
   };
@@ -3290,18 +3772,18 @@
   const getLevelById = (id) => LEVEL_CONFIG[id] || LEVEL_CONFIG.level1;
   const coerceLevelId = (value, fallback = "level1") => {
     if (typeof value === "number" && Number.isFinite(value)) {
-      const order = clampSetup(Math.floor(value), 1, 40);
+      const order = clampSetup(Math.floor(value), 1, MAX_MAIN_LEVEL);
       return `level${order}`;
     }
     const raw = String(value || "").trim();
     if (LEVEL_CONFIG[raw]) return raw;
     if (/^\d+$/.test(raw)) {
-      const order = clampSetup(Number(raw), 1, 40);
+      const order = clampSetup(Number(raw), 1, MAX_MAIN_LEVEL);
       return `level${order}`;
     }
     const match = raw.match(/^level(\d+)$/i);
     if (match) {
-      const order = clampSetup(Number(match[1]), 1, 40);
+      const order = clampSetup(Number(match[1]), 1, MAX_MAIN_LEVEL);
       return `level${order}`;
     }
     return LEVEL_CONFIG[fallback] ? fallback : "level1";
@@ -3338,10 +3820,12 @@
     return save?.levels?.[selected]?.unlocked ? selected : highest;
   };
   const getLevelExtraClearShards = (order) => {
-    if (order >= 40) return 14;
-    if (order >= 30) return 10;
-    if (order >= 20) return 8;
-    if (order >= 10) return 6;
+    if (order >= 81) return 22;
+    if (order >= 63) return 18;
+    if (order >= 45) return 14;
+    if (order >= 36) return 10;
+    if (order >= 27) return 8;
+    if (order >= 18) return 6;
     if (order >= 9) return 4;
     if (order >= 7) return 3;
     if (order >= 5) return 2;
@@ -3404,8 +3888,23 @@
       owned: [],
       equipped: [],
     },
+    artifacts: createDefaultArtifacts(),
+    equippedArtifacts: createDefaultEquippedArtifacts(),
     bestiary: {
       seen: {},
+      kills: {},
+      claimed: {},
+    },
+    dailyChallenge: {
+      lastDate: "",
+      rewardClaimed: false,
+    },
+    endless: {
+      bestWave: 0,
+      bestKills: 0,
+      bestTime: 0,
+      bestBossKills: 0,
+      lastJadeDate: "",
     },
     achievements: {
       unlocked: {},
@@ -3515,11 +4014,11 @@
         save.records.highestClearedLevel = Math.max(save.records.highestClearedLevel, level.order);
       }
     }
-    if (save.levels.level40?.cleared || save.records.highestClearedLevel >= 40) {
+    if (save.levels.level81?.cleared || save.records.highestClearedLevel >= MAX_MAIN_LEVEL) {
       save.records.finalCleared = true;
-      if (save.levels.level40) {
-        save.levels.level40.unlocked = true;
-        save.levels.level40.cleared = true;
+      if (save.levels.level81) {
+        save.levels.level81.unlocked = true;
+        save.levels.level81.cleared = true;
       }
     }
     if (!save.levels[save.selectedLevelId]?.unlocked) save.selectedLevelId = getHighestUnlockedLevelId(save);
@@ -3527,7 +4026,7 @@
     save.settings.soundEnabled = source.settings?.soundEnabled !== false;
     save.settings.timeScale = Number(source.settings?.timeScale) === 2 ? 2 : readTimeScaleSetting();
     save.redeemedCodes = Array.isArray(source.redeemedCodes)
-      ? Array.from(new Set(source.redeemedCodes.map((code) => String(code)).filter(Boolean)))
+      ? Array.from(new Set(source.redeemedCodes.map((code) => String(code).trim().toUpperCase()).filter(Boolean)))
       : [];
     save.lastDailyRewardDate = typeof source.lastDailyRewardDate === "string" ? source.lastDailyRewardDate : "";
     save.totalRechargeTest = Number.isFinite(source.totalRechargeTest) ? Math.max(0, Math.floor(source.totalRechargeTest)) : 0;
@@ -3541,11 +4040,11 @@
     const invited = Array.isArray(source.companions?.invited) ? source.companions.invited : [];
     const pendingInvites = Array.isArray(source.companions?.pendingInvites) ? source.companions.pendingInvites : [];
     save.companions.invited = Array.from(new Set(invited.map(normalizeHeroId).filter((id) => HERO_IDS.includes(id) && id !== save.selectedHero))).slice(0, 3);
-    save.companions.pendingInvites = Array.from(new Set(pendingInvites.map((value) => Number(value)).filter((value) => [10, 20, 30].includes(value))));
+    save.companions.pendingInvites = Array.from(new Set(pendingInvites.map((value) => Number(value)).filter((value) => COMPANION_INVITE_LEVELS.includes(value))));
     const sourceCompanionProgress = source.companionProgress && typeof source.companionProgress === "object" ? source.companionProgress : {};
     for (const id of HERO_IDS) {
       const progress = sourceCompanionProgress[id] || (id === "tangseng" ? sourceCompanionProgress.tang : null) || {};
-      save.companionProgress[id] = { level: clamp(Math.floor(Number(progress.level) || 1), 1, 20) };
+      save.companionProgress[id] = { level: clamp(Math.floor(Number(progress.level) || 1), 1, 30) };
     }
     const sourceRunes = source.runes && typeof source.runes === "object" ? source.runes : {};
     save.runes.owned = Array.isArray(sourceRunes.owned)
@@ -3560,10 +4059,14 @@
       : [];
     const ownedIds = new Set(save.runes.owned.map((rune) => rune.uid));
     save.runes.equipped = Array.isArray(sourceRunes.equipped)
-      ? sourceRunes.equipped.filter((uid) => ownedIds.has(uid)).slice(0, 3)
+      ? sourceRunes.equipped.filter((uid) => ownedIds.has(uid)).slice(0, getRuneSlotCount(save))
       : [];
+    save.artifacts = normalizeArtifacts(source.artifacts || {});
+    save.equippedArtifacts = normalizeEquippedArtifacts(source.equippedArtifacts || {}, save.artifacts);
     const seen = source.bestiary?.seen && typeof source.bestiary.seen === "object" ? source.bestiary.seen : {};
     save.bestiary.seen = {};
+    save.bestiary.kills = {};
+    save.bestiary.claimed = {};
     for (const id of Object.keys(seen)) {
       const normalized = normalizeEnemyType(id);
       if (seen[id] && MONSTER_BOOK[normalized]) save.bestiary.seen[normalized] = true;
@@ -3571,11 +4074,34 @@
     for (const id of Object.keys(MONSTER_BOOK)) {
       if (seen[id]) save.bestiary.seen[id] = true;
     }
+    const kills = source.bestiary?.kills && typeof source.bestiary.kills === "object" ? source.bestiary.kills : {};
+    for (const [id, value] of Object.entries(kills)) {
+      const normalized = normalizeEnemyType(id);
+      if (MONSTER_BOOK[normalized]) save.bestiary.kills[normalized] = Math.max(0, Math.floor(Number(value) || 0));
+    }
+    const claimed = source.bestiary?.claimed && typeof source.bestiary.claimed === "object" ? source.bestiary.claimed : {};
+    for (const [id, value] of Object.entries(claimed)) {
+      const normalized = normalizeEnemyType(id);
+      if (MONSTER_BOOK[normalized]) save.bestiary.claimed[normalized] = value === true;
+    }
     const unlocked = source.achievements?.unlocked && typeof source.achievements.unlocked === "object" ? source.achievements.unlocked : {};
     save.achievements.unlocked = {};
     for (const id of Object.keys(ACHIEVEMENT_DEFS)) {
       if (unlocked[id]) save.achievements.unlocked[id] = true;
     }
+    const daily = source.dailyChallenge && typeof source.dailyChallenge === "object" ? source.dailyChallenge : {};
+    save.dailyChallenge = {
+      lastDate: typeof daily.lastDate === "string" ? daily.lastDate : "",
+      rewardClaimed: daily.rewardClaimed === true,
+    };
+    const endless = source.endless && typeof source.endless === "object" ? source.endless : {};
+    save.endless = {
+      bestWave: Math.max(0, Math.floor(Number(endless.bestWave) || 0)),
+      bestKills: Math.max(0, Math.floor(Number(endless.bestKills) || 0)),
+      bestTime: Math.max(0, Math.floor(Number(endless.bestTime) || 0)),
+      bestBossKills: Math.max(0, Math.floor(Number(endless.bestBossKills) || 0)),
+      lastJadeDate: typeof endless.lastJadeDate === "string" ? endless.lastJadeDate : "",
+    };
     return save;
   };
 
@@ -3629,14 +4155,15 @@
       }
     }
     const mirroredJourneyTraining = loadJSON(SAVE_KEYS.journeyTraining, null);
+    const mirroredRootUpgrades = loadJSON(SAVE_KEYS.rootUpgrades, null);
     save.journeyTraining = normalizeJourneyTraining(
-      mirroredJourneyTraining || save.journeyTraining,
+      mirroredRootUpgrades || mirroredJourneyTraining || save.journeyTraining,
       { ...(mirroredUpgrades || {}), ...(save.talents || {}) },
     );
 
     const redeemed = loadJSON(SAVE_KEYS.redeemedCodes, null);
     if (Array.isArray(redeemed)) {
-      save.redeemedCodes = Array.from(new Set(redeemed.map((code) => String(code)).filter(Boolean)));
+      save.redeemedCodes = Array.from(new Set(redeemed.map((code) => String(code).trim().toUpperCase()).filter(Boolean)));
     }
     if (hasStorageValue(SAVE_KEYS.lastDailyRewardDate)) save.lastDailyRewardDate = loadString(SAVE_KEYS.lastDailyRewardDate, "");
     save.settings.timeScale = loadNumber(SAVE_KEYS.timeScale, save.settings.timeScale) === 2 ? 2 : 1;
@@ -3655,20 +4182,52 @@
     if (mirroredCompanionProgress && typeof mirroredCompanionProgress === "object") {
       for (const id of HERO_IDS) {
         const progress = mirroredCompanionProgress[id] || (id === "tangseng" ? mirroredCompanionProgress.tang : null) || save.companionProgress[id];
-        save.companionProgress[id] = { level: clamp(Math.floor(Number(progress?.level) || 1), 1, 20) };
+        save.companionProgress[id] = { level: clamp(Math.floor(Number(progress?.level) || 1), 1, 30) };
       }
     }
     const mirroredPending = loadJSON(SAVE_KEYS.pendingCompanionInvites, null);
-    if (Array.isArray(mirroredPending)) save.companions.pendingInvites = Array.from(new Set(mirroredPending.map(Number).filter((value) => [10, 20, 30].includes(value))));
+    if (Array.isArray(mirroredPending)) save.companions.pendingInvites = Array.from(new Set(mirroredPending.map(Number).filter((value) => COMPANION_INVITE_LEVELS.includes(value))));
     else if (Number.isFinite(Number(mirroredPending)) && Number(mirroredPending) > 0) {
-      save.companions.pendingInvites = [10, 20, 30].slice(0, clamp(Math.floor(Number(mirroredPending)), 0, 3));
+      save.companions.pendingInvites = COMPANION_INVITE_LEVELS.slice(0, clamp(Math.floor(Number(mirroredPending)), 0, 3));
     }
+    const mirroredRunes = loadJSON(SAVE_KEYS.runes, null);
+    const mirroredEquippedRunes = loadJSON(SAVE_KEYS.equippedRunes, null);
+    if (mirroredRunes && typeof mirroredRunes === "object") {
+      const sourceRunes = Array.isArray(mirroredRunes) ? { owned: mirroredRunes, equipped: mirroredEquippedRunes || [] } : mirroredRunes;
+      const normalized = normalizeSave({ ...save, runes: sourceRunes }).runes;
+      save.runes = normalized;
+    }
+    const mirroredArtifacts = loadJSON(SAVE_KEYS.artifacts, null);
+    if (mirroredArtifacts && typeof mirroredArtifacts === "object") save.artifacts = normalizeArtifacts(mirroredArtifacts);
+    const mirroredEquippedArtifacts = loadJSON(SAVE_KEYS.equippedArtifacts, null);
+    if (mirroredEquippedArtifacts && typeof mirroredEquippedArtifacts === "object") {
+      save.equippedArtifacts = normalizeEquippedArtifacts(mirroredEquippedArtifacts, save.artifacts);
+    }
+    const mirroredBook = loadJSON(SAVE_KEYS.monsterBook, null);
+    if (mirroredBook && typeof mirroredBook === "object") {
+      save.bestiary = {
+        seen: { ...(save.bestiary?.seen || {}), ...(mirroredBook.seen || {}) },
+        kills: { ...(save.bestiary?.kills || {}), ...(mirroredBook.kills || {}) },
+        claimed: { ...(save.bestiary?.claimed || {}), ...(mirroredBook.claimed || {}) },
+      };
+    }
+    const mirroredDaily = loadJSON(SAVE_KEYS.dailyChallenge, null);
+    if (mirroredDaily && typeof mirroredDaily === "object") {
+      save.dailyChallenge = {
+        lastDate: typeof mirroredDaily.lastDate === "string" ? mirroredDaily.lastDate : "",
+        rewardClaimed: mirroredDaily.rewardClaimed === true,
+      };
+    }
+    save.endless = save.endless || { bestWave: 0, bestKills: 0, bestTime: 0, bestBossKills: 0, lastJadeDate: "" };
+    if (hasStorageValue(SAVE_KEYS.endlessBestWave)) save.endless.bestWave = Math.max(save.endless.bestWave || 0, loadNumber(SAVE_KEYS.endlessBestWave, 0));
+    if (hasStorageValue(SAVE_KEYS.endlessBestKills)) save.endless.bestKills = Math.max(save.endless.bestKills || 0, loadNumber(SAVE_KEYS.endlessBestKills, 0));
+    if (hasStorageValue(SAVE_KEYS.endlessBestTime)) save.endless.bestTime = Math.max(save.endless.bestTime || 0, loadNumber(SAVE_KEYS.endlessBestTime, 0));
     return save;
   }
 
   function reconcileSaveProgress(save) {
     save.version = SAVE_VERSION;
-    save.records.highestClearedLevel = clampSetup(Math.floor(save.records.highestClearedLevel || 0), 0, 40);
+    save.records.highestClearedLevel = clampSetup(Math.floor(save.records.highestClearedLevel || 0), 0, MAX_MAIN_LEVEL);
     for (const level of LEVEL_LIST) {
       const state = save.levels[level.id] || createDefaultLevels()[level.id];
       save.levels[level.id] = state;
@@ -3679,23 +4238,38 @@
         save.records.highestClearedLevel = Math.max(save.records.highestClearedLevel, level.order);
       }
     }
-    save.records.finalCleared = save.records.finalCleared === true || save.records.highestClearedLevel >= 40 || save.levels.level40?.cleared === true;
+    save.records.finalCleared = save.records.finalCleared === true || save.records.highestClearedLevel >= MAX_MAIN_LEVEL || save.levels.level81?.cleared === true;
     save.journeyTraining = normalizeJourneyTraining(save.journeyTraining || {}, save.talents || {});
-    if (save.records.finalCleared && save.levels.level40) {
-      save.levels.level40.unlocked = true;
-      save.levels.level40.cleared = true;
+    save.artifacts = normalizeArtifacts(save.artifacts || {});
+    save.equippedArtifacts = normalizeEquippedArtifacts(save.equippedArtifacts || {}, save.artifacts);
+    save.runes.equipped = (save.runes.equipped || []).slice(0, getRuneSlotCount(save));
+    if (save.records.finalCleared && save.levels.level81) {
+      save.levels.level81.unlocked = true;
+      save.levels.level81.cleared = true;
     }
     if (!save.levels[save.selectedLevelId]?.unlocked) save.selectedLevelId = getHighestUnlockedLevelId(save);
     save.records.bestLevel = Math.max(save.records.bestLevel || 1, save.records.highestPlayerLevel || 1);
     save.selectedHero = normalizeHeroId(save.selectedHero || "");
     if (!HERO_IDS.includes(save.selectedHero)) save.selectedHero = "";
+    save.dailyChallenge = save.dailyChallenge && typeof save.dailyChallenge === "object"
+      ? { lastDate: String(save.dailyChallenge.lastDate || ""), rewardClaimed: save.dailyChallenge.rewardClaimed === true }
+      : { lastDate: "", rewardClaimed: false };
+    save.endless = save.endless && typeof save.endless === "object"
+      ? {
+        bestWave: Math.max(0, Math.floor(Number(save.endless.bestWave) || 0)),
+        bestKills: Math.max(0, Math.floor(Number(save.endless.bestKills) || 0)),
+        bestTime: Math.max(0, Math.floor(Number(save.endless.bestTime) || 0)),
+        bestBossKills: Math.max(0, Math.floor(Number(save.endless.bestBossKills) || 0)),
+        lastJadeDate: String(save.endless.lastJadeDate || ""),
+      }
+      : { bestWave: 0, bestKills: 0, bestTime: 0, bestBossKills: 0, lastJadeDate: "" };
     for (const id of HERO_IDS) {
       save.heroes[id] = normalizeHeroProgress(save.heroes[id]);
       const companionLevel = Number(save.companionProgress?.[id]?.level);
-      save.companionProgress[id] = { level: clamp(Math.floor(Number.isFinite(companionLevel) ? companionLevel : 1), 1, 20) };
+      save.companionProgress[id] = { level: clamp(Math.floor(Number.isFinite(companionLevel) ? companionLevel : 1), 1, 30) };
     }
     save.companions.invited = Array.from(new Set((save.companions.invited || []).map(normalizeHeroId).filter((id) => HERO_IDS.includes(id) && id !== save.selectedHero))).slice(0, 3);
-    save.companions.pendingInvites = Array.from(new Set((save.companions.pendingInvites || []).filter((order) => [10, 20, 30].includes(order))));
+    save.companions.pendingInvites = Array.from(new Set((save.companions.pendingInvites || []).filter((order) => COMPANION_INVITE_LEVELS.includes(order))));
     return save;
   }
 
@@ -3714,6 +4288,7 @@
     saveBool(SAVE_KEYS.finalCleared, data.records.finalCleared === true);
     saveJSON(SAVE_KEYS.upgrades, data.talents || {});
     saveJSON(SAVE_KEYS.journeyTraining, data.journeyTraining || {});
+    saveJSON(SAVE_KEYS.rootUpgrades, data.journeyTraining || {});
     saveJSON(SAVE_KEYS.redeemedCodes, data.redeemedCodes || []);
     saveString(SAVE_KEYS.lastDailyRewardDate, data.lastDailyRewardDate || "");
     saveNumber(SAVE_KEYS.timeScale, data.settings?.timeScale === 2 ? 2 : 1);
@@ -3723,11 +4298,24 @@
     saveJSON(SAVE_KEYS.companions, data.companions?.invited || []);
     saveJSON(SAVE_KEYS.companionProgress, data.companionProgress || {});
     saveJSON(SAVE_KEYS.pendingCompanionInvites, data.companions?.pendingInvites || []);
+    saveJSON(SAVE_KEYS.runes, data.runes || { owned: [], equipped: [] });
+    saveJSON(SAVE_KEYS.equippedRunes, data.runes?.equipped || []);
+    saveJSON(SAVE_KEYS.artifacts, data.artifacts || {});
+    saveJSON(SAVE_KEYS.equippedArtifacts, data.equippedArtifacts || createDefaultEquippedArtifacts());
+    saveJSON(SAVE_KEYS.monsterBook, data.bestiary || { seen: {}, kills: {}, claimed: {} });
+    saveJSON(SAVE_KEYS.dailyChallenge, data.dailyChallenge || { lastDate: "", rewardClaimed: false });
+    saveNumber(SAVE_KEYS.endlessBestWave, data.endless?.bestWave || 0);
+    saveNumber(SAVE_KEYS.endlessBestKills, data.endless?.bestKills || 0);
+    saveNumber(SAVE_KEYS.endlessBestTime, data.endless?.bestTime || 0);
     return data;
   }
 
   function loadSave() {
     const rawSave = loadJSON(SAVE_KEY, null);
+    if (shouldResetLegacyLocalSave(rawSave)) {
+      clearLocalSaveKeys();
+      return saveSave(createDefaultSave());
+    }
     const save = reconcileSaveProgress(applyMirroredKeys(normalizeSave(rawSave)));
     return saveSave(save);
   }
@@ -3756,7 +4344,7 @@
       spiritStone: save.coins || 0,
       jade: save.jade || 0,
       highestClearedLevel: highestCleared,
-      highestUnlockedLevel: Math.min(40, highestCleared + 1),
+      highestUnlockedLevel: Math.min(MAX_MAIN_LEVEL, highestCleared + 1),
       selectedLevel: save.selectedLevelId || getHighestUnlockedLevelId(save),
       bestKills: save.records.bestKills || 0,
       bestSurvivalTime: save.records.bestSurvivalTime || 0,
@@ -3765,6 +4353,7 @@
       finalCleared: save.records.finalCleared === true,
       upgrades: save.talents || {},
       journeyTraining: save.journeyTraining || {},
+      rootUpgrades: save.journeyTraining || {},
       gems: save.gems || {},
       levels: save.levels || {},
       records: save.records || {},
@@ -3780,7 +4369,13 @@
       companionProgress: save.companionProgress || {},
       pendingCompanionInvites: save.companions?.pendingInvites || [],
       runes: save.runes || { owned: [], equipped: [] },
+      equippedRunes: save.runes?.equipped || [],
+      artifacts: save.artifacts || {},
+      equippedArtifacts: save.equippedArtifacts || createDefaultEquippedArtifacts(),
       bestiary: save.bestiary || { seen: {} },
+      monsterBook: save.bestiary || { seen: {}, kills: {}, claimed: {} },
+      dailyChallenge: save.dailyChallenge || { lastDate: "", rewardClaimed: false },
+      endless: save.endless || { bestWave: 0, bestKills: 0, bestTime: 0, bestBossKills: 0, lastJadeDate: "" },
       achievements: save.achievements || { unlocked: {} },
     };
   }
@@ -3810,7 +4405,7 @@
       selectedLevelId: saveData.selectedLevel || saveData.selectedLevelId || "level1",
       gems: saveData.gems || {},
       talents: saveData.upgrades || saveData.talents || {},
-      journeyTraining: saveData.journeyTraining || {},
+      journeyTraining: saveData.rootUpgrades || saveData.journeyTraining || {},
       levels: saveData.levels || null,
       records,
       redeemedCodes: Array.isArray(saveData.redeemedCodes) ? saveData.redeemedCodes : [],
@@ -3824,8 +4419,12 @@
       heroes: saveData.heroProgress || saveData.heroes || {},
       companions: cloudCompanions,
       companionProgress: saveData.companionProgress || {},
-      runes: saveData.runes || { owned: [], equipped: [] },
-      bestiary: saveData.bestiary || { seen: {} },
+      runes: saveData.runes || { owned: [], equipped: saveData.equippedRunes || [] },
+      artifacts: saveData.artifacts || {},
+      equippedArtifacts: saveData.equippedArtifacts || {},
+      bestiary: saveData.monsterBook || saveData.bestiary || { seen: {} },
+      dailyChallenge: saveData.dailyChallenge || {},
+      endless: saveData.endless || {},
       achievements: saveData.achievements || { unlocked: {} },
     };
     return saveSave(reconcileSaveProgress(normalizeSave(source)));
@@ -3905,6 +4504,102 @@
     };
   }
 
+  function getTodayKey() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function hashSeed(text) {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i += 1) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function seededRandom(seedText) {
+    let state = hashSeed(seedText) || 1;
+    return () => {
+      state = Math.imul(1664525, state) + 1013904223;
+      return ((state >>> 0) / 4294967296);
+    };
+  }
+
+  const DAILY_LIMITS = [
+    { id: "heroLock", text: "指定主角出战", apply: (config, rng) => { config.requiredHero = HERO_IDS[Math.floor(rng() * HERO_IDS.length)]; } },
+    { id: "runeMinus", text: "符文槽 -1", apply: (config) => { config.runeSlotPenalty = 1; } },
+    { id: "fastMonsters", text: "怪物速度 +20%", apply: (config) => { config.enemySpeedMultiplier *= 1.2; } },
+    { id: "noRevive", text: "不可复活", apply: (config) => { config.noRevive = true; } },
+    { id: "cooldownTax", text: "技能冷却 +10%", apply: (config) => { config.cooldownPenalty = 1.1; } },
+    { id: "bossHard", text: "Boss 血量 +30%", apply: (config) => { config.bossHpMultiplier = 1.3; } },
+  ];
+
+  function createDailyChallengeConfig(dateKey = getTodayKey()) {
+    const rng = seededRandom(`daily-${dateKey}`);
+    const chapterIndex = Math.floor(rng() * LEVEL_REALMS.length);
+    const realm = LEVEL_REALMS[chapterIndex];
+    const baseOrder = realm.start + Math.floor(rng() * Math.max(1, realm.end - realm.start + 1));
+    const base = getLevelById(`level${baseOrder}`);
+    const config = {
+      ...base,
+      id: "dailyChallenge",
+      order: base.order,
+      name: `每日挑战 ${dateKey}`,
+      description: `${realm.name}的限时镇妖试炼。`,
+      chapter: "每日挑战",
+      duration: clamp(base.duration, 120, 150),
+      maxEnemies: Math.min(140, Math.max(90, base.maxEnemies || 90)),
+      rewardMultiplier: 1.25 + chapterIndex * 0.08,
+      phases: [
+        { time: 0, text: "每日妖潮开启" },
+        { time: 45, text: "限制试炼加剧" },
+        { time: 90, text: "今日决战" },
+      ],
+      dailyDate: dateKey,
+      isDaily: true,
+    };
+    const limitCount = rng() > 0.72 ? 2 : 1;
+    const chosen = [];
+    for (let i = 0; i < limitCount; i += 1) {
+      const limit = DAILY_LIMITS[Math.floor(rng() * DAILY_LIMITS.length)];
+      if (chosen.includes(limit.id)) continue;
+      chosen.push(limit.id);
+      limit.apply(config, rng);
+    }
+    config.limitText = DAILY_LIMITS.filter((item) => chosen.includes(item.id)).map((item) => item.text).join("、") || "无额外限制";
+    if (!config.boss && rng() > 0.45) {
+      const bossOrder = realm.end;
+      const bossConfig = getLevelById(`level${bossOrder}`).boss;
+      if (bossConfig) config.boss = { ...bossConfig, time: Math.max(45, config.duration - 35) };
+    }
+    return config;
+  }
+
+  function createEndlessConfig() {
+    const base = getLevelById("level81");
+    return {
+      ...base,
+      id: "endless",
+      order: MAX_MAIN_LEVEL,
+      name: "无尽镇妖",
+      chapter: "无尽镇妖",
+      description: "九九劫后开启的无尽妖潮。",
+      duration: 999999,
+      maxEnemies: 130,
+      rewardMultiplier: 1,
+      boss: null,
+      phases: [{ time: 0, text: "无尽镇妖开启" }],
+      spawnProfiles: [
+        { start: 0, end: 999999, intervalMin: 1.05, intervalMax: 1.35, extraChance: 0.08, weights: { foxDemon: 0.28, dogDemon: 0.18, shrimpDemon: 0.16, frogDemon: 0.14, boarDragon: 0.08, lampGranny: 0.06, stoneArmor: 0.05, yaksha: 0.03, wingDemon: 0.02 } },
+      ],
+      isEndless: true,
+    };
+  }
+
   function getRuneDisplay(rune) {
     const def = RUNE_DEFS[rune?.id] || RUNE_DEFS.crit;
     const quality = RUNE_QUALITIES[rune?.quality] || RUNE_QUALITIES.common;
@@ -3931,6 +4626,11 @@
       expMultiplier: 0,
       coinMultiplier: 0,
       cooldownMultiplier: 1,
+      shadowDamageBonus: 0,
+      regenBonus: 0,
+      controlDurationBonus: 0,
+      formationDamageBonus: 0,
+      iceSlowBonus: 0,
     };
     for (const uid of data.runes?.equipped || []) {
       const rune = owned.get(uid);
@@ -3952,6 +4652,7 @@
     const talents = data.talents;
     const training = data.journeyTraining || createDefaultJourneyTraining();
     const runes = getRuneBonuses(data);
+    const artifacts = getArtifactBonuses(data);
     const heroId = HERO_IDS.includes(data.selectedHero) ? data.selectedHero : "wukong";
     const hero = HERO_DEFS[heroId] || HERO_DEFS.wukong;
     const heroState = normalizeHeroProgress(data.heroes?.[heroId]);
@@ -3967,43 +4668,48 @@
     const bajieRange = heroId === "bajie" ? Math.floor(heroLevel / 5) * 0.05 : 0;
     const tangRare = heroId === "tangseng" ? Math.floor(heroLevel / 5) * 0.005 : 0;
     return {
-      damageMultiplier: (1 + gems.attack.level * 0.03) * (heroBonuses.damageMultiplier || 1) * levelDamage,
+      damageMultiplier: (1 + gems.attack.level * 0.03) * (1 + (training.scripture || 0) * 0.01) * (heroBonuses.damageMultiplier || 1) * levelDamage,
       cooldownMultiplier: (1 - Math.min(gems.cooldown.level * 0.02, 0.4)) *
-        Math.max(0.75, 1 - training.agility * 0.0035) *
+        Math.max(0.75, 1 - (training.cloudStep || 0) * 0.003) *
         (heroBonuses.cooldownMultiplier || 1) *
         runes.cooldownMultiplier,
-      maxHpBonus: gems.wall.level * 10 + training.barrier * 5 + (runes.maxHpBonus || 0),
+      maxHpBonus: gems.wall.level * 10 + training.barrier * 5 + (runes.maxHpBonus || 0) + (artifacts.maxHpBonus || 0),
       maxHpMultiplier: (heroBonuses.maxHpMultiplier || 1) * bajieWall,
-      critChance: Math.min(gems.crit.level * 0.02 + (heroBonuses.critChance || 0) + (runes.critChance || 0), 0.65),
-      critDamageMultiplier: 2 + (heroBonuses.critDamageBonus || 0) + (heroId === "wukong" ? (heroLevel - 1) * 0.02 : 0),
-      expMultiplier: 1 + gems.exp.level * 0.05 + talents.battleInsight * 0.03 + (runes.expMultiplier || 0),
-      swordDamageMultiplier: 1 + training.weapon * 0.015,
-      weaponDamageMultiplier: 1 + training.weapon * 0.015,
-      spellDamageMultiplier: 1 + training.spell * 0.015,
+      critChance: Math.min(gems.crit.level * 0.02 + (heroBonuses.critChance || 0) + (runes.critChance || 0) + (artifacts.critChance || 0), 0.65),
+      critDamageMultiplier: 2 + (heroBonuses.critDamageBonus || 0) + (artifacts.critDamageBonus || 0) + (heroId === "wukong" ? (heroLevel - 1) * 0.02 : 0),
+      expMultiplier: 1 + gems.exp.level * 0.05 + talents.battleInsight * 0.03 + (runes.expMultiplier || 0) + (artifacts.expMultiplier || 0),
+      swordDamageMultiplier: 1 + (training.scripture || 0) * 0.01,
+      weaponDamageMultiplier: 1 + (training.scripture || 0) * 0.01,
+      spellDamageMultiplier: 1 + (training.scripture || 0) * 0.01,
       fireRangeMultiplier: 1 + (heroBonuses.fireRangeMultiplier ? heroBonuses.fireRangeMultiplier - 1 : 0) + (runes.fireRange || 0) + bajieRange,
-      controlDamageMultiplier: 1 + training.control * 0.01,
-      controlPowerBonus: training.control * 0.005,
-      iceSlowBonus: (heroBonuses.iceSlowBonus || 0) + shasengSlow,
-      thunderDamageMultiplier: 1 + training.thunder * 0.015,
-      thunderBounceRetention: Math.min(0.84, 0.72 + training.thunder * 0.002),
-      swordArrayDamageMultiplier: 1 + training.formation * 0.015 + (heroBonuses.arrayDamageMultiplier ? heroBonuses.arrayDamageMultiplier - 1 : 0),
-      formationDamageMultiplier: 1 + training.formation * 0.015,
-      formationDurationMultiplier: 1 + training.formation * 0.002,
+      controlDamageMultiplier: 1 + (training.scripture || 0) * 0.01,
+      controlPowerBonus: 0,
+      iceSlowBonus: (heroBonuses.iceSlowBonus || 0) + shasengSlow + (runes.iceSlowBonus || 0),
+      thunderDamageMultiplier: 1 + (training.scripture || 0) * 0.01,
+      thunderBounceRetention: Math.min(0.84, 0.72 + (training.scripture || 0) * 0.001),
+      swordArrayDamageMultiplier: 1 + (training.scripture || 0) * 0.01 + (heroBonuses.arrayDamageMultiplier ? heroBonuses.arrayDamageMultiplier - 1 : 0) + (runes.formationDamageBonus || 0),
+      formationDamageMultiplier: 1 + (training.scripture || 0) * 0.01 + (runes.formationDamageBonus || 0),
+      formationDurationMultiplier: 1,
       startExp: talents.startSpirit * 5,
       swordPierceBonus: (runes.swordPierce || 0) + (heroId === "wukong" ? breakthrough : 0),
       thunderBounceBonus: runes.thunderBounce || 0,
-      wallDamageReduction: Math.min(0.55, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0) + Math.min(0.4, training.protection * 0.004) + (heroId === "bajie" ? breakthrough * 0.03 : 0)),
+      wallDamageReduction: Math.min(0.65, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0) + (artifacts.wallDamageReduction || 0) + Math.min(0.45, (training.wardArray || 0) * 0.005) + (heroId === "bajie" ? breakthrough * 0.03 : 0)),
       retaliationDamage: runes.retaliation || 0,
-      coinMultiplier: (runes.coinMultiplier || 0) + training.spiritGain * 0.02,
-      spiritStoneRewardMultiplier: 1 + training.spiritGain * 0.02,
-      eliteBossDamageMultiplier: 1 + training.demonSlayer * 0.01,
+      coinMultiplier: (runes.coinMultiplier || 0) + (training.incense || 0) * 0.02 + (artifacts.coinMultiplier || 0),
+      spiritStoneRewardMultiplier: 1 + (training.incense || 0) * 0.02 + (artifacts.coinMultiplier || 0),
+      eliteBossDamageMultiplier: (1 + (training.bossSlayer || 0) * 0.01) * (artifacts.eliteBossDamageMultiplier || 1),
+      bestiaryRewardMultiplier: 1 + (training.bestiaryInsight || 0) * 0.01,
       rareChanceBonus: (heroBonuses.rareChanceBonus || 0) + tangRare,
-      regenPerSecond: (heroBonuses.regenPerSecond || 0) * tangScale,
+      regenPerSecond: (heroBonuses.regenPerSecond || 0) * tangScale + (runes.regenBonus || 0) + (artifacts.regenPerSecond || 0),
+      artifactRegenInterval: artifacts.regenInterval || 3,
+      gourdChance: artifacts.gourdChance || 0,
+      gourdBonus: artifacts.gourdBonus || 0,
+      startShieldMultiplier: artifacts.startShieldMultiplier || 0,
       shieldChance: heroBonuses.shieldChance || 0,
       shieldStrength: heroId === "tangseng" ? 1 + breakthrough * 0.1 : 1,
       dotDamageMultiplier: (heroBonuses.dotDamageMultiplier || 1) * shasengDot,
-      controlDurationMultiplier: (heroBonuses.controlDurationMultiplier || 1) + (heroId === "shaseng" ? breakthrough : 0),
-      shadowDamageMultiplier: wukongShadow,
+      controlDurationMultiplier: (heroBonuses.controlDurationMultiplier || 1) + (heroId === "shaseng" ? breakthrough : 0) + (runes.controlDurationBonus || 0),
+      shadowDamageMultiplier: wukongShadow + (runes.shadowDamageBonus || 0),
       heroSpecific: { heroId, heroLevel, breakthrough },
     };
   }
@@ -4024,19 +4730,7 @@
     }
 
     reset() {
-      const keys = [
-        SAVE_KEY,
-        SAVE_VERSION_KEY,
-        LEGACY_HIGHEST_CLEARED_KEY,
-        ...Object.values(SAVE_KEYS),
-      ];
-      for (const key of keys) {
-        try {
-          localStorage.removeItem(key);
-        } catch (_err) {
-          // Reset can continue even if a browser blocks one key.
-        }
-      }
+      clearLocalSaveKeys();
       this.data = createDefaultSave();
       this.save();
     }
@@ -4152,8 +4846,8 @@
       if (!HERO_IDS.includes(heroId)) return { ok: false, message: "伙伴不存在" };
       if (!(this.data.companions.invited || []).includes(heroId)) return { ok: false, message: "尚未邀请该伙伴" };
       const progress = this.data.companionProgress[heroId] || { level: 1 };
-      const level = clamp(Math.floor(progress.level || 1), 1, 20);
-      if (level >= 20) return { ok: false, message: "伙伴助战已满级" };
+      const level = clamp(Math.floor(progress.level || 1), 1, 30);
+      if (level >= 30) return { ok: false, message: "伙伴助战已满级" };
       const cost = getCompanionUpgradeCost(level);
       if (this.data.coins < cost) return { ok: false, message: "灵石不足" };
       this.data.coins -= cost;
@@ -4166,7 +4860,7 @@
     addRune(rune) {
       const item = rune || createRuneDrop(false);
       this.data.runes.owned.push(item);
-      if (this.data.runes.equipped.length < 3) this.data.runes.equipped.push(item.uid);
+      if (this.data.runes.equipped.length < getRuneSlotCount(this.data)) this.data.runes.equipped.push(item.uid);
       this.save();
       return item;
     }
@@ -4180,16 +4874,137 @@
         this.save();
         return { ok: true, message: "已卸下符文" };
       }
-      if (equipped.length >= 3) return { ok: false, message: "最多装备 3 枚符文" };
+      const maxSlots = getRuneSlotCount(this.data);
+      if (equipped.length >= maxSlots) return { ok: false, message: `最多装备 ${maxSlots} 枚符文` };
       equipped.push(uid);
       this.save();
       return { ok: true, message: "已装备符文" };
     }
 
+    exchangeJadeForCoins(packId) {
+      const pack = JADE_EXCHANGE_PACKS.find((item) => item.id === packId);
+      if (!pack) return { ok: false, message: "兑换档位不存在" };
+      if ((this.data.jade || 0) < pack.jade) return { ok: false, message: "仙玉不足" };
+      this.data.jade -= pack.jade;
+      this.data.coins += pack.coins;
+      this.save();
+      return { ok: true, message: `兑换成功，获得 ${pack.coins} 灵石` };
+    }
+
+    redeemGiftCode(rawCode) {
+      const code = String(rawCode || "").trim().toUpperCase();
+      if (!code) return { ok: false, message: "请输入礼包码" };
+      if (!GIFT_CODES[code]) return { ok: false, message: "礼包码无效" };
+      const redeemed = new Set(this.data.redeemedCodes || []);
+      if (redeemed.has(code)) return { ok: false, message: "该礼包码已使用" };
+      const reward = GIFT_CODES[code];
+      this.data.jade = (this.data.jade || 0) + (reward.jade || 0);
+      redeemed.add(code);
+      this.data.redeemedCodes = Array.from(redeemed);
+      this.save();
+      return { ok: true, message: `兑换成功，获得 ${reward.jade} 仙玉` };
+    }
+
+    rerollRune(uid) {
+      const owned = this.data.runes?.owned || [];
+      const index = owned.findIndex((rune) => rune.uid === uid);
+      if (index < 0) return { ok: false, message: "符文不存在" };
+      if ((this.data.jade || 0) < RUNE_REROLL_COST) return { ok: false, message: "仙玉不足，无法重铸" };
+      const oldRune = owned[index];
+      const oldDef = RUNE_DEFS[oldRune.id] || null;
+      const sameCategoryIds = Object.keys(RUNE_DEFS).filter((id) => oldDef && RUNE_DEFS[id].category === oldDef.category);
+      const next = createRuneDrop(Math.random() < 0.28);
+      if (sameCategoryIds.length) next.id = randomFrom(sameCategoryIds);
+      next.uid = oldRune.uid;
+      next.obtainedAt = Date.now();
+      owned[index] = next;
+      this.data.jade -= RUNE_REROLL_COST;
+      this.save();
+      return { ok: true, message: `重铸成功：${getRuneDisplay(next).name}` };
+    }
+
+    buyArtifactChest(chestId) {
+      const chest = ARTIFACT_CHESTS[chestId];
+      if (!chest) return { ok: false, message: "法宝碎片箱不存在" };
+      if ((this.data.jade || 0) < chest.cost) return { ok: false, message: "仙玉不足" };
+      this.data.artifacts = normalizeArtifacts(this.data.artifacts || {});
+      const count = Math.floor(rand(chest.min, chest.max + 0.999));
+      const drops = {};
+      for (let i = 0; i < count; i += 1) {
+        addArtifactFragmentsToSave(this.data, getWeightedArtifactId(chestId, this.data), 1, drops);
+      }
+      this.data.jade -= chest.cost;
+      this.save();
+      const detail = Object.entries(drops).map(([id, amount]) => `${ARTIFACT_DEFS[id]?.name || "法宝"}碎片 x${amount}`).join("、");
+      const lockedTip = (this.data.records.highestClearedLevel || 0) < ARTIFACT_UNLOCK_LEVEL
+        ? `。法宝系统第 ${ARTIFACT_UNLOCK_LEVEL} 关开启后可装备使用`
+        : "";
+      return { ok: true, message: `获得 ${detail}${lockedTip}`, drops };
+    }
+
+    refreshTreasure() {
+      if ((this.data.jade || 0) < TREASURE_REFRESH_COST) return { ok: false, message: "仙玉不足" };
+      this.data.jade -= TREASURE_REFRESH_COST;
+      this.save();
+      return { ok: true, message: "藏宝阁已刷新" };
+    }
+
+    equipArtifact(id) {
+      const def = ARTIFACT_DEFS[id];
+      const artifact = this.data.artifacts?.[id];
+      if (!def || !artifact) return { ok: false, message: "法宝不存在" };
+      if (!artifact.unlocked) return { ok: false, message: "法宝尚未合成" };
+      this.data.equippedArtifacts = normalizeEquippedArtifacts(this.data.equippedArtifacts || {}, this.data.artifacts || {});
+      if (def.type === "active") {
+        this.data.equippedArtifacts.active = this.data.equippedArtifacts.active === id ? "" : id;
+      } else {
+        const current = this.data.equippedArtifacts.passive || [];
+        if (current.includes(id)) this.data.equippedArtifacts.passive = current.filter((item) => item !== id);
+        else if (current.length >= 2) return { ok: false, message: "被动法宝最多装备 2 件" };
+        else this.data.equippedArtifacts.passive = [...current, id];
+      }
+      this.save();
+      const equipped = this.data.equippedArtifacts.active === id || this.data.equippedArtifacts.passive.includes(id);
+      return { ok: true, message: equipped ? "法宝已装备" : "法宝已卸下" };
+    }
+
+    upgradeArtifact(id) {
+      const def = ARTIFACT_DEFS[id];
+      this.data.artifacts = normalizeArtifacts(this.data.artifacts || {});
+      const artifact = this.data.artifacts?.[id];
+      if (!def || !artifact) return { ok: false, message: "法宝不存在" };
+      const level = Math.max(0, Math.floor(artifact.level || 0));
+      const maxLevel = getArtifactMaxLevel(id);
+      if (!artifact.unlocked) {
+        const need = getArtifactFragmentNeed(id);
+        if (artifact.fragments < need) return { ok: false, message: `碎片不足，需要 ${need}` };
+        artifact.fragments -= need;
+        artifact.unlocked = true;
+        artifact.level = 1;
+        this.save();
+        return { ok: true, message: `${def.name} 已合成` };
+      }
+      if (level >= maxLevel) return { ok: false, message: "法宝已满级" };
+      const cost = getArtifactUpgradeCost(id, level);
+      if (artifact.fragments < cost.fragments) return { ok: false, message: `法宝碎片不足，需要 ${cost.fragments}` };
+      if ((this.data.coins || 0) < cost.coins) return { ok: false, message: "灵石不足" };
+      artifact.fragments -= cost.fragments;
+      this.data.coins -= cost.coins;
+      artifact.level = level + 1;
+      this.save();
+      return { ok: true, message: `${def.name} 升至 Lv.${artifact.level}` };
+    }
+
     markEnemySeen(type) {
       const normalized = normalizeEnemyType(type);
       if (!MONSTER_BOOK[normalized]) return;
+      const firstSeen = !this.data.bestiary.seen[normalized];
       this.data.bestiary.seen[normalized] = true;
+      if (firstSeen) {
+        const reward = Math.max(10, Math.floor(20 * (buildBattleModifiers(this.data).bestiaryRewardMultiplier || 1)));
+        this.data.coins += reward;
+        this.save();
+      }
     }
 
     unlockAchievement(id) {
@@ -4202,10 +5017,113 @@
       if (levelOrder >= 10) this.unlockAchievement("clear10");
       if (levelOrder >= 20) this.unlockAchievement("clear20");
       if (levelOrder >= 30) this.unlockAchievement("clear30");
-      if (levelOrder >= 40) this.unlockAchievement("clear40");
+      if (levelOrder >= MAX_MAIN_LEVEL) this.unlockAchievement("clear81");
       if ((this.data.records.totalKills || 0) >= 1000) this.unlockAchievement("kill1000");
       const superiorCount = (this.data.runes.owned || []).filter((rune) => rune.quality === "superior" || rune.quality === "spirit").length;
       if (superiorCount >= 3) this.unlockAchievement("threeSuperiorRunes");
+    }
+
+    addDailyChallengeResult({ victory, kills, survivalTime, level }) {
+      const dateKey = getTodayKey();
+      const daily = this.data.dailyChallenge || { lastDate: "", rewardClaimed: false };
+      const firstRewardToday = daily.lastDate !== dateKey || daily.rewardClaimed !== true;
+      const seconds = Math.floor(survivalTime || 0);
+      const runeDrops = [];
+      const artifactDrops = {};
+      let coins = Math.floor(kills + seconds * 2);
+      let jade = 0;
+      if (victory && firstRewardToday) {
+        coins += 1000;
+        jade += 20;
+        if (kills >= 180) jade += 10;
+        const rune = createRuneDrop(true);
+        this.data.runes.owned.push(rune);
+        if (this.data.runes.equipped.length < getRuneSlotCount(this.data)) this.data.runes.equipped.push(rune.uid);
+        runeDrops.push(rune);
+        for (let i = 0; i < 3; i += 1) addArtifactFragmentsToSave(this.data, getWeightedArtifactId("small", this.data), 1, artifactDrops);
+        this.data.dailyChallenge = { lastDate: dateKey, rewardClaimed: true };
+      } else if (daily.lastDate !== dateKey) {
+        this.data.dailyChallenge = { lastDate: dateKey, rewardClaimed: false };
+      }
+      this.data.coins += coins;
+      this.data.jade = (this.data.jade || 0) + jade;
+      this.data.records.totalRuns += 1;
+      this.data.records.totalKills = (this.data.records.totalKills || 0) + kills;
+      this.data.records.bestKills = Math.max(this.data.records.bestKills, kills);
+      this.data.records.bestSurvivalTime = Math.max(this.data.records.bestSurvivalTime, seconds);
+      this.data.records.bestLevel = Math.max(this.data.records.bestLevel, level);
+      this.save();
+      return {
+        coins,
+        jade,
+        totalCoins: this.data.coins,
+        drops: {},
+        runeDrops,
+        artifactDrops,
+        bestiaryReward: 0,
+        survivalSeconds: seconds,
+        levelName: "每日挑战",
+        levelId: "dailyChallenge",
+        dailyRewardClaimed: victory && firstRewardToday,
+        dailyAlreadyClaimed: victory && !firstRewardToday,
+        heroExpGain: 0,
+        heroLevelBefore: level,
+        heroLevelAfter: level,
+        heroNeedBreakthrough: false,
+      };
+    }
+
+    addEndlessResult({ kills, survivalTime, level, wave, bossKills }) {
+      const seconds = Math.floor(survivalTime || 0);
+      const safeWave = Math.max(1, Math.floor(wave || 1));
+      const safeBossKills = Math.max(0, Math.floor(bossKills || 0));
+      const coins = Math.floor(kills + safeWave * 50 + safeBossKills * 150);
+      const runeDrops = [];
+      const artifactDrops = {};
+      for (let i = 0; i < Math.floor(safeWave / 5); i += 1) {
+        if (Math.random() < 0.55) {
+          const rune = createRuneDrop(i % 2 === 0);
+          this.data.runes.owned.push(rune);
+          runeDrops.push(rune);
+        }
+      }
+      for (let i = 0; i < Math.floor(safeWave / 10) * 3; i += 1) addArtifactFragmentsToSave(this.data, getWeightedArtifactId("large", this.data), 1, artifactDrops);
+      let jade = 0;
+      const today = getTodayKey();
+      this.data.endless = this.data.endless || { bestWave: 0, bestKills: 0, bestTime: 0, bestBossKills: 0, lastJadeDate: "" };
+      if (safeWave >= 5 && this.data.endless.lastJadeDate !== today) {
+        jade = 15;
+        this.data.endless.lastJadeDate = today;
+      }
+      const newRecord = safeWave > (this.data.endless.bestWave || 0) || kills > (this.data.endless.bestKills || 0) || seconds > (this.data.endless.bestTime || 0);
+      this.data.endless.bestWave = Math.max(this.data.endless.bestWave || 0, safeWave);
+      this.data.endless.bestKills = Math.max(this.data.endless.bestKills || 0, kills);
+      this.data.endless.bestTime = Math.max(this.data.endless.bestTime || 0, seconds);
+      this.data.endless.bestBossKills = Math.max(this.data.endless.bestBossKills || 0, safeBossKills);
+      this.data.coins += coins;
+      this.data.jade = (this.data.jade || 0) + jade;
+      this.data.records.totalRuns += 1;
+      this.data.records.totalKills = (this.data.records.totalKills || 0) + kills;
+      this.save();
+      return {
+        coins,
+        jade,
+        totalCoins: this.data.coins,
+        drops: {},
+        runeDrops,
+        artifactDrops,
+        bestiaryReward: 0,
+        survivalSeconds: seconds,
+        levelName: "无尽镇妖",
+        levelId: "endless",
+        endlessWave: safeWave,
+        endlessBossKills: safeBossKills,
+        newRecord,
+        heroExpGain: 0,
+        heroLevelBefore: level,
+        heroLevelAfter: level,
+        heroNeedBreakthrough: false,
+      };
     }
 
     addRunResult({ victory, kills, survivalTime, level, levelId }) {
@@ -4221,6 +5139,9 @@
       const shardCount = Math.floor(kills / 30) + (victory ? 2 : 0) + clearShardBonus;
       const drops = {};
       const runeDrops = [];
+      const artifactDrops = {};
+      const systemUnlocks = [];
+      let bestiaryReward = 0;
       const gemIds = Object.keys(GEM_DEFS);
 
       for (let i = 0; i < shardCount; i += 1) {
@@ -4242,28 +5163,45 @@
       levelRecord.bestLevel = Math.max(levelRecord.bestLevel, level);
       let unlockedLevel = null;
       let pendingCompanionInvite = false;
+      const firstClear = victory && !levelRecord.cleared;
       if (victory) {
         this.data.records.clearCount += 1;
         this.data.records.highestClearedLevel = Math.max(this.data.records.highestClearedLevel || 0, levelConfig.order);
         writeHighestClearedSetting(this.data.records.highestClearedLevel);
-        if (levelConfig.order >= 40) this.data.records.finalCleared = true;
+        if (levelConfig.order >= MAX_MAIN_LEVEL) this.data.records.finalCleared = true;
         levelRecord.cleared = true;
         levelRecord.clearCount += 1;
         const rune = createRuneDrop(!!levelConfig.boss);
         this.data.runes.owned.push(rune);
-        if (this.data.runes.equipped.length < 3) this.data.runes.equipped.push(rune.uid);
+        if (this.data.runes.equipped.length < getRuneSlotCount(this.data)) this.data.runes.equipped.push(rune.uid);
         runeDrops.push(rune);
-        if ([10, 20, 30].includes(levelConfig.order)) {
+        if (levelConfig.boss) {
+          addBossArtifactDrops(this.data, levelConfig.order, firstClear, artifactDrops);
+        } else if (levelConfig.order >= ARTIFACT_UNLOCK_LEVEL && Math.random() < 0.08) {
+          addRandomLowArtifactDrop(this.data, artifactDrops);
+        }
+        if (COMPANION_INVITE_LEVELS.includes(levelConfig.order)) {
           const eligible = HERO_IDS.filter((id) => id !== this.data.selectedHero && !(this.data.companions.invited || []).includes(id));
           if (eligible.length && !this.data.companions.pendingInvites.includes(levelConfig.order)) {
             this.data.companions.pendingInvites.push(levelConfig.order);
             pendingCompanionInvite = true;
           }
         }
+        if (levelConfig.order === ARTIFACT_UNLOCK_LEVEL) systemUnlocks.push("法宝系统已开启");
+        if (levelConfig.order === 63) systemUnlocks.push("第 5 个符文槽已开启");
         const nextLevel = getNextLevel(levelConfig.id);
         if (nextLevel && !this.data.levels[nextLevel.id].unlocked) {
           this.data.levels[nextLevel.id].unlocked = true;
           unlockedLevel = nextLevel;
+        }
+      }
+      const bookMultiplier = buildBattleModifiers(this.data).bestiaryRewardMultiplier || 1;
+      for (const [id, count] of Object.entries(this.data.bestiary.kills || {})) {
+        if (!this.data.bestiary.claimed[id] && count >= 100) {
+          const reward = Math.floor(60 * bookMultiplier);
+          this.data.bestiary.claimed[id] = true;
+          this.data.coins += reward;
+          bestiaryReward += reward;
         }
       }
       const heroId = normalizeHeroId(this.data.selectedHero || "");
@@ -4278,7 +5216,7 @@
         heroLevelBefore = hero.level;
         heroExpGain = kills * 2 + levelConfig.order * 20;
         if (victory) heroExpGain += 100 + levelConfig.order * 10;
-        if (victory && levelConfig.order % 10 === 0) heroExpGain += 150;
+        if (victory && levelConfig.boss) heroExpGain += 150;
         const heroResult = addHeroExpToProgress(hero, heroExpGain);
         heroLevelAfter = heroResult.afterLevel;
         heroNeedBreakthrough = heroResult.blocked;
@@ -4291,6 +5229,9 @@
         totalCoins: this.data.coins,
         drops,
         runeDrops,
+        artifactDrops,
+        systemUnlocks,
+        bestiaryReward,
         shardCount,
         survivalSeconds: seconds,
         levelName: levelConfig.name,
@@ -6604,6 +7545,8 @@
         homeOverlay: document.getElementById("homeOverlay"),
         cultivationOverlay: document.getElementById("cultivationOverlay"),
         runeOverlay: document.getElementById("runeOverlay"),
+        artifactOverlay: document.getElementById("artifactOverlay"),
+        marketOverlay: document.getElementById("marketOverlay"),
         codexOverlay: document.getElementById("codexOverlay"),
         achievementOverlay: document.getElementById("achievementOverlay"),
         companionOverlay: document.getElementById("companionOverlay"),
@@ -6620,15 +7563,27 @@
         resultClear: document.getElementById("resultClear"),
         resultCoins: document.getElementById("resultCoins"),
         resultTotalCoins: document.getElementById("resultTotalCoins"),
+        resultJade: document.getElementById("resultJade"),
         resultShards: document.getElementById("resultShards"),
         resultHeroExp: document.getElementById("resultHeroExp"),
         resultUnlockNotice: document.getElementById("resultUnlockNotice"),
         homeCoins: document.getElementById("homeCoins"),
+        homeJade: document.getElementById("homeJade"),
         selectedTrialText: document.getElementById("selectedTrialText"),
         levelList: document.getElementById("levelList"),
         heroList: document.getElementById("heroList"),
         runeSummary: document.getElementById("runeSummary"),
         runeList: document.getElementById("runeList"),
+        artifactSummary: document.getElementById("artifactSummary"),
+        artifactList: document.getElementById("artifactList"),
+        marketCoins: document.getElementById("marketCoins"),
+        marketJade: document.getElementById("marketJade"),
+        jadeExchangeList: document.getElementById("jadeExchangeList"),
+        artifactChestList: document.getElementById("artifactChestList"),
+        marketOfferList: document.getElementById("marketOfferList"),
+        treasureRefreshBtn: document.getElementById("treasureRefreshBtn"),
+        redeemCodeInput: document.getElementById("redeemCodeInput"),
+        redeemCodeBtn: document.getElementById("redeemCodeBtn"),
         codexList: document.getElementById("codexList"),
         achievementList: document.getElementById("achievementList"),
         companionList: document.getElementById("companionList"),
@@ -6641,10 +7596,24 @@
         clearCount: document.getElementById("clearCount"),
         totalRuns: document.getElementById("totalRuns"),
         startBtn: document.getElementById("startBtn"),
+        dailyBtn: document.getElementById("dailyBtn"),
+        endlessBtn: document.getElementById("endlessBtn"),
+        dailyOverlay: document.getElementById("dailyOverlay"),
+        dailySummary: document.getElementById("dailySummary"),
+        dailyRewardList: document.getElementById("dailyRewardList"),
+        dailyStartBtn: document.getElementById("dailyStartBtn"),
+        closeDailyBtn: document.getElementById("closeDailyBtn"),
+        endlessOverlay: document.getElementById("endlessOverlay"),
+        endlessSummary: document.getElementById("endlessSummary"),
+        endlessRecordList: document.getElementById("endlessRecordList"),
+        endlessStartBtn: document.getElementById("endlessStartBtn"),
+        closeEndlessBtn: document.getElementById("closeEndlessBtn"),
         heroBtn: document.getElementById("heroBtn"),
         companionBtn: document.getElementById("companionBtn"),
         cultivationBtn: document.getElementById("cultivationBtn"),
         runeBtn: document.getElementById("runeBtn"),
+        artifactBtn: document.getElementById("artifactBtn"),
+        marketBtn: document.getElementById("marketBtn"),
         codexBtn: document.getElementById("codexBtn"),
         achievementBtn: document.getElementById("achievementBtn"),
         soundToggleBtn: document.getElementById("soundToggleBtn"),
@@ -6658,6 +7627,8 @@
         closeSaveInfoBtn: document.getElementById("closeSaveInfoBtn"),
         backHomeBtn: document.getElementById("backHomeBtn"),
         closeRuneBtn: document.getElementById("closeRuneBtn"),
+        closeArtifactBtn: document.getElementById("closeArtifactBtn"),
+        closeMarketBtn: document.getElementById("closeMarketBtn"),
         closeCodexBtn: document.getElementById("closeCodexBtn"),
         closeAchievementBtn: document.getElementById("closeAchievementBtn"),
         skipCompanionBtn: document.getElementById("skipCompanionBtn"),
@@ -6665,6 +7636,7 @@
         pauseBtn: document.getElementById("pauseBtn"),
         restartBtn: document.getElementById("restartBtn"),
         againBtn: document.getElementById("againBtn"),
+        reviveBtn: document.getElementById("reviveBtn"),
         replayLevelBtn: document.getElementById("replayLevelBtn"),
         resultHomeBtn: document.getElementById("resultHomeBtn"),
         toast: document.getElementById("toast"),
@@ -6693,6 +7665,7 @@
       this.lastVibrate = 0;
       this.timeScale = this.saveManager.data.settings.timeScale === 2 ? 2 : 1;
       this.monsterGalleryMode = new URLSearchParams(window.location.search).get("monsterGallery") === "1";
+      this.runMode = "story";
       this.selectedLevelId = getSavedSelectedLevelId(this.saveManager.data);
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
 
@@ -6703,6 +7676,8 @@
       this.renderHome();
       this.renderCultivation();
       this.renderRunes();
+      this.renderArtifacts();
+      this.renderMarket();
       this.renderCodex();
       this.renderAchievements();
       if (this.monsterGalleryMode) this.openCodex();
@@ -6712,6 +7687,12 @@
     bindEvents() {
       window.addEventListener("resize", () => this.resize());
       this.dom.startBtn.addEventListener("click", () => this.start());
+      this.dom.dailyBtn?.addEventListener("click", () => this.openDailyChallenge());
+      this.dom.endlessBtn?.addEventListener("click", () => this.openEndlessMode());
+      this.dom.dailyStartBtn?.addEventListener("click", () => this.startDailyChallenge());
+      this.dom.closeDailyBtn?.addEventListener("click", () => this.showHome());
+      this.dom.endlessStartBtn?.addEventListener("click", () => this.startEndlessMode());
+      this.dom.closeEndlessBtn?.addEventListener("click", () => this.showHome());
       this.dom.againBtn.addEventListener("click", () => this.handleResultPrimaryAction());
       this.dom.replayLevelBtn.addEventListener("click", () => this.replayResultLevel());
       this.dom.restartBtn.addEventListener("click", () => this.start());
@@ -6723,6 +7704,8 @@
       this.dom.companionBtn?.addEventListener("click", () => this.openCompanions());
       this.dom.cultivationBtn.addEventListener("click", () => this.openCultivation());
       this.dom.runeBtn.addEventListener("click", () => this.openRunes());
+      this.dom.artifactBtn?.addEventListener("click", () => this.openArtifacts());
+      this.dom.marketBtn?.addEventListener("click", () => this.openMarket());
       this.dom.codexBtn.addEventListener("click", () => this.openCodex());
       this.dom.achievementBtn.addEventListener("click", () => this.openAchievements());
       this.dom.soundToggleBtn.addEventListener("click", () => this.toggleSound());
@@ -6736,10 +7719,18 @@
       });
       this.dom.backHomeBtn.addEventListener("click", () => this.showHome());
       this.dom.closeRuneBtn.addEventListener("click", () => this.showHome());
+      this.dom.closeArtifactBtn?.addEventListener("click", () => this.showHome());
+      this.dom.closeMarketBtn?.addEventListener("click", () => this.showHome());
       this.dom.closeCodexBtn.addEventListener("click", () => this.showHome());
       this.dom.closeAchievementBtn.addEventListener("click", () => this.showHome());
       this.dom.skipCompanionBtn.addEventListener("click", () => this.closeCompanionInvite());
-      this.dom.resultHomeBtn.addEventListener("click", () => this.showHome());
+      this.dom.resultHomeBtn.addEventListener("click", () => this.returnHomeFromResult());
+      this.dom.reviveBtn?.addEventListener("click", () => this.reviveFromResult());
+      this.dom.redeemCodeBtn?.addEventListener("click", () => this.handleRedeemCode());
+      this.dom.redeemCodeInput?.addEventListener("input", () => {
+        this.dom.redeemCodeInput.value = String(this.dom.redeemCodeInput.value || "").trim().toUpperCase();
+      });
+      this.dom.treasureRefreshBtn?.addEventListener("click", () => this.refreshTreasureMarket());
       this.dom.resetSaveBtn.addEventListener("click", () => this.resetSave());
       document.addEventListener("click", (event) => {
         if (event.target.closest("button")) {
@@ -6824,11 +7815,20 @@
       this.heroShadowTimer = 4.5;
       this.heroRegenTimer = 1;
       this.companionBuffUntil = 0;
+      this.activeArtifactKey = this.saveManager.data.equippedArtifacts?.active || "";
+      this.activeArtifactCooldown = 0;
+      this.artifactBuffUntil = 0;
+      this.artifactDamageAmp = 0;
+      this.artifactHealTimer = this.metaBonuses.artifactRegenInterval || 3;
+      this.artifactUiTimer = 0;
       this.elapsed = 0;
       this.level = 1;
       this.exp = levelConfig.startExp + this.metaBonuses.startExp;
       this.expToNext = levelConfig.baseExpNeed;
       this.maxWallHp = Math.round((levelConfig.wallHp + this.metaBonuses.maxHpBonus) * (this.metaBonuses.maxHpMultiplier || 1));
+      if (this.metaBonuses.startShieldMultiplier) {
+        this.maxWallHp += Math.round(this.maxWallHp * this.metaBonuses.startShieldMultiplier);
+      }
       this.wallHp = this.maxWallHp;
       this.kills = 0;
       this.difficultyTier = 0;
@@ -6840,6 +7840,7 @@
       this.stageIndex = -1;
       this.lastDebugSecond = -10;
       this.emergencyHealUsed = false;
+      this.revived = false;
       this.bossSpawned = false;
       this.bossDefeated = false;
       this.bossEnemy = null;
@@ -6847,6 +7848,9 @@
       this.runtimeExpPenalty = 1;
       this.speedAuraEnemies = [];
       this.seenEnemyTypes = new Set();
+      this.endlessWave = 1;
+      this.endlessBossKills = 0;
+      this.endlessNextWaveTime = 60;
       this.screenShake = 0;
       this.shakeTime = 0;
       this.flashAlpha = 0;
@@ -6877,6 +7881,7 @@
       const firstPhase = (levelConfig.phases || levelConfig.stages || [])[0];
       if (this.dom.stageText) this.dom.stageText.textContent = firstPhase?.text || firstPhase?.name || levelConfig.name;
       this.renderSkillStrip();
+      this.renderArtifactSkillChip();
       this.updateUI();
     }
 
@@ -6892,6 +7897,7 @@
         return;
       }
       this.currentLevelConfig = getLevelById(this.selectedLevelId);
+      this.runMode = "story";
       this.saveManager.data.selectedLevelId = this.selectedLevelId;
       this.saveManager.save();
       this.reset();
@@ -6899,6 +7905,10 @@
       this.dom.homeOverlay.classList.add("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
       this.dom.runeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
+      this.dom.dailyOverlay?.classList.add("hidden");
+      this.dom.endlessOverlay?.classList.add("hidden");
       this.dom.codexOverlay.classList.add("hidden");
       this.dom.achievementOverlay.classList.add("hidden");
       this.dom.companionOverlay.classList.add("hidden");
@@ -6922,6 +7932,93 @@
       this.start();
     }
 
+    openDailyChallenge() {
+      this.state = "daily";
+      const config = createDailyChallengeConfig();
+      const daily = this.saveManager.data.dailyChallenge || {};
+      const claimed = daily.lastDate === getTodayKey() && daily.rewardClaimed === true;
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.dailyOverlay?.classList.remove("hidden");
+      this.dom.endlessOverlay?.classList.add("hidden");
+      if (this.dom.dailySummary) {
+        const heroLimit = config.requiredHero ? `指定主角：${HERO_DEFS[config.requiredHero]?.name || config.requiredHero}。` : "";
+        this.dom.dailySummary.textContent = `${config.name} · ${formatTime(config.duration)} · 限制：${config.limitText}。${heroLimit}${claimed ? "今日奖励已领取，可继续挑战但不重复领奖。" : "完成后可领取今日奖励。"}`;
+      }
+      if (this.dom.dailyRewardList) {
+        this.dom.dailyRewardList.innerHTML = `
+          <article class="system-card market-card"><span class="system-icon">日</span><div class="system-copy"><strong>完成奖励</strong><p>灵石 +1000、仙玉 +20、随机符文 x1、法宝碎片 x3。高斩妖可额外 +10 仙玉。</p></div></article>
+        `;
+      }
+    }
+
+    openEndlessMode() {
+      this.state = "endlessInfo";
+      const unlocked = (this.saveManager.data.records.highestClearedLevel || 0) >= MAX_MAIN_LEVEL || this.saveManager.data.records.finalCleared;
+      const record = this.saveManager.data.endless || {};
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.dailyOverlay?.classList.add("hidden");
+      this.dom.endlessOverlay?.classList.remove("hidden");
+      if (this.dom.endlessSummary) {
+        this.dom.endlessSummary.textContent = unlocked
+          ? "无尽镇妖已开启。每60秒一波，每5波精英，每10波Boss，结界破碎后结算奖励。"
+          : `通关第 ${MAX_MAIN_LEVEL} 关后开启无尽镇妖。`;
+      }
+      if (this.dom.endlessStartBtn) this.dom.endlessStartBtn.disabled = !unlocked;
+      if (this.dom.endlessRecordList) {
+        this.dom.endlessRecordList.innerHTML = `
+          <article class="system-card market-card"><span class="system-icon">尽</span><div class="system-copy"><strong>历史记录</strong><p>最高波数 ${record.bestWave || 0} · 最高斩妖 ${record.bestKills || 0} · 最长 ${formatTime(record.bestTime || 0)} · Boss ${record.bestBossKills || 0}</p></div></article>
+        `;
+      }
+    }
+
+    startCustomRun(config, mode) {
+      if (!this.saveManager.data.selectedHero) {
+        this.showToast("请先选择取经主角");
+        this.renderHeroList();
+        return;
+      }
+      if (config.requiredHero && this.saveManager.data.selectedHero !== config.requiredHero) {
+        this.showToast(`今日挑战限定：${HERO_DEFS[config.requiredHero]?.name || "指定主角"}`);
+        return;
+      }
+      this.runMode = mode;
+      this.currentLevelConfig = config;
+      this.reset();
+      this.runMode = mode;
+      if (config.cooldownPenalty) this.globalCooldownMult *= config.cooldownPenalty;
+      this.state = "playing";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.dailyOverlay?.classList.add("hidden");
+      this.dom.endlessOverlay?.classList.add("hidden");
+      this.dom.cultivationOverlay.classList.add("hidden");
+      this.dom.runeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
+      this.dom.codexOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.add("hidden");
+      this.dom.companionOverlay.classList.add("hidden");
+      this.dom.saveInfoOverlay.classList.add("hidden");
+      this.dom.gameOverOverlay.classList.add("hidden");
+      this.dom.upgradeOverlay.classList.add("hidden");
+      this.dom.pauseBtn.textContent = "调息";
+      this.dom.pauseBtn.disabled = false;
+      this.lastFrame = performance.now();
+      this.updateStagePrompt(true);
+    }
+
+    startDailyChallenge() {
+      this.startCustomRun(createDailyChallengeConfig(), "daily");
+    }
+
+    startEndlessMode() {
+      const unlocked = (this.saveManager.data.records.highestClearedLevel || 0) >= MAX_MAIN_LEVEL || this.saveManager.data.records.finalCleared;
+      if (!unlocked) {
+        this.showToast(`通关第 ${MAX_MAIN_LEVEL} 关后开启`);
+        return;
+      }
+      this.startCustomRun(createEndlessConfig(), "endless");
+    }
+
     handleResultPrimaryAction() {
       const result = this.lastResult;
       if (!result) {
@@ -6929,10 +8026,22 @@
         return;
       }
       if (result.pendingCompanionInvite) {
-        this.showCompanionInvite();
-        return;
+        if ((this.saveManager.data.companions.pendingInvites || []).length) {
+          this.showCompanionInvite();
+          return;
+        }
+        result.pendingCompanionInvite = false;
       }
       if (!result.victory) {
+        this.finalizeDeferredFailure();
+        if (result.runMode === "daily") {
+          this.startDailyChallenge();
+          return;
+        }
+        if (result.runMode === "endless") {
+          this.startEndlessMode();
+          return;
+        }
         this.startLevel(result.levelId);
         return;
       }
@@ -6949,7 +8058,73 @@
 
     replayResultLevel() {
       const levelId = this.lastResult?.levelId || this.currentLevelConfig.id;
+      this.finalizeDeferredFailure();
+      if (this.lastResult?.runMode === "daily") {
+        this.startDailyChallenge();
+        return;
+      }
+      if (this.lastResult?.runMode === "endless") {
+        this.startEndlessMode();
+        return;
+      }
       this.startLevel(levelId);
+    }
+
+    returnHomeFromResult() {
+      this.finalizeDeferredFailure();
+      this.showHome();
+    }
+
+    finalizeDeferredFailure() {
+      if (!this.lastResult?.pendingFailure || this.lastResult.finalized) return null;
+      const reward = this.saveManager.addRunResult({
+        victory: false,
+        kills: this.kills,
+        survivalTime: this.elapsed,
+        level: this.level,
+        levelId: this.currentLevelConfig.id,
+      });
+      this.lastResult.finalized = true;
+      this.renderHome();
+      this.renderCultivation();
+      this.renderRunes();
+      this.renderArtifacts();
+      this.renderMarket();
+      return reward;
+    }
+
+    reviveFromResult() {
+      if (!this.lastResult?.pendingFailure || this.revived) return;
+      if ((this.saveManager.data.jade || 0) < JADE_REVIVE_COST) {
+        this.showToast("仙玉不足");
+        this.configureResultButtons(false);
+        return;
+      }
+      this.saveManager.data.jade -= JADE_REVIVE_COST;
+      this.saveManager.save();
+      this.revived = true;
+      this.wallHp = Math.max(this.wallHp, Math.ceil(this.maxWallHp * 0.5));
+      const closeEnemies = this.enemies
+        .filter((enemy) => enemy && !enemy.dead && enemy.y >= this.wallY - 150)
+        .sort((a, b) => b.y - a.y);
+      const removeCount = Math.ceil(closeEnemies.length * 0.3);
+      for (const enemy of closeEnemies.slice(0, removeCount)) {
+        enemy.dead = true;
+        this.spawnDeathParticles(enemy);
+      }
+      this.state = "playing";
+      this.lastResult = null;
+      this.dom.gameOverOverlay.classList.add("hidden");
+      this.dom.pauseBtn.disabled = false;
+      this.dom.pauseBtn.textContent = "调息";
+      this.lastFrame = performance.now();
+      this.addShake(6, 0.22);
+      this.floatingTexts.push(new FloatingText("仙玉续命 +50%", this.width / 2, this.wallY - 92, "#d7fff5", { size: 18, life: 1.2, kind: "heal" }));
+      for (let i = 0; i < 24; i += 1) this.addParticle(this.width / 2, this.wallY - 70, "#9fd9cf", rand(-90, 90), rand(-140, -30), rand(2, 5), rand(0.5, 1), "heal");
+      this.showToast("复活成功");
+      this.renderHome();
+      this.renderMarket();
+      this.updateUI();
     }
 
     showHome() {
@@ -6961,6 +8136,10 @@
       this.dom.homeOverlay.classList.remove("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
       this.dom.runeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
+      this.dom.dailyOverlay?.classList.add("hidden");
+      this.dom.endlessOverlay?.classList.add("hidden");
       this.dom.codexOverlay.classList.add("hidden");
       this.dom.achievementOverlay.classList.add("hidden");
       this.dom.companionOverlay.classList.add("hidden");
@@ -6978,6 +8157,8 @@
       this.dom.homeOverlay.classList.add("hidden");
       this.dom.cultivationOverlay.classList.remove("hidden");
       this.dom.runeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
       this.dom.codexOverlay.classList.add("hidden");
       this.dom.achievementOverlay.classList.add("hidden");
       this.renderCultivation();
@@ -6987,12 +8168,38 @@
       this.state = "runes";
       this.dom.homeOverlay.classList.add("hidden");
       this.dom.runeOverlay.classList.remove("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
       this.renderRunes();
+    }
+
+    openArtifacts() {
+      this.state = "artifacts";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.runeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.remove("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
+      this.dom.codexOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.add("hidden");
+      this.renderArtifacts();
+    }
+
+    openMarket() {
+      this.state = "market";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.runeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.remove("hidden");
+      this.dom.codexOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.add("hidden");
+      this.renderMarket();
     }
 
     openCodex() {
       this.state = "codex";
       this.dom.homeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
       this.dom.codexOverlay.classList.remove("hidden");
       this.renderCodex();
     }
@@ -7000,6 +8207,8 @@
     openAchievements() {
       this.state = "achievements";
       this.dom.homeOverlay.classList.add("hidden");
+      this.dom.artifactOverlay?.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
       this.dom.achievementOverlay.classList.remove("hidden");
       this.renderAchievements();
     }
@@ -7031,6 +8240,7 @@
       this.setCloudResult("");
       this.lastCloudCode = "";
       this.dom.copyCloudCodeBtn.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
       this.dom.saveInfoOverlay.classList.remove("hidden");
     }
 
@@ -7041,7 +8251,7 @@
     renderSaveInfo() {
       const save = this.saveManager.data;
       const highestCleared = save.records.highestClearedLevel || 0;
-      const highestUnlocked = Math.min(40, highestCleared + 1);
+      const highestUnlocked = Math.min(MAX_MAIN_LEVEL, highestCleared + 1);
       const totalTrainingLevel = Object.values(save.journeyTraining || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
       const items = [
         ["存档版本", SAVE_VERSION],
@@ -7053,7 +8263,7 @@
         ["当前选择", `第 ${getLevelById(this.selectedLevelId).order} 关`],
         ["当前角色", HERO_DEFS[save.selectedHero]?.name || "孙悟空"],
         ["助战伙伴", (save.companions.invited || []).map((id) => COMPANION_DEFS[id]?.name).filter(Boolean).join("、") || "暂无"],
-        ["已装备符文", `${(save.runes.equipped || []).length}/3`],
+        ["已装备符文", `${(save.runes.equipped || []).length}/${getRuneSlotCount(save)}`],
         ["妖怪图鉴", `${Object.keys(save.bestiary.seen || {}).length} 种`],
         ["修行总等级", totalTrainingLevel],
         ["礼包码记录", `${(save.redeemedCodes || []).length} 个`],
@@ -7115,6 +8325,7 @@
         this.renderHome();
         this.renderCultivation();
         this.renderRunes();
+        this.renderArtifacts();
         this.renderCodex();
         this.renderAchievements();
         this.renderSaveInfo();
@@ -7149,6 +8360,8 @@
       this.renderHome();
       this.renderCultivation();
       this.renderRunes();
+      this.renderArtifacts();
+      this.renderMarket();
       this.renderCodex();
       this.renderAchievements();
       this.renderTimeScale();
@@ -7208,9 +8421,10 @@
       this.updateAuraParticles(dt);
       this.updateFeedback(dt);
       this.updateBossSpawn();
+      if (this.runMode === "endless") this.updateEndlessMode();
       this.updateRuntimeAuras();
-      if (this.elapsed >= this.currentLevelConfig.duration) {
-        if (this.currentLevelConfig.order === 40 && this.currentLevelConfig.boss && !this.bossDefeated) {
+      if (this.runMode !== "endless" && this.elapsed >= this.currentLevelConfig.duration) {
+        if (this.currentLevelConfig.order === MAX_MAIN_LEVEL && this.currentLevelConfig.boss && !this.bossDefeated) {
           this.endGame(false);
           return;
         }
@@ -7221,6 +8435,7 @@
       this.updateSpawns(dt);
       for (const skill of Object.values(this.skills)) skill.update(dt, this);
       this.updateHeroAndCompanions(dt);
+      this.updateArtifacts(dt);
       for (const area of this.areaEffects) area.update(dt, this);
       for (const enemy of this.enemies) enemy.update(dt, this);
       for (const projectile of this.projectiles) projectile.update(dt, this);
@@ -7295,6 +8510,31 @@
       this.showToast(text);
       this.audio.play("stage");
       this.floatingTexts.push(new FloatingText(text, this.width / 2, this.battleTop + 34, "#fff1bd", { size: 22, life: 1.2, kind: "crit" }));
+    }
+
+    updateEndlessMode() {
+      if (this.elapsed < (this.endlessNextWaveTime || 60)) return;
+      this.endlessWave += 1;
+      this.endlessNextWaveTime += 60;
+      const pressure = 1 + Math.floor((this.endlessWave - 1) / 2) * 0.04;
+      this.currentLevelConfig.enemyHpMultiplier = 2.2 * pressure;
+      this.currentLevelConfig.enemySpeedMultiplier = 1.12 + Math.min(0.5, this.endlessWave * 0.01);
+      this.currentLevelConfig.enemyDamageMultiplier = 1.2 + Math.min(1.2, this.endlessWave * 0.035);
+      this.currentLevelConfig.spawnMultiplier = 1.2 + Math.min(1.6, this.endlessWave * 0.05);
+      if (this.endlessWave % 10 === 0) {
+        const bossTypes = ["bossBlackWind", "bossYellowWind", "bossBoneLady", "bossBullKing"];
+        const type = bossTypes[Math.min(bossTypes.length - 1, Math.floor(this.endlessWave / 10) - 1)];
+        const boss = this.spawnEnemy(type, { boss: true, x: this.width / 2, y: this.battleTop - 42 });
+        boss.maxHp = Math.round(boss.maxHp * (1 + this.endlessWave * 0.08));
+        boss.hp = boss.maxHp;
+        this.bossEnemy = boss;
+        this.showToast(`无尽第 ${this.endlessWave} 波：${boss.name}来袭`);
+      } else if (this.endlessWave % 5 === 0) {
+        for (let i = 0; i < 3; i += 1) this.spawnEnemy(randomFrom(["yaksha", "stoneArmor", "bullVanguard", "blackWind"]), { elite: true });
+        this.showToast(`无尽第 ${this.endlessWave} 波：精英妖潮`);
+      } else {
+        this.showToast(`无尽第 ${this.endlessWave} 波`);
+      }
     }
 
     debugBalanceLog() {
@@ -7438,6 +8678,10 @@
         x: this.width / 2,
         y: this.battleTop - bossRadius * 1.1,
       });
+      if (this.currentLevelConfig.bossHpMultiplier) {
+        enemy.maxHp = Math.round(enemy.maxHp * this.currentLevelConfig.bossHpMultiplier);
+        enemy.hp = enemy.maxHp;
+      }
       this.bossEnemy = enemy;
       this.showToast(boss.appearText || `${enemy.name}来袭！`);
       this.floatingTexts.push(new FloatingText(boss.appearText || `${enemy.name}来袭！`, this.width / 2, 92, "#fff1bd", { size: 26, life: 1.6, kind: "crit" }));
@@ -7496,7 +8740,7 @@
     getCompanionLevel(id) {
       const heroId = normalizeHeroId(id);
       const progress = this.saveManager.data.companionProgress?.[heroId] || { level: 1 };
-      return clamp(Math.floor(progress.level || 1), 1, 20);
+      return clamp(Math.floor(progress.level || 1), 1, 30);
     }
 
     castHeroShadow() {
@@ -7565,6 +8809,105 @@
           }
         }
       }
+    }
+
+    updateArtifacts(dt) {
+      if (this.activeArtifactCooldown > 0) this.activeArtifactCooldown = Math.max(0, this.activeArtifactCooldown - dt);
+      if ((this.metaBonuses.regenPerSecond || 0) > 0 && this.saveManager.data.equippedArtifacts?.passive?.includes("pureBottle")) {
+        this.artifactHealTimer -= dt;
+        if (this.artifactHealTimer <= 0) {
+          const interval = this.metaBonuses.artifactRegenInterval || 3;
+          this.artifactHealTimer += interval;
+          const lowHpBoost = this.wallHp <= this.maxWallHp * 0.35 && this.saveManager.data.artifacts?.pureBottle?.level >= getArtifactMaxLevel("pureBottle") ? 2 : 1;
+          const heal = Math.max(1, Math.round(this.metaBonuses.regenPerSecond * interval * lowHpBoost));
+          this.wallHp = Math.min(this.maxWallHp, this.wallHp + heal);
+          this.floatingTexts.push(new FloatingText(`净瓶 +${heal}`, this.width / 2, this.wallY - 76, "#d7fff5", { size: 13, life: 0.75 }));
+        }
+      }
+      this.artifactUiTimer = Math.max(0, (this.artifactUiTimer || 0) - dt);
+      if (this.dom.skillStrip && this.state === "playing" && this.artifactUiTimer <= 0) {
+        this.artifactUiTimer = 0.25;
+        this.renderSkillStrip();
+        this.renderArtifactSkillChip();
+      }
+    }
+
+    castActiveArtifact() {
+      const id = this.saveManager.data.equippedArtifacts?.active || "";
+      const def = ARTIFACT_DEFS[id];
+      const artifact = this.saveManager.data.artifacts?.[id];
+      if (!def || !artifact?.unlocked) {
+        this.showToast("尚未装备主动法宝");
+        return;
+      }
+      if (this.state !== "playing") return;
+      if (this.activeArtifactCooldown > 0) {
+        this.showToast(`法宝冷却 ${Math.ceil(this.activeArtifactCooldown)} 秒`);
+        return;
+      }
+      const level = clamp(Math.floor(artifact.level || 1), 1, getArtifactMaxLevel(id));
+      const full = level >= getArtifactMaxLevel(id);
+      const enemies = this.enemies.filter((enemy) => this.isEnemyTargetable(enemy));
+      if (!enemies.length && id !== "demonMirror") return;
+      const center = this.findDenseTarget() || this.findClosestToWall() || { x: this.width / 2, y: this.battleTop + 80 };
+      const power = getArtifactPower(id, level);
+      if (id === "goldenStaff") {
+        const width = (def.base.width || 64) * (1 + (level - 1) * (def.perLevel.range || 0));
+        const y = center.y;
+        for (const enemy of enemies) {
+          if (Math.abs(enemy.y - y) <= width + enemy.radius) {
+            this.damageEnemy(enemy, (def.base.damage || 170) * power, "sword", { x: enemy.x, y: enemy.y });
+            if (full && enemy.isBoss) this.damageEnemy(enemy, (def.base.damage || 170) * 0.45 * power, "thunder", { x: enemy.x, y: enemy.y, silent: true });
+          }
+        }
+        this.lightningEffects.push({ x1: 16, y1: y - 14, x2: this.width - 16, y2: y + 14, life: 0.32, age: 0, sword: true });
+        this.addShake(6, 0.18);
+      } else if (id === "purpleBowl") {
+        const radius = (def.base.radius || 112) * (1 + (level - 1) * (def.perLevel.range || 0));
+        const duration = (def.base.duration || 3.2) * (1 + (level - 1) * (def.perLevel.duration || 0));
+        const dps = (def.base.damage || 16) * power;
+        this.areaEffects.push(new AreaEffect({ kind: "sand", x: center.x, y: center.y, radius, duration, damagePerSecond: dps, color: "rgba(191, 238, 228, 0.24)", tickSource: "ice" }));
+        if (full) this.areaEffects.push(new AreaEffect({ kind: "flash", x: center.x, y: center.y, radius: radius * 0.86, duration: 0.25, damagePerSecond: dps * 2.6, color: "rgba(255, 241, 189, 0.22)", tickSource: "array" }));
+        for (const enemy of enemies) {
+          if (distSq(center.x, center.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
+            enemy.slowUntil = Math.max(enemy.slowUntil, this.elapsed + duration);
+            enemy.slowFactor = Math.min(enemy.slowFactor, 0.42);
+          }
+        }
+      } else if (id === "palmFan") {
+        const radius = (def.base.radius || 132) * (1 + (level - 1) * (def.perLevel.range || 0));
+        const push = (def.base.push || 52) * (1 + (level - 1) * (def.perLevel.push || 0));
+        for (const enemy of enemies) {
+          const inRange = distSq(center.x, center.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2 || enemy.config?.flying || enemy.type === "blackWind";
+          if (!inRange) continue;
+          enemy.y = Math.max(this.battleTop + enemy.radius, enemy.y - push);
+          const extra = full && (enemy.config?.flying || enemy.type === "blackWind" || enemy.type === "bossYellowWind") ? 1.35 : 1;
+          this.damageEnemy(enemy, (def.base.damage || 62) * power * extra, "array", { x: enemy.x, y: enemy.y, silent: false });
+        }
+        this.addShake(6, 0.18);
+      } else if (id === "tightHoop") {
+        const radius = def.base.radius || 128;
+        const duration = (def.base.duration || 2.1) * (1 + (level - 1) * (def.perLevel.duration || 0));
+        const bossDuration = (def.base.bossDuration || 0.75) * (1 + (level - 1) * (def.perLevel.duration || 0));
+        for (const enemy of enemies) {
+          if (distSq(center.x, center.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2 || enemy.isBoss || enemy.elite) {
+            enemy.stunUntil = Math.max(enemy.stunUntil, this.elapsed + (enemy.isBoss ? bossDuration : duration));
+            if (full) enemy.artifactVulnerableUntil = Math.max(enemy.artifactVulnerableUntil || 0, this.elapsed + duration);
+            this.damageEnemy(enemy, (def.base.damage || 42) * power, "thunder", { x: enemy.x, y: enemy.y });
+          }
+        }
+        this.addFlash(0.08);
+      } else if (id === "demonMirror") {
+        const amp = (def.base.amplify || 0.22) + (level - 1) * (def.perLevel.amplify || 0);
+        const duration = (def.base.duration || 6) * (1 + (level - 1) * (def.perLevel.duration || 0));
+        this.artifactBuffUntil = Math.max(this.artifactBuffUntil, this.elapsed + duration);
+        this.artifactDamageAmp = Math.max(this.artifactDamageAmp || 0, amp + (full ? 0.08 : 0));
+        this.floatingTexts.push(new FloatingText("照妖镜破绽", this.width / 2, this.battleTop + 70, "#fff1bd", { size: 18, life: 1, kind: "crit" }));
+        this.addFlash(0.06);
+      }
+      this.activeArtifactCooldown = getArtifactCooldown(id, level);
+      this.audio.play("thunder");
+      this.renderSkillStrip();
     }
 
     damageWall(amount, x, y) {
@@ -7701,6 +9044,8 @@
       if (!options.ignoreTargetable && !this.isEnemyTargetable(enemy)) return 0;
       let amount = baseAmount * this.globalDamageMult;
       if (this.elapsed < this.companionBuffUntil) amount *= 1.16;
+      if (this.elapsed < this.artifactBuffUntil) amount *= 1 + (this.artifactDamageAmp || 0.25);
+      if (this.elapsed < (enemy.artifactVulnerableUntil || 0)) amount *= 1.18;
       if (enemy.config?.swordDamageTaken && source === "sword") amount *= enemy.config.swordDamageTaken;
       if (enemy.config?.flying && source === "array") amount *= enemy.config.arrayDamageTaken || 0.3;
       if (source === "array") amount *= this.metaBonuses.dotDamageMultiplier || 1;
@@ -7809,8 +9154,24 @@
       }
       enemy.dead = true;
       this.kills += 1;
+      const bookKey = normalizeEnemyType(enemy.type);
+      if (MONSTER_BOOK[bookKey]) {
+        const book = this.saveManager.data.bestiary;
+        book.seen[bookKey] = true;
+        book.kills[bookKey] = (book.kills[bookKey] || 0) + 1;
+      }
       const expGain = Math.max(1, Math.round(enemy.exp * this.expMultiplier));
       this.addExp(Math.max(1, Math.round(expGain * (this.runtimeExpPenalty || 1))), enemy.x, enemy.y);
+      if ((this.metaBonuses.gourdChance || 0) > 0 && Math.random() < this.metaBonuses.gourdChance) {
+        const bonus = Math.max(1, Math.round((enemy.exp + 2) * (1 + (this.metaBonuses.gourdBonus || 0))));
+        if (Math.random() < 0.5) {
+          this.addExp(bonus, enemy.x, enemy.y - 8);
+          this.floatingTexts.push(new FloatingText(`葫芦修为 +${bonus}`, enemy.x, enemy.y - 20, "#d7fff5", { size: 12, life: 0.75 }));
+        } else {
+          this.saveManager.data.coins += bonus;
+          this.floatingTexts.push(new FloatingText(`葫芦灵石 +${bonus}`, enemy.x, enemy.y - 20, "#fff1bd", { size: 12, life: 0.75 }));
+        }
+      }
       if (enemy.config?.onDeath === "poisonCloud") this.spawnPoisonCloud(enemy);
       if (enemy.config?.splitInto?.length) this.spawnSplitChildren(enemy);
       this.spawnDeathParticles(enemy);
@@ -7856,7 +9217,12 @@
         const speed = rand(70, 190);
         this.addParticle(enemy.x, enemy.y, i % 2 ? "#fff1bd" : "#9fd9cf", Math.cos(angle) * speed, Math.sin(angle) * speed, rand(2.5, 7), rand(0.55, 1.2), "death");
       }
-      if (this.currentLevelConfig.order === 40 && this.state !== "ended") {
+      if (this.runMode === "endless") {
+        this.endlessBossKills = (this.endlessBossKills || 0) + 1;
+        this.bossDefeated = false;
+        return;
+      }
+      if (this.currentLevelConfig.order === MAX_MAIN_LEVEL && this.state !== "ended") {
         this.endGame(true);
       }
     }
@@ -8213,8 +9579,51 @@
       this.particles.push(new Particle({ x, y, color, vx, vy, size, life, type }));
     }
 
+    showReviveFailureResult() {
+      this.state = "ended";
+      this.leveling = false;
+      this.dom.pauseBtn.disabled = true;
+      this.dom.pauseBtn.textContent = "调息";
+      this.dom.upgradeOverlay.classList.add("hidden");
+      this.audio.play("failure");
+      this.vibrate(65);
+      this.lastResult = {
+        victory: false,
+        levelId: this.currentLevelConfig.id,
+        levelOrder: this.currentLevelConfig.order,
+        nextLevelId: null,
+        nextLevelName: "",
+        isFinalLevel: false,
+        pendingCompanionInvite: false,
+        pendingFailure: true,
+      };
+      this.dom.resultEyebrow.textContent = "妖潮破门";
+      this.dom.resultTitle.textContent = "山门失守";
+      this.dom.gameOverOverlay.classList.toggle("victory", false);
+      this.dom.gameOverOverlay.classList.toggle("failure", true);
+      this.dom.resultTrialName.textContent = `第 ${this.currentLevelConfig.order} 关 ${this.currentLevelConfig.name}`;
+      this.dom.resultTime.textContent = formatTime(Math.floor(Math.min(this.elapsed, this.currentLevelConfig.duration)));
+      this.dom.resultKills.textContent = this.kills;
+      this.dom.resultLevel.textContent = this.level;
+      this.dom.resultClear.textContent = "未通关";
+      this.dom.resultCoins.textContent = 0;
+      this.dom.resultTotalCoins.textContent = this.saveManager.data.coins || 0;
+      if (this.dom.resultJade) this.dom.resultJade.textContent = this.saveManager.data.jade || 0;
+      this.dom.resultShards.textContent = "可消耗仙玉复活一次，或强化后再战";
+      if (this.dom.resultHeroExp) this.dom.resultHeroExp.textContent = "复活后继续本局，放弃复活后结算失败记录";
+      this.dom.resultUnlockNotice.textContent = "结界恢复 50%，并清除靠近山门的部分妖怪";
+      this.dom.resultUnlockNotice.classList.remove("hidden");
+      this.configureResultButtons(false);
+      this.dom.gameOverOverlay.classList.remove("hidden");
+      this.dom.gameOverOverlay.scrollTop = 0;
+    }
+
     endGame(victory) {
       if (this.state === "ended") return;
+      if (!victory && !this.revived && !this.currentLevelConfig.noRevive && this.runMode !== "endless") {
+        this.showReviveFailureResult();
+        return;
+      }
       this.state = "ended";
       this.leveling = false;
       this.dom.pauseBtn.disabled = true;
@@ -8223,42 +9632,52 @@
       this.audio.play(victory ? "victory" : "failure");
       this.vibrate(victory ? 45 : 65);
 
-      const reward = this.saveManager.addRunResult({
-        victory,
-        kills: this.kills,
-        survivalTime: this.elapsed,
-        level: this.level,
-        levelId: this.currentLevelConfig.id,
-      });
-      const nextLevel = getNextLevel(this.currentLevelConfig.id);
+      const reward = this.runMode === "daily"
+        ? this.saveManager.addDailyChallengeResult({ victory, kills: this.kills, survivalTime: this.elapsed, level: this.level })
+        : this.runMode === "endless"
+          ? this.saveManager.addEndlessResult({ kills: this.kills, survivalTime: this.elapsed, level: this.level, wave: this.endlessWave, bossKills: this.endlessBossKills })
+          : this.saveManager.addRunResult({
+            victory,
+            kills: this.kills,
+            survivalTime: this.elapsed,
+            level: this.level,
+            levelId: this.currentLevelConfig.id,
+          });
+      const nextLevel = this.runMode === "story" ? getNextLevel(this.currentLevelConfig.id) : null;
       this.lastResult = {
         victory,
         levelId: this.currentLevelConfig.id,
         levelOrder: this.currentLevelConfig.order,
         nextLevelId: victory && nextLevel ? nextLevel.id : null,
         nextLevelName: victory && nextLevel ? nextLevel.name : "",
-        isFinalLevel: this.currentLevelConfig.order >= 40,
+        isFinalLevel: this.runMode !== "story" || this.currentLevelConfig.order >= MAX_MAIN_LEVEL,
         pendingCompanionInvite: !!reward.pendingCompanionInvite,
+        runMode: this.runMode || "story",
       };
 
       this.dom.resultEyebrow.textContent = victory ? "守住山门" : "妖潮破门";
       this.dom.resultTitle.textContent = victory
-        ? this.currentLevelConfig.order >= 40
-          ? "万妖退散，山门永固"
+        ? this.currentLevelConfig.order >= MAX_MAIN_LEVEL
+          ? "九九归真，妖劫尽散"
           : this.currentLevelConfig.boss
             ? "妖劫已破"
             : "守山成功"
         : "山门失守";
+      if (this.runMode === "daily") this.dom.resultTitle.textContent = victory ? "每日挑战完成" : "每日挑战失败";
+      if (this.runMode === "endless") this.dom.resultTitle.textContent = "无尽镇妖结算";
       this.dom.gameOverOverlay.classList.toggle("victory", victory);
       this.dom.gameOverOverlay.classList.toggle("failure", !victory);
-      this.dom.resultTrialName.textContent = `第 ${this.currentLevelConfig.order} 关 ${reward.levelName}`;
+      this.dom.resultTrialName.textContent = this.runMode === "story"
+        ? `第 ${this.currentLevelConfig.order} 关 ${reward.levelName}`
+        : reward.levelName;
       this.dom.resultTime.textContent = formatTime(reward.survivalSeconds);
       this.dom.resultKills.textContent = this.kills;
       this.dom.resultLevel.textContent = this.level;
       this.dom.resultClear.textContent = victory ? "已通关" : "未通关";
       this.dom.resultCoins.textContent = reward.coins;
       this.dom.resultTotalCoins.textContent = reward.totalCoins;
-      this.dom.resultShards.textContent = this.formatShardDrops(reward.drops, reward.runeDrops);
+      if (this.dom.resultJade) this.dom.resultJade.textContent = this.saveManager.data.jade || 0;
+      this.dom.resultShards.textContent = this.formatShardDrops(reward.drops, reward.runeDrops, reward.artifactDrops, reward.bestiaryReward);
       if (this.dom.resultHeroExp) {
         const heroLabel = reward.heroName || "角色";
         const levelText = reward.heroLevelAfter > reward.heroLevelBefore
@@ -8266,13 +9685,22 @@
           : `${heroLabel} +${reward.heroExpGain} 经验`;
         this.dom.resultHeroExp.textContent = reward.heroNeedBreakthrough ? `${levelText}，需要突破后继续升级` : levelText;
       }
-      if (victory && this.currentLevelConfig.id === "level40") {
-        this.dom.resultUnlockNotice.textContent = "万妖退散，山门永固";
+      if (this.runMode === "daily") {
+        this.dom.resultUnlockNotice.textContent = reward.dailyAlreadyClaimed ? "今日奖励已领取，本次不重复发放" : (victory ? "今日奖励已领取：灵石、仙玉、符文与法宝碎片" : "每日挑战失败，可继续挑战");
         this.dom.resultUnlockNotice.classList.remove("hidden");
-      } else if (victory && this.currentLevelConfig.id === "level10") {
+      } else if (this.runMode === "endless") {
+        this.dom.resultUnlockNotice.textContent = `${reward.newRecord ? "刷新无尽记录！" : "无尽记录未刷新"} 到达第 ${reward.endlessWave || this.endlessWave} 波，击败Boss ${reward.endlessBossKills || 0} 只`;
+        this.dom.resultUnlockNotice.classList.remove("hidden");
+      } else if (victory && this.currentLevelConfig.id === "level81") {
+        this.dom.resultUnlockNotice.textContent = "九九归真，妖劫尽散";
+        this.dom.resultUnlockNotice.classList.remove("hidden");
+      } else if (victory && this.currentLevelConfig.id === "level9") {
         this.dom.resultUnlockNotice.textContent = nextLevel
-          ? `炼气终试已破，已解锁：第 ${nextLevel.order} 关 ${nextLevel.name}`
-          : "炼气终试已破，筑基妖潮将启！";
+          ? `花果山妖乱已破，已解锁：第 ${nextLevel.order} 关 ${nextLevel.name}`
+          : "花果山妖乱已破，黑风山迷雾将启！";
+        this.dom.resultUnlockNotice.classList.remove("hidden");
+      } else if (victory && reward.systemUnlocks?.length) {
+        this.dom.resultUnlockNotice.textContent = reward.systemUnlocks.join("；");
         this.dom.resultUnlockNotice.classList.remove("hidden");
       } else if (victory && nextLevel) {
         this.dom.resultUnlockNotice.textContent = `已解锁：第 ${nextLevel.order} 关 ${nextLevel.name}`;
@@ -8304,6 +9732,7 @@
       this.renderHome();
       this.renderCultivation();
       this.renderRunes();
+      this.renderArtifacts();
       this.renderCodex();
       this.renderAchievements();
     }
@@ -8313,6 +9742,14 @@
       if (!result) return;
       this.dom.resultHomeBtn.textContent = "返回关卡";
       this.dom.replayLevelBtn.classList.toggle("hidden", !victory);
+      if (this.dom.reviveBtn) {
+        const showRevive = !victory && result.pendingFailure && !this.revived;
+        this.dom.reviveBtn.classList.toggle("hidden", !showRevive);
+        this.dom.reviveBtn.disabled = (this.saveManager.data.jade || 0) < JADE_REVIVE_COST;
+        this.dom.reviveBtn.textContent = (this.saveManager.data.jade || 0) >= JADE_REVIVE_COST
+          ? `消耗 ${JADE_REVIVE_COST} 仙玉复活一次`
+          : "仙玉不足，无法复活";
+      }
       if (victory) {
         if (result.pendingCompanionInvite) {
           this.dom.againBtn.textContent = "邀请伙伴";
@@ -8332,10 +9769,12 @@
       }
     }
 
-    formatShardDrops(drops, runeDrops = []) {
+    formatShardDrops(drops, runeDrops = [], artifactDrops = {}, bestiaryReward = 0) {
       const entries = Object.entries(drops);
       const parts = entries.map(([id, count]) => `${GEM_DEFS[id].shardName} x${count}`);
       for (const rune of runeDrops || []) parts.push(getRuneDisplay(rune).name);
+      for (const [id, count] of Object.entries(artifactDrops || {})) parts.push(`${ARTIFACT_DEFS[id]?.name || "法宝"}碎片 x${count}`);
+      if (bestiaryReward > 0) parts.push(`图鉴奖励 ${bestiaryReward}灵石`);
       if (!parts.length) return "无";
       return parts.join("、");
     }
@@ -8345,12 +9784,12 @@
       this.dom.levelText.textContent = this.level;
       this.dom.expText.textContent = `${Math.floor(this.exp)} / ${this.expToNext}`;
       const remaining = this.currentLevelConfig.duration - this.elapsed;
-      this.dom.timeText.textContent = formatTime(remaining);
+      this.dom.timeText.textContent = this.runMode === "endless" ? `波${this.endlessWave} ${formatTime(this.elapsed)}` : formatTime(remaining);
       this.dom.wallHpText.textContent = `${Math.ceil(this.wallHp)} / ${this.maxWallHp}`;
       this.dom.killText.textContent = this.kills;
       const hpLow = this.wallHp / this.maxWallHp <= 0.3;
       this.dom.wallHpText.classList.toggle("danger-text", hpLow);
-      this.dom.timeText.classList.toggle("danger-text", remaining <= 30);
+      this.dom.timeText.classList.toggle("danger-text", this.runMode !== "endless" && remaining <= 30);
       this.dom.expText.style.setProperty("--exp-rate", `${clamp(this.exp / this.expToNext, 0, 1) * 100}%`);
     }
 
@@ -8361,6 +9800,7 @@
         this.currentLevelConfig = getLevelById(this.selectedLevelId);
       }
       this.dom.homeCoins.textContent = save.coins;
+      if (this.dom.homeJade) this.dom.homeJade.textContent = save.jade || 0;
       this.dom.bestKills.textContent = save.records.bestKills;
       this.dom.bestTime.textContent = formatTime(save.records.bestSurvivalTime);
       this.dom.bestLevel.textContent = save.records.bestLevel;
@@ -8369,6 +9809,11 @@
       this.renderHeroList();
       this.renderLevelSelector();
       this.renderSoundToggle();
+      if (this.dom.endlessBtn) {
+        const endlessOpen = (save.records.highestClearedLevel || 0) >= MAX_MAIN_LEVEL || save.records.finalCleared;
+        this.dom.endlessBtn.disabled = !endlessOpen;
+        this.dom.endlessBtn.textContent = endlessOpen ? "无尽镇妖" : `无尽镇妖（${MAX_MAIN_LEVEL}关后）`;
+      }
     }
 
     renderHeroList() {
@@ -8477,8 +9922,9 @@
       const save = this.saveManager.data;
       const equipped = new Set(save.runes.equipped || []);
       const owned = save.runes.owned || [];
+      const maxSlots = getRuneSlotCount(save);
       this.dom.runeSummary.textContent = owned.length
-        ? `已拥有 ${owned.length} 枚符文，已装备 ${equipped.size}/3。通关会获得随机符文，Boss 关更容易出上品与灵品。`
+        ? `已拥有 ${owned.length} 枚符文，已装备 ${equipped.size}/${maxSlots}。第 36 / 63 关会扩展符文槽，Boss 关更容易出上品与灵品。`
         : "暂未获得符文。通关任意试炼后会掉落第一枚符文。";
       this.dom.runeList.innerHTML = "";
       if (!owned.length) {
@@ -8490,24 +9936,238 @@
       }
       for (const rune of owned) {
         const info = getRuneDisplay(rune);
-        const card = document.createElement("button");
-        card.type = "button";
+        const card = document.createElement("article");
         card.className = `system-card ${equipped.has(rune.uid) ? "equipped" : ""}`;
         card.innerHTML = `
           <span class="system-icon" style="color:${info.quality.color}">符</span>
           <div class="system-copy">
             <strong>${info.name}</strong>
             <p>${info.desc}</p>
-            <div class="system-tags"><span>${equipped.has(rune.uid) ? "已装备" : "点击装备"}</span><span>${info.def.category}</span></div>
+            <div class="system-tags"><span>${equipped.has(rune.uid) ? "已装备" : "未装备"}</span><span>${info.def.category}</span></div>
           </div>
         `;
-        card.addEventListener("click", () => {
+        const actions = document.createElement("div");
+        actions.className = "system-actions";
+        const equipBtn = document.createElement("button");
+        equipBtn.type = "button";
+        equipBtn.className = "growth-button";
+        equipBtn.textContent = equipped.has(rune.uid) ? "卸下" : "装备";
+        equipBtn.addEventListener("click", () => {
           const result = this.saveManager.toggleRuneEquip(rune.uid);
           this.showToast(result.message);
           this.renderRunes();
         });
+        const rerollBtn = document.createElement("button");
+        rerollBtn.type = "button";
+        rerollBtn.className = "growth-button";
+        rerollBtn.disabled = (save.jade || 0) < RUNE_REROLL_COST;
+        rerollBtn.textContent = (save.jade || 0) < RUNE_REROLL_COST ? "仙玉不足" : `重铸 ${RUNE_REROLL_COST}仙玉`;
+        rerollBtn.addEventListener("click", () => {
+          if (!window.confirm(`重铸会随机改变该符文，消耗 ${RUNE_REROLL_COST} 仙玉，是否继续？`)) return;
+          const result = this.saveManager.rerollRune(rune.uid);
+          this.showToast(result.message);
+          this.renderHome();
+          this.renderRunes();
+          this.renderMarket();
+        });
+        actions.append(equipBtn, rerollBtn);
+        card.appendChild(actions);
         this.dom.runeList.appendChild(card);
       }
+    }
+
+    renderArtifacts() {
+      if (!this.dom.artifactList || !this.dom.artifactSummary) return;
+      const save = this.saveManager.data;
+      save.artifacts = normalizeArtifacts(save.artifacts || {});
+      const systemOpen = (save.records.highestClearedLevel || 0) >= ARTIFACT_UNLOCK_LEVEL;
+      const equipped = normalizeEquippedArtifacts(save.equippedArtifacts || {}, save.artifacts || {});
+      this.dom.artifactSummary.textContent = systemOpen
+        ? `法宝系统已开启：主动 ${equipped.active ? ARTIFACT_DEFS[equipped.active]?.name : "未装备"}，被动 ${equipped.passive.length}/2。Boss关、每日挑战、无尽镇妖和法宝箱都会产出碎片。`
+        : `通关第 ${ARTIFACT_UNLOCK_LEVEL} 关后开启装备。现在仍可提前从Boss关和法宝箱获得碎片。`;
+      this.dom.artifactList.innerHTML = "";
+      for (const [id, def] of Object.entries(ARTIFACT_DEFS)) {
+        const item = save.artifacts[id] || { fragments: 0, level: 0, unlocked: false };
+        const quality = getArtifactQuality(id);
+        const maxLevel = getArtifactMaxLevel(id);
+        const level = Math.max(0, Math.floor(item.level || 0));
+        const isEquipped = equipped.active === id || equipped.passive.includes(id);
+        const synthNeed = getArtifactFragmentNeed(id);
+        const upgradeCost = item.unlocked && level < maxLevel ? getArtifactUpgradeCost(id, Math.max(1, level)) : null;
+        const canSynthesize = systemOpen && !item.unlocked && (item.fragments || 0) >= synthNeed;
+        const canUpgrade = systemOpen && item.unlocked && level < maxLevel && (item.fragments || 0) >= upgradeCost.fragments && (save.coins || 0) >= upgradeCost.coins;
+        const card = document.createElement("article");
+        card.className = `system-card artifact-card ${item.unlocked ? "unlocked" : "locked"} ${isEquipped ? "equipped" : ""}`;
+        card.style.setProperty("--artifact-quality", quality.color);
+        card.innerHTML = `
+          <span class="system-icon" style="border-color:${quality.color};box-shadow:0 0 16px ${quality.color}55">${def.icon || "宝"}</span>
+          <div class="system-copy">
+            <strong>${def.name} <small>${quality.label} · ${def.type === "active" ? "主动" : "被动"} Lv.${level}/${maxLevel}</small></strong>
+            <p>${def.desc}</p>
+            <p class="growth-note">当前：${item.unlocked ? getArtifactEffectText(id, level) : `未合成，需要 ${synthNeed} 碎片`}</p>
+            <p class="growth-note">下级：${item.unlocked ? (level >= maxLevel ? def.fullBonus : getArtifactEffectText(id, level, true)) : getArtifactEffectText(id, 1)}</p>
+            <div class="system-tags">
+              <span>${quality.label}</span>
+              <span>碎片 ${item.fragments || 0}/${item.unlocked ? upgradeCost?.fragments || "-" : synthNeed}</span>
+              <span>${isEquipped ? "已装备" : item.unlocked ? "可装备" : "未合成"}</span>
+            </div>
+          </div>
+        `;
+        const actions = document.createElement("div");
+        actions.className = "system-actions";
+        const equipBtn = document.createElement("button");
+        equipBtn.type = "button";
+        equipBtn.className = "growth-button";
+        equipBtn.disabled = !systemOpen || !item.unlocked;
+        equipBtn.textContent = isEquipped ? "卸下" : "装备";
+        equipBtn.addEventListener("click", () => {
+          const result = this.saveManager.equipArtifact(id);
+          this.showToast(result.message);
+          this.renderArtifacts();
+          this.renderSkillStrip();
+        });
+        const upgradeBtn = document.createElement("button");
+        upgradeBtn.type = "button";
+        upgradeBtn.className = `growth-button ${(canSynthesize || canUpgrade) ? "can-upgrade" : ""}`;
+        upgradeBtn.disabled = !systemOpen || level >= maxLevel;
+        upgradeBtn.textContent = item.unlocked
+          ? (level >= maxLevel ? "已满级" : `升级 ${upgradeCost.coins}灵石/${upgradeCost.fragments}碎片`)
+          : `合成 ${synthNeed}碎片`;
+        upgradeBtn.addEventListener("click", () => {
+          const result = this.saveManager.upgradeArtifact(id);
+          this.showToast(result.message);
+          this.renderHome();
+          this.renderArtifacts();
+          this.renderMarket();
+          this.renderSkillStrip();
+        });
+        actions.append(equipBtn, upgradeBtn);
+        card.appendChild(actions);
+        this.dom.artifactList.appendChild(card);
+      }
+    }
+
+    createMarketOffers() {
+      const offers = [
+        { icon: "灵", title: "灵石包", desc: "仙玉可在上方兑换灵石，用于取经根基、伙伴和法宝升级。" },
+        { icon: "符", title: "符文重铸", desc: `在符文玉匣中消耗 ${RUNE_REROLL_COST} 仙玉，可随机重铸一枚已有符文。` },
+        { icon: "宝", title: "法宝碎片", desc: "法宝碎片箱会随机开出法宝碎片，第 36 关后可装备法宝。" },
+        { icon: "命", title: "紧急复活", desc: `山门失守时可消耗 ${JADE_REVIVE_COST} 仙玉复活一次，每关限 1 次。` },
+        { icon: "刷", title: "刷新藏宝阁", desc: `消耗 ${TREASURE_REFRESH_COST} 仙玉刷新推荐，不会直接购买永久攻击力。` },
+      ];
+      const shuffled = [...offers].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, 3);
+    }
+
+    renderMarket() {
+      if (!this.dom.marketOverlay) return;
+      const save = this.saveManager.data;
+      if (this.dom.marketCoins) this.dom.marketCoins.textContent = save.coins || 0;
+      if (this.dom.marketJade) this.dom.marketJade.textContent = save.jade || 0;
+      if (this.dom.treasureRefreshBtn) {
+        this.dom.treasureRefreshBtn.disabled = (save.jade || 0) < TREASURE_REFRESH_COST;
+        this.dom.treasureRefreshBtn.textContent = (save.jade || 0) < TREASURE_REFRESH_COST
+          ? "仙玉不足，无法刷新"
+          : `消耗 ${TREASURE_REFRESH_COST} 仙玉刷新`;
+      }
+
+      if (this.dom.jadeExchangeList) {
+        this.dom.jadeExchangeList.innerHTML = "";
+        for (const pack of JADE_EXCHANGE_PACKS) {
+          const card = document.createElement("article");
+          card.className = "system-card market-card";
+          card.innerHTML = `
+            <span class="system-icon jade-icon">玉</span>
+            <div class="system-copy">
+              <strong>${pack.jade} 仙玉 → ${pack.coins} 灵石</strong>
+              <p>用于取经根基、角色突破、伙伴和法宝升级。</p>
+            </div>
+          `;
+          const actions = document.createElement("div");
+          actions.className = "system-actions single";
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "growth-button";
+          btn.disabled = (save.jade || 0) < pack.jade;
+          btn.textContent = (save.jade || 0) < pack.jade ? "仙玉不足" : "兑换";
+          btn.addEventListener("click", () => {
+            const result = this.saveManager.exchangeJadeForCoins(pack.id);
+            this.showToast(result.message);
+            this.renderHome();
+            this.renderCultivation();
+            this.renderMarket();
+          });
+          actions.appendChild(btn);
+          card.appendChild(actions);
+          this.dom.jadeExchangeList.appendChild(card);
+        }
+      }
+
+      if (this.dom.artifactChestList) {
+        this.dom.artifactChestList.innerHTML = "";
+        for (const chest of Object.values(ARTIFACT_CHESTS)) {
+          const card = document.createElement("article");
+          card.className = "system-card market-card";
+          card.innerHTML = `
+            <span class="system-icon">箱</span>
+            <div class="system-copy">
+              <strong>${chest.name}</strong>
+              <p>消耗 ${chest.cost} 仙玉，随机获得 ${chest.min}-${chest.max} 个法宝碎片。</p>
+              <div class="system-tags"><span>${(save.records.highestClearedLevel || 0) >= ARTIFACT_UNLOCK_LEVEL ? "法宝已开启" : `第 ${ARTIFACT_UNLOCK_LEVEL} 关后可装备`}</span></div>
+            </div>
+          `;
+          const actions = document.createElement("div");
+          actions.className = "system-actions single";
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "growth-button";
+          btn.disabled = (save.jade || 0) < chest.cost;
+          btn.textContent = (save.jade || 0) < chest.cost ? "仙玉不足" : `购买 ${chest.cost}仙玉`;
+          btn.addEventListener("click", () => {
+            const result = this.saveManager.buyArtifactChest(chest.id);
+            this.showToast(result.message);
+            this.renderHome();
+            this.renderMarket();
+            this.renderArtifacts();
+            this.renderSkillStrip();
+          });
+          actions.appendChild(btn);
+          card.appendChild(actions);
+          this.dom.artifactChestList.appendChild(card);
+        }
+      }
+
+      if (this.dom.marketOfferList) {
+        this.marketOffers = this.marketOffers || this.createMarketOffers();
+        this.dom.marketOfferList.innerHTML = "";
+        for (const offer of this.marketOffers) {
+          const card = document.createElement("article");
+          card.className = "system-card market-card";
+          card.innerHTML = `
+            <span class="system-icon">${offer.icon}</span>
+            <div class="system-copy"><strong>${offer.title}</strong><p>${offer.desc}</p></div>
+          `;
+          this.dom.marketOfferList.appendChild(card);
+        }
+      }
+    }
+
+    handleRedeemCode() {
+      const input = this.dom.redeemCodeInput;
+      const result = this.saveManager.redeemGiftCode(input?.value || "");
+      this.showToast(result.message);
+      if (result.ok && input) input.value = "";
+      this.renderHome();
+      this.renderMarket();
+      this.renderSaveInfo();
+    }
+
+    refreshTreasureMarket() {
+      const result = this.saveManager.refreshTreasure();
+      this.showToast(result.message);
+      if (result.ok) this.marketOffers = this.createMarketOffers();
+      this.renderHome();
+      this.renderMarket();
     }
 
     renderCodex() {
@@ -9060,6 +10720,7 @@
       if (!this.dom.companionOverlay) return;
       this.state = "companions";
       this.dom.homeOverlay.classList.add("hidden");
+      this.dom.marketOverlay?.classList.add("hidden");
       this.renderCompanionPanel(false);
       this.dom.companionOverlay.classList.remove("hidden");
     }
@@ -9078,7 +10739,7 @@
         const companion = COMPANION_DEFS[id];
         const joined = invited.has(id);
         const progress = save.companionProgress[id] || { level: 1 };
-        const level = clamp(Math.floor(progress.level || 1), 1, 20);
+        const level = clamp(Math.floor(progress.level || 1), 1, 30);
         const cost = getCompanionUpgradeCost(level);
         const card = document.createElement("article");
         card.className = `hero-card ${joined ? "selected" : ""}`;
@@ -9096,8 +10757,8 @@
           const upgradeBtn = document.createElement("button");
           upgradeBtn.type = "button";
           upgradeBtn.className = "primary-button mini";
-          upgradeBtn.textContent = level >= 20 ? "已满级" : `升级 ${cost} 灵石`;
-          upgradeBtn.disabled = level >= 20;
+          upgradeBtn.textContent = level >= 30 ? "已满级" : `升级 ${cost} 灵石`;
+          upgradeBtn.disabled = level >= 30;
           upgradeBtn.addEventListener("click", () => {
             const result = this.saveManager.upgradeCompanion(id);
             this.showToast(result.message);
@@ -9159,7 +10820,7 @@
       this.dom.selectedTrialText.textContent = `当前试炼：${selectedLevel.order}. ${selectedLevel.name} · ${formatTime(selectedLevel.duration)} · 奖励 x${selectedLevel.rewardMultiplier}`;
       this.dom.levelList.innerHTML = "";
       for (const level of LEVEL_LIST) {
-        if ([1, 11, 21, 31].includes(level.order)) {
+        if (LEVEL_REALMS.some((realm) => realm.start === level.order)) {
           const title = document.createElement("div");
           title.className = "level-group-title";
           title.textContent = getRealmByOrder(level.order).name;
@@ -9320,6 +10981,18 @@
         item.innerHTML = `<span class="skill-icon">${def.name.slice(0, 1)}</span><strong>${def.skill}</strong><span>助战 Lv.${this.getCompanionLevel(id)}</span>`;
         this.dom.skillStrip.appendChild(item);
       }
+    }
+
+    renderArtifactSkillChip() {
+      const activeArtifact = this.saveManager.data.equippedArtifacts?.active || "";
+      const artifactDef = ARTIFACT_DEFS[activeArtifact];
+      if (!artifactDef || !this.saveManager.data.artifacts?.[activeArtifact]?.unlocked || !this.dom.skillStrip) return;
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = `skill-chip artifact-chip ${this.activeArtifactCooldown > 0 ? "locked" : ""}`;
+      item.innerHTML = `<span class="skill-icon">${artifactDef.icon || "宝"}</span><strong>${artifactDef.name}</strong><span>${this.activeArtifactCooldown > 0 ? `${Math.ceil(this.activeArtifactCooldown)}s` : "可释放"}</span>`;
+      item.addEventListener("click", () => this.castActiveArtifact());
+      this.dom.skillStrip.appendChild(item);
     }
 
     showToast(message) {
