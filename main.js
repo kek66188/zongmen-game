@@ -990,7 +990,7 @@
     brute: { name: "小野猪妖", visual: "boar", body: "#5a4738", eye: "#ff5b4f", lore: "披着破甲的野猪妖，皮厚力沉，专撞结界。" },
     shield: { name: "蛙僧", visual: "frog", body: "#517d55", eye: "#ff6b57", lore: "背负铜钹的蛙妖僧，妖纹护罩护住周身。" },
     poison: { name: "毒雾蛙婆", visual: "poisonFrog", body: "#315f3d", eye: "#ff6b57", lore: "吐雾成瘴的蛙婆，死后仍会留下毒烟。" },
-    stone: { name: "石甲妖", visual: "stoneBeast", body: "#667066", eye: "#ff6b57", lore: "乱石成精，披甲带裂，寻常剑影难以破壳。" },
+    stone: { name: "石甲妖", visual: "stoneBeast", body: "#667066", eye: "#ff6b57", lore: "乱石成精，披甲带裂，寻常兵器难以破壳。" },
     fireling: { name: "灯花婆婆", visual: "lampGranny", body: "#7c4434", eye: "#fff1bd", lore: "端着妖火灯盏的老妖，近门便爆成火碗。" },
     yaksha: { name: "夜叉", visual: "yakshaCn", body: "#31233f", eye: "#ff4b45", lore: "双角利爪，夜行如鬼影，伤害极高。" },
     flying: { name: "鸟妖", visual: "birdDemon", body: "#213f42", eye: "#ff5b4f", lore: "山林鸟妖，掠空而来，地面阵法难以完全伤它。" },
@@ -1143,8 +1143,8 @@
       swordDamageTaken: 0.62,
       colorTheme: { stone: "#68736b", crack: "#fff1bd" },
       traits: ["高护甲", "裂纹"],
-      description: "灰青石壳成精，裂纹藏火，寻常剑影伤害降低。",
-      lore: "灰青石壳成精，裂纹藏火，寻常剑影伤害降低。",
+      description: "灰青石壳成精，裂纹藏火，寻常兵器伤害降低。",
+      lore: "灰青石壳成精，裂纹藏火，寻常兵器伤害降低。",
     },
     yaksha: {
       key: "yaksha",
@@ -1458,7 +1458,7 @@
     boarDragon: { name: "猪龙", traits: ["厚血推进", "獠牙"], description: "圆滚猪身长出龙须鳞片，慢而厚重，专撞结界。" },
     frogDemon: { name: "蛙妖", traits: ["跳跃推进", "蹲坐"], description: "鼓眼圆肚的蛙妖，披小荷袍，时不时一跃向前。" },
     lampGranny: { name: "灯花婆婆", traits: ["火碗", "近门爆燃"], description: "端灯盏的小老太妖，火光照脸，近门时妖火炸裂。" },
-    stoneArmor: { name: "石甲妖", traits: ["高护甲", "裂纹"], description: "灰青石壳成精，裂纹藏火，寻常剑影伤害降低。" },
+    stoneArmor: { name: "石甲妖", traits: ["高护甲", "裂纹"], description: "灰青石壳成精，裂纹藏火，寻常兵器伤害降低。" },
     yaksha: { name: "夜叉", traits: ["高速高伤", "利爪"], description: "双角利爪，披黑气而行，数量不多但压迫极强。" },
     wingDemon: { name: "飞妖", traits: ["飞行", "阵法减伤"], description: "鸟妖剪影掠空，翅影扇动，受地面阵法伤害降低。" },
     curseMage: { name: "咒师妖", traits: ["咒印光环", "小怪加速"], description: "小妖道执杖画咒，脚下紫色咒印会鼓动附近妖物。" },
@@ -2485,19 +2485,78 @@
   }
 
   const SKILL_ORDER = ["sword", "fire", "ice", "thunder", "array"];
+  const DEFAULT_SKILL_THEMES = {
+    sword: { name: "主武器", shortName: "武器", icon: "武", desc: "主角的核心武器攻击，自动追击最近妖怪。", projectileName: "武器影" },
+    fire: { name: "范围法术", shortName: "法术", icon: "法", desc: "范围法术命中后，对一片妖怪造成伤害。" },
+    ice: { name: "镇妖控制", shortName: "控制", icon: "镇", desc: "镇妖术压制妖怪，使其行动迟缓。" },
+    thunder: { name: "天威雷法", shortName: "天威", icon: "雷", desc: "召来天威雷光，弹射劈击多个妖怪。" },
+    array: { name: "护山法阵", shortName: "法阵", icon: "阵", desc: "在山门前展开法阵，持续打击靠近妖怪。" },
+  };
+
+  const HERO_SKILL_THEMES = {
+    wukong: {
+      sword: { name: "金箍棒影", shortName: "棒影", icon: "棒", desc: "挥出金色棍影，自动追击最近妖怪。", projectileName: "棍影", color: "#f5d78a", accent: "#e84b35" },
+      fire: { name: "火眼金睛", shortName: "火眼", icon: "眼", desc: "火眼迸发金焰，命中后灼烧一片妖怪。", color: "#f0b23a", accent: "#ff6b57" },
+      ice: { name: "定身咒", shortName: "定身", icon: "定", desc: "以定身法压制妖怪，使其行动迟缓。", color: "#ffe6a3", accent: "#bfeee4" },
+      thunder: { name: "筋斗雷", shortName: "筋雷", icon: "雷", desc: "召来筋斗云雷光，弹射劈击多个妖怪。", color: "#fff1bd", accent: "#9fd9cf" },
+      array: { name: "齐天战阵", shortName: "战阵", icon: "阵", desc: "在山门前展开战阵，持续打击靠近妖怪。", color: "#f5d78a", accent: "#e84b35" },
+    },
+    tangseng: {
+      sword: { name: "禅杖佛光", shortName: "佛光", icon: "佛", desc: "禅杖引出佛光，自动净化最近妖怪。", projectileName: "佛光", color: "#fff1bd", accent: "#f3fff9" },
+      fire: { name: "莲火佛印", shortName: "莲火", icon: "莲", desc: "佛印化作莲火，命中后净化一片妖气。", color: "#ffe6a3", accent: "#f5d78a" },
+      ice: { name: "紧箍梵音", shortName: "梵音", icon: "咒", desc: "梵音回荡，使妖怪心神迟滞。", color: "#f3fff9", accent: "#d7fff5" },
+      thunder: { name: "金刚雷音", shortName: "雷音", icon: "音", desc: "金刚雷音震荡妖群，弹射造成伤害。", color: "#fff1bd", accent: "#bfeee4" },
+      array: { name: "金莲法阵", shortName: "莲阵", icon: "阵", desc: "展开金莲法阵，持续庇护山门并净化妖怪。", color: "#fff1bd", accent: "#f3fff9" },
+    },
+    bajie: {
+      sword: { name: "钉耙横扫", shortName: "钉耙", icon: "耙", desc: "挥动九齿钉耙，横扫最近的妖怪。", projectileName: "耙影", color: "#d9a35d", accent: "#fff1bd" },
+      fire: { name: "妖火乱耙", shortName: "火耙", icon: "火", desc: "钉耙卷起妖火，命中后炸裂成范围伤害。", color: "#e9b85f", accent: "#ff6b57" },
+      ice: { name: "饕餮吞势", shortName: "吞势", icon: "吞", desc: "吞吸妖气，减缓妖怪推进。", color: "#e8f7ef", accent: "#d9a35d" },
+      thunder: { name: "震地雷耙", shortName: "雷耙", icon: "雷", desc: "九齿钉耙震地，引雷击退妖群。", color: "#f5d78a", accent: "#8e643f" },
+      array: { name: "土行耙阵", shortName: "耙阵", icon: "阵", desc: "在山门前布下土行耙阵，持续阻挡妖怪。", color: "#d9a35d", accent: "#fff1bd" },
+    },
+    shaseng: {
+      sword: { name: "月牙铲斩", shortName: "铲斩", icon: "铲", desc: "挥出月牙铲影，斩向最近妖怪。", projectileName: "铲影", color: "#9fd9cf", accent: "#315b57" },
+      fire: { name: "赤砂爆", shortName: "赤砂", icon: "砂", desc: "赤砂炸开，对范围内妖怪造成伤害。", color: "#e9b85f", accent: "#6bb8c7" },
+      ice: { name: "流沙困阵", shortName: "流沙", icon: "沙", desc: "流沙缠住妖怪，使其行动缓慢。", color: "#9fd9cf", accent: "#bfeee4" },
+      thunder: { name: "卷帘雷击", shortName: "雷击", icon: "雷", desc: "卷帘雷光劈击妖怪，并向附近弹射。", color: "#bfeee4", accent: "#6bb8c7" },
+      array: { name: "弱水法阵", shortName: "弱水", icon: "阵", desc: "弱水法阵持续侵蚀经过的妖怪。", color: "#9fd9cf", accent: "#315b57" },
+    },
+  };
+
+  const SKILL_CATEGORY_MAP = {
+    sword: "weapon",
+    fire: "spell",
+    ice: "control",
+    thunder: "thunder",
+    array: "formation",
+  };
+
+  const getSkillTheme = (skillKey, heroKey = "wukong") => {
+    const normalizedHero = heroKey === "tang" ? "tangseng" : heroKey;
+    const heroTheme = HERO_SKILL_THEMES[normalizedHero] || HERO_SKILL_THEMES.wukong;
+    return heroTheme[skillKey] || DEFAULT_SKILL_THEMES[skillKey] || {
+      name: skillKey,
+      shortName: skillKey,
+      icon: "术",
+      desc: "",
+      projectileName: skillKey,
+    };
+  };
+
   const SKILL_LABELS = {
-    sword: "飞剑",
-    fire: "火符",
-    ice: "冰符",
-    thunder: "天雷",
-    array: "剑阵",
+    sword: DEFAULT_SKILL_THEMES.sword.name,
+    fire: DEFAULT_SKILL_THEMES.fire.name,
+    ice: DEFAULT_SKILL_THEMES.ice.name,
+    thunder: DEFAULT_SKILL_THEMES.thunder.name,
+    array: DEFAULT_SKILL_THEMES.array.name,
   };
   const SKILL_ICONS = {
-    sword: "✦",
-    fire: "符",
-    ice: "❄",
-    thunder: "雷",
-    array: "阵",
+    sword: DEFAULT_SKILL_THEMES.sword.icon,
+    fire: DEFAULT_SKILL_THEMES.fire.icon,
+    ice: DEFAULT_SKILL_THEMES.ice.icon,
+    thunder: DEFAULT_SKILL_THEMES.thunder.icon,
+    array: DEFAULT_SKILL_THEMES.array.icon,
     global: "悟",
     wall: "护",
     crit: "斩",
@@ -2539,29 +2598,29 @@
 
   const TALENT_DEFS = {
     swordDamage: {
-      name: "强化飞剑",
+      name: "兵器精通",
       max: 10,
-      current: (level) => `飞剑伤害 +${level * 5}%`,
+      current: (level) => `主武器伤害 +${level * 5}%`,
     },
     fireMastery: {
-      name: "火符精通",
+      name: "法术精通",
       max: 10,
-      current: (level) => `火符爆炸范围 +${level * 4}%`,
+      current: (level) => `范围法术效果 +${level * 4}%`,
     },
     iceMastery: {
-      name: "冰符精通",
+      name: "镇妖控制",
       max: 10,
-      current: (level) => `冰符减速效果 +${level * 3}%`,
+      current: (level) => `控制效果 +${level * 3}%`,
     },
     thunderMastery: {
-      name: "天雷精通",
+      name: "天威感应",
       max: 10,
-      current: (level) => `天雷伤害 +${level * 5}%`,
+      current: (level) => `天威伤害 +${level * 5}%`,
     },
     swordArrayMastery: {
-      name: "剑阵精通",
+      name: "阵法修行",
       max: 10,
-      current: (level) => `剑阵伤害 +${level * 5}%`,
+      current: (level) => `阵法伤害 +${level * 5}%`,
     },
     wallFortify: {
       name: "城墙加固",
@@ -2598,8 +2657,8 @@
       playstyle: "攻速快，爆发高，适合主动清怪。",
       color: "#f0b23a",
       accent: "#e84b35",
-      labels: { sword: "金箍棒影", thunder: "火眼雷引", array: "毫毛分身", fire: "金焰符", ice: "定身灵光" },
-      icons: { sword: "棒", thunder: "雷", array: "影", fire: "焰", ice: "定" },
+      labels: { sword: "金箍棒影", fire: "火眼金睛", ice: "定身咒", thunder: "筋斗雷", array: "齐天战阵" },
+      icons: { sword: "棒", fire: "眼", ice: "定", thunder: "雷", array: "阵" },
       bonuses: { critChance: 0.08, critDamageBonus: 0.2, damageMultiplier: 1.04 },
     },
     tangseng: {
@@ -2615,8 +2674,8 @@
       playstyle: "生存强，节奏稳，适合持久战。",
       color: "#fff1bd",
       accent: "#d7fff5",
-      labels: { ice: "紧箍梵音", array: "禅杖佛光", sword: "佛珠击妖", fire: "莲火符", thunder: "梵雷" },
-      icons: { ice: "梵", array: "佛", sword: "珠", fire: "莲", thunder: "梵" },
+      labels: { sword: "禅杖佛光", fire: "莲火佛印", ice: "紧箍梵音", thunder: "金刚雷音", array: "金莲法阵" },
+      icons: { sword: "佛", fire: "莲", ice: "咒", thunder: "音", array: "阵" },
       bonuses: { cooldownMultiplier: 0.96, rareChanceBonus: 0.08, regenPerSecond: 0.12, shieldChance: 0.08 },
     },
     bajie: {
@@ -2632,8 +2691,8 @@
       playstyle: "抗压强，范围横扫，适合妖潮堆叠。",
       color: "#d9a35d",
       accent: "#6f4d32",
-      labels: { fire: "九齿钉耙横扫", array: "震地退妖", sword: "钉耙重击", ice: "土墙缓行", thunder: "天蓬震雷" },
-      icons: { fire: "耙", array: "震", sword: "钉", ice: "土", thunder: "震" },
+      labels: { sword: "钉耙横扫", fire: "妖火乱耙", ice: "饕餮吞势", thunder: "震地雷耙", array: "土行耙阵" },
+      icons: { sword: "耙", fire: "火", ice: "吞", thunder: "雷", array: "阵" },
       bonuses: { maxHpMultiplier: 1.2, wallDamageReduction: 0.1, fireRangeMultiplier: 1.08 },
     },
     shaseng: {
@@ -2649,8 +2708,8 @@
       playstyle: "控场稳定，适合拖慢妖群推进。",
       color: "#6bb8c7",
       accent: "#315b57",
-      labels: { sword: "月牙铲斩", ice: "流沙困阵", array: "流沙法阵", fire: "水火符", thunder: "沙雷" },
-      icons: { sword: "铲", ice: "沙", array: "阵", fire: "水", thunder: "雷" },
+      labels: { sword: "月牙铲斩", fire: "赤砂爆", ice: "流沙困阵", thunder: "卷帘雷击", array: "弱水法阵" },
+      icons: { sword: "铲", fire: "砂", ice: "沙", thunder: "雷", array: "阵" },
       bonuses: { iceSlowBonus: 0.15, arrayDamageMultiplier: 1.06, dotDamageMultiplier: 1.1, controlDurationMultiplier: 1.1 },
     },
   };
@@ -2718,9 +2777,9 @@
 
   const RUNE_DEFS = {
     crit: { name: "狂击符", category: "攻击符文", desc: "暴击率提升", effect: (m) => ({ critChance: 0.04 * m }) },
-    pierce: { name: "穿透符", category: "攻击符文", desc: "飞剑 / 棍影穿透 +1", effect: (m) => ({ swordPierce: Math.max(1, Math.round(m)) }) },
+    pierce: { name: "穿透符", category: "攻击符文", desc: "主武器影穿透 +1", effect: (m) => ({ swordPierce: Math.max(1, Math.round(m)) }) },
     fireBurst: { name: "爆炎符", category: "攻击符文", desc: "火系爆炸范围提升", effect: (m) => ({ fireRange: 0.12 * m }) },
-    chainThunder: { name: "连雷符", category: "攻击符文", desc: "天雷弹射 +1", effect: (m) => ({ thunderBounce: Math.max(1, Math.round(m)) }) },
+    chainThunder: { name: "连雷符", category: "攻击符文", desc: "天威弹射 +1", effect: (m) => ({ thunderBounce: Math.max(1, Math.round(m)) }) },
     bell: { name: "金钟符", category: "守御符文", desc: "结界最大血量提升", effect: (m) => ({ maxHpBonus: Math.round(28 * m) }) },
     guard: { name: "护体符", category: "守御符文", desc: "结界受到伤害降低", effect: (m) => ({ wallDamageReduction: 0.06 * m }) },
     returnHit: { name: "结界符", category: "守御符文", desc: "结界受击时反伤附近妖怪", effect: (m) => ({ retaliation: 8 * m }) },
@@ -5702,9 +5761,9 @@
         },
         {
           id: "sword_damage",
-          title: "飞剑淬芒",
+          title: (theme) => `${theme.name}淬芒`,
           skill: "sword",
-          statText: (v) => `飞剑伤害 +${pct(v)}`,
+          statText: (v, _locked, theme) => `${theme.name}伤害 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("sword");
             game.skills.sword.damageMult *= 1 + v;
@@ -5713,9 +5772,9 @@
         },
         {
           id: "sword_count",
-          title: "剑影分光",
+          title: (theme) => `${theme.shortName}分影`,
           skill: "sword",
-          statText: (v) => `飞剑数量 +${Math.round(v)}`,
+          statText: (v, _locked, theme) => `${theme.projectileName || theme.shortName}数量 +${Math.round(v)}`,
           apply: (game, v) => {
             game.unlockSkill("sword");
             game.skills.sword.count += Math.round(v);
@@ -5725,9 +5784,9 @@
         },
         {
           id: "sword_cooldown",
-          title: "御剑无滞",
+          title: (theme) => `${theme.shortName}疾发`,
           skill: "sword",
-          statText: (v) => `飞剑冷却 -${pct(v)}`,
+          statText: (v, _locked, theme) => `${theme.name}冷却 -${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("sword");
             game.skills.sword.cooldownMult *= 1 - v;
@@ -5736,9 +5795,9 @@
         },
         {
           id: "sword_pierce",
-          title: "贯虹剑意",
+          title: (theme) => `${theme.shortName}贯妖`,
           skill: "sword",
-          statText: (v) => `飞剑获得 ${Math.round(v)} 次穿透`,
+          statText: (v, _locked, theme) => `${theme.projectileName || theme.shortName}获得 ${Math.round(v)} 次穿透`,
           apply: (game, v) => {
             game.unlockSkill("sword");
             game.skills.sword.pierce += Math.round(v);
@@ -5748,9 +5807,9 @@
         },
         {
           id: "sword_speed",
-          title: "流星驭剑",
+          title: (theme) => `${theme.shortName}追风`,
           skill: "sword",
-          statText: (v) => `飞剑飞行速度 +${pct(v)}`,
+          statText: (v, _locked, theme) => `${theme.projectileName || theme.shortName}飞行速度 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("sword");
             game.skills.sword.speedMult *= 1 + v;
@@ -5759,9 +5818,9 @@
         },
         {
           id: "fire_damage",
-          title: "火符炽燃",
+          title: (theme) => `${theme.shortName}炽燃`,
           skill: "fire",
-          statText: (v, locked) => `${locked ? "解锁火符，" : ""}火符伤害 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}伤害 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("fire");
             game.skills.fire.damageMult *= 1 + v;
@@ -5770,9 +5829,9 @@
         },
         {
           id: "fire_range",
-          title: "焰纹扩印",
+          title: (theme) => `${theme.shortName}扩印`,
           skill: "fire",
-          statText: (v, locked) => `${locked ? "解锁火符，" : ""}火符爆炸范围 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}范围 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("fire");
             game.skills.fire.rangeMult *= 1 + v;
@@ -5781,9 +5840,9 @@
         },
         {
           id: "fire_cooldown",
-          title: "朱砂疾书",
+          title: (theme) => `${theme.shortName}疾发`,
           skill: "fire",
-          statText: (v, locked) => `${locked ? "解锁火符，" : ""}火符冷却 -${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}冷却 -${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("fire");
             game.skills.fire.cooldownMult *= 1 - v;
@@ -5792,9 +5851,9 @@
         },
         {
           id: "fire_burn",
-          title: "余焰留痕",
+          title: (theme) => `${theme.shortName}留痕`,
           skill: "fire",
-          statText: (_v, locked) => `${locked ? "解锁火符，" : ""}火符爆炸后留下灼烧区域 2 秒`,
+          statText: (_v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}命中后留下灼烧区域 2 秒`,
           apply: (game) => {
             game.unlockSkill("fire");
             game.skills.fire.burn = true;
@@ -5804,9 +5863,9 @@
         },
         {
           id: "ice_slow",
-          title: "寒符凝霜",
+          title: (theme) => `${theme.shortName}镇妖`,
           skill: "ice",
-          statText: (v, locked) => `${locked ? "解锁冰符，" : ""}冰符减速效果 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}迟缓效果 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("ice");
             game.skills.ice.slowPower = Math.min(0.82, game.skills.ice.slowPower + v);
@@ -5815,9 +5874,9 @@
         },
         {
           id: "ice_duration",
-          title: "霜息绵长",
+          title: (theme) => `${theme.shortName}绵长`,
           skill: "ice",
-          statText: (v, locked) => `${locked ? "解锁冰符，" : ""}冰符持续时间 +${v.toFixed(1)} 秒`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}持续时间 +${v.toFixed(1)} 秒`,
           apply: (game, v) => {
             game.unlockSkill("ice");
             game.skills.ice.slowDuration += v;
@@ -5826,9 +5885,9 @@
         },
         {
           id: "ice_range",
-          title: "冰轮外拓",
+          title: (theme) => `${theme.shortName}外拓`,
           skill: "ice",
-          statText: (v, locked) => `${locked ? "解锁冰符，" : ""}冰符范围 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}范围 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("ice");
             game.skills.ice.rangeMult *= 1 + v;
@@ -5837,9 +5896,9 @@
         },
         {
           id: "ice_vulnerable",
-          title: "寒侵骨隙",
+          title: (theme) => `${theme.shortName}破绽`,
           skill: "ice",
-          statText: (v, locked) => `${locked ? "解锁冰符，" : ""}被冰冻敌人受到伤害 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}受${theme.shortName}压制的妖怪承伤 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("ice");
             game.iceVulnerabilityBonus += v;
@@ -5848,9 +5907,9 @@
         },
         {
           id: "thunder_damage",
-          title: "天雷轰顶",
+          title: (theme) => `${theme.shortName}轰顶`,
           skill: "thunder",
-          statText: (v, locked) => `${locked ? "解锁天雷，" : ""}天雷伤害 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}伤害 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("thunder");
             game.skills.thunder.damageMult *= 1 + v;
@@ -5859,9 +5918,9 @@
         },
         {
           id: "thunder_bounce",
-          title: "雷引连环",
+          title: (theme) => `${theme.shortName}连环`,
           skill: "thunder",
-          statText: (v, locked) => `${locked ? "解锁天雷，" : ""}天雷弹射次数 +${Math.round(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}弹射次数 +${Math.round(v)}`,
           apply: (game, v) => {
             game.unlockSkill("thunder");
             game.skills.thunder.bounces += Math.round(v);
@@ -5871,9 +5930,9 @@
         },
         {
           id: "thunder_cooldown",
-          title: "雷诀疾诵",
+          title: (theme) => `${theme.shortName}疾诵`,
           skill: "thunder",
-          statText: (v, locked) => `${locked ? "解锁天雷，" : ""}天雷冷却 -${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}冷却 -${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("thunder");
             game.skills.thunder.cooldownMult *= 1 - v;
@@ -5882,9 +5941,9 @@
         },
         {
           id: "thunder_stun",
-          title: "震魂余威",
+          title: (theme) => `${theme.shortName}震魂`,
           skill: "thunder",
-          statText: (_v, locked) => `${locked ? "解锁天雷，" : ""}天雷命中后短暂眩晕`,
+          statText: (_v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}命中后短暂眩晕`,
           apply: (game) => {
             game.unlockSkill("thunder");
             game.skills.thunder.stun = true;
@@ -5894,9 +5953,9 @@
         },
         {
           id: "array_damage",
-          title: "剑阵鸣锋",
+          title: (theme) => `${theme.shortName}鸣锋`,
           skill: "array",
-          statText: (v, locked) => `${locked ? "解锁剑阵，" : ""}剑阵伤害 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}伤害 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("array");
             game.skills.array.damageMult *= 1 + v;
@@ -5905,9 +5964,9 @@
         },
         {
           id: "array_range",
-          title: "阵纹扩界",
+          title: (theme) => `${theme.shortName}扩界`,
           skill: "array",
-          statText: (v, locked) => `${locked ? "解锁剑阵，" : ""}剑阵范围 +${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}范围 +${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("array");
             game.skills.array.rangeMult *= 1 + v;
@@ -5916,9 +5975,9 @@
         },
         {
           id: "array_duration",
-          title: "剑势不息",
+          title: (theme) => `${theme.shortName}不息`,
           skill: "array",
-          statText: (v, locked) => `${locked ? "解锁剑阵，" : ""}剑阵持续时间 +${v.toFixed(1)} 秒`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}持续时间 +${v.toFixed(1)} 秒`,
           apply: (game, v) => {
             game.unlockSkill("array");
             game.skills.array.duration += v;
@@ -5927,9 +5986,9 @@
         },
         {
           id: "array_interval",
-          title: "阵机更迭",
+          title: (theme) => `${theme.shortName}更迭`,
           skill: "array",
-          statText: (v, locked) => `${locked ? "解锁剑阵，" : ""}剑阵触发间隔 -${pct(v)}`,
+          statText: (v, locked, theme) => `${locked ? `习得${theme.name}，` : ""}${theme.name}触发间隔 -${pct(v)}`,
           apply: (game, v) => {
             game.unlockSkill("array");
             game.skills.array.cooldownMult *= 1 - v;
@@ -5967,13 +6026,15 @@
             ? Math.max(1, Math.round(base.value * rarity.mult))
             : base.value * rarity.mult;
         const locked = base.skill ? !this.game.skills[base.skill].enabled : false;
+        const theme = base.skill ? this.game.getSkillTheme(base.skill) : null;
         return {
           ...base,
           rarityKey,
           rarity,
           value,
           locked,
-          desc: base.statText(value, locked),
+          title: typeof base.title === "function" ? base.title(theme) : base.title,
+          desc: base.statText(value, locked, theme),
         };
       };
 
@@ -6003,7 +6064,7 @@
     }
 
     getUpgradeIcon(option) {
-      if (option.skill) return SKILL_ICONS[option.skill] || "✦";
+      if (option.skill) return this.game.getSkillTheme(option.skill).icon || SKILL_ICONS[option.skill] || "术";
       if (option.id.includes("wall")) return SKILL_ICONS.wall;
       if (option.id.includes("crit")) return SKILL_ICONS.crit;
       return SKILL_ICONS.global;
@@ -6017,6 +6078,11 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = `upgrade-card ${option.rarity.className}`;
+        if (option.skill) {
+          const theme = this.game.getSkillTheme(option.skill);
+          button.style.setProperty("--skill-color", theme.color || "#fff1bd");
+          button.style.setProperty("--skill-accent", theme.accent || "#9fd9cf");
+        }
         button.innerHTML = `
           <span class="upgrade-icon">${this.getUpgradeIcon(option)}</span>
           <div class="upgrade-content">
@@ -7394,12 +7460,20 @@
       }
     }
 
+    getCurrentHeroKey() {
+      return normalizeHeroId(this.heroId || this.saveManager?.data?.selectedHero || "wukong") || "wukong";
+    }
+
+    getSkillTheme(id) {
+      return getSkillTheme(id, this.getCurrentHeroKey());
+    }
+
     getSkillLabel(id) {
-      return this.heroDef?.labels?.[id] || SKILL_LABELS[id] || id;
+      return this.getSkillTheme(id).name || SKILL_LABELS[id] || id;
     }
 
     getSkillIcon(id) {
-      return this.heroDef?.icons?.[id] || SKILL_ICONS[id] || "法";
+      return this.getSkillTheme(id).icon || SKILL_ICONS[id] || "法";
     }
 
     findClosestToWall() {
@@ -7839,7 +7913,7 @@
             <p>${hero.role}</p>
             <p>${hero.passive}</p>
             <p>${status.blocked ? `需要突破：${status.breakthroughCost} 灵石` : `经验 ${Math.floor(state.exp)} / ${status.need}`}</p>
-            <div class="hero-tags"><span>${hero.initialSkills.map((skill) => hero.labels?.[skill] || SKILL_LABELS[skill]).join("</span><span>")}</span><span>胜场 ${state.wins || 0}</span></div>
+            <div class="hero-tags"><span>${hero.initialSkills.map((skill) => getSkillTheme(skill, id).name).join("</span><span>")}</span><span>胜场 ${state.wins || 0}</span></div>
           </div>
         `;
         button.addEventListener("click", () => {
@@ -8748,10 +8822,13 @@
       this.dom.skillStrip.innerHTML = "";
       for (const id of SKILL_ORDER) {
         const skill = this.skills[id];
+        const theme = this.getSkillTheme(id);
         const item = document.createElement("div");
         item.className = `skill-chip skill-${id} ${skill.enabled ? "" : "locked"}`;
+        item.style.setProperty("--skill-color", theme.color || "#fff1bd");
+        item.style.setProperty("--skill-accent", theme.accent || "#9fd9cf");
         const value = skill.enabled ? `Lv.${skill.level}` : "未悟";
-        item.innerHTML = `<span class="skill-icon">${this.getSkillIcon(id)}</span><strong>${this.getSkillLabel(id)}</strong><span>${value}</span>`;
+        item.innerHTML = `<span class="skill-icon">${theme.icon || this.getSkillIcon(id)}</span><strong>${theme.name || this.getSkillLabel(id)}</strong><span>${value}</span>`;
         this.dom.skillStrip.appendChild(item);
       }
       for (const id of this.companionIds || []) {
@@ -8759,7 +8836,7 @@
         if (!def) continue;
         const item = document.createElement("div");
         item.className = "skill-chip companion-chip";
-        item.innerHTML = `<span class="skill-icon">${def.name.slice(0, 1)}</span><strong>${def.skill}</strong><span>助战 Lv.${this.getCompanionLevel(companionId)}</span>`;
+        item.innerHTML = `<span class="skill-icon">${def.name.slice(0, 1)}</span><strong>${def.skill}</strong><span>助战 Lv.${this.getCompanionLevel(id)}</span>`;
         this.dom.skillStrip.appendChild(item);
       }
     }
