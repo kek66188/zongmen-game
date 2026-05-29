@@ -1040,8 +1040,21 @@ h3 {
 }
 
 .system-card {
-  grid-template-columns: 42px 1fr;
+  grid-template-columns: 54px 1fr;
   align-items: center;
+}
+
+.monster-portrait {
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255, 241, 189, 0.58);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.38), transparent 28%),
+    rgba(159, 217, 207, 0.16);
+  box-shadow:
+    inset 0 0 14px rgba(243, 255, 249, 0.16),
+    0 0 10px rgba(191, 238, 228, 0.12);
 }
 
 .system-icon {

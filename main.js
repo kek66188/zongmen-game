@@ -6690,7 +6690,7 @@
         const card = document.createElement("article");
         card.className = `system-card ${unlocked ? "" : "locked"}`;
         card.innerHTML = `
-          <span class="system-icon">${unlocked ? def.name.slice(0, 1) : "?"}</span>
+          <canvas class="monster-portrait" aria-label="${unlocked ? def.name : "未遭遇妖怪"}"></canvas>
           <div class="system-copy">
             <strong>${unlocked ? def.name : "未遭遇妖怪"}</strong>
             <p>${unlocked ? (def.description || "取经路上现身的志怪妖物。") : `第 ${def.unlockLevel || 1} 关后可能出现。`}</p>
@@ -6698,7 +6698,422 @@
           </div>
         `;
         this.dom.codexList.appendChild(card);
+        this.drawMonsterPortrait(card.querySelector(".monster-portrait"), id, unlocked);
       }
+    }
+
+    drawMonsterPortrait(canvas, id, unlocked) {
+      if (!canvas) return;
+      const cssSize = 54;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = cssSize * dpr;
+      canvas.height = cssSize * dpr;
+      canvas.style.width = `${cssSize}px`;
+      canvas.style.height = `${cssSize}px`;
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssSize, cssSize);
+      const cx = cssSize / 2;
+      const cy = cssSize / 2;
+      const key = normalizeEnemyType(id);
+
+      const gradient = ctx.createRadialGradient(cx - 12, cy - 13, 2, cx, cy, 31);
+      gradient.addColorStop(0, "rgba(255, 241, 189, 0.34)");
+      gradient.addColorStop(0.52, "rgba(159, 217, 207, 0.18)");
+      gradient.addColorStop(1, "rgba(23, 63, 66, 0.74)");
+      ctx.fillStyle = gradient;
+      ctx.strokeStyle = unlocked ? "rgba(255, 241, 189, 0.72)" : "rgba(191, 238, 228, 0.32)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 25.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(cx, cy + 2);
+      if (!unlocked) {
+        ctx.globalAlpha = 0.45;
+        this.drawPortraitMist(ctx, 18, "#0b1b1e");
+        ctx.fillStyle = "#173f42";
+        ctx.beginPath();
+        ctx.ellipse(0, 1, 12, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff1bd";
+        ctx.font = "bold 21px KaiTi, SimSun, serif";
+        ctx.textAlign = "center";
+        ctx.fillText("?", 0, 7);
+        ctx.restore();
+        return;
+      }
+
+      this.drawMonsterPortraitShape(ctx, key);
+      ctx.restore();
+    }
+
+    drawMonsterPortraitShape(ctx, key) {
+      const drawEyes = (mode = "dot") => {
+        ctx.save();
+        ctx.fillStyle = "#ff6b57";
+        ctx.strokeStyle = "#ff6b57";
+        ctx.shadowColor = "#ff6b57";
+        ctx.shadowBlur = 4;
+        if (mode === "slash") {
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-9, -4);
+          ctx.lineTo(-3, -3);
+          ctx.moveTo(9, -4);
+          ctx.lineTo(3, -3);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(-5.5, -4, 2, 0, Math.PI * 2);
+          ctx.arc(5.5, -4, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      };
+      const drawHorns = (color = "#f5d78a", spread = 8, height = 15) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(-spread, -11);
+        ctx.quadraticCurveTo(-spread - 8, -height, -spread - 10, -4);
+        ctx.moveTo(spread, -11);
+        ctx.quadraticCurveTo(spread + 8, -height, spread + 10, -4);
+        ctx.stroke();
+      };
+
+      if (key === "foxDemon") {
+        this.drawPortraitMist(ctx, 17, "#442d38");
+        ctx.strokeStyle = "rgba(255, 188, 114, 0.78)";
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(-2, 9);
+        ctx.quadraticCurveTo(-20, 3, -16, -12);
+        ctx.stroke();
+        ctx.fillStyle = "#c97844";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 11, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#f0aa73";
+        ctx.beginPath();
+        ctx.moveTo(-7, -11);
+        ctx.lineTo(-15, -23);
+        ctx.lineTo(-2, -16);
+        ctx.moveTo(7, -11);
+        ctx.lineTo(15, -23);
+        ctx.lineTo(2, -16);
+        ctx.fill();
+        ctx.fillStyle = "#fff1bd";
+        ctx.beginPath();
+        ctx.ellipse(0, 7, 5, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        drawEyes("slash");
+      } else if (key === "dogDemon") {
+        this.drawPortraitMist(ctx, 16, "#0b1b1e");
+        ctx.fillStyle = "#202d2c";
+        ctx.beginPath();
+        ctx.moveTo(0, -18);
+        ctx.quadraticCurveTo(14, -9, 8, 15);
+        ctx.lineTo(0, 11);
+        ctx.lineTo(-8, 15);
+        ctx.quadraticCurveTo(-14, -9, 0, -18);
+        ctx.fill();
+        ctx.strokeStyle = "#e9b85f";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-8, -12);
+        ctx.lineTo(-16, -23);
+        ctx.moveTo(8, -12);
+        ctx.lineTo(16, -23);
+        ctx.stroke();
+        ctx.fillStyle = "#a85f35";
+        ctx.fillRect(-9, 8, 18, 4);
+        drawEyes("slash");
+      } else if (key === "shrimpDemon") {
+        ctx.strokeStyle = "rgba(127, 209, 216, 0.75)";
+        ctx.lineWidth = 1.2;
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          ctx.moveTo(side * 3, -13);
+          ctx.quadraticCurveTo(side * 20, -20, side * 22, -3);
+          ctx.stroke();
+        }
+        for (let i = 0; i < 4; i += 1) {
+          ctx.fillStyle = i % 2 ? "#2f7470" : "#d96943";
+          ctx.beginPath();
+          ctx.ellipse(0, -8 + i * 6, 9 - i, 5, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.strokeStyle = "#f5d78a";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(-12, 3, 5, -1.2, 1.2);
+        ctx.arc(12, 3, 5, Math.PI - 1.2, Math.PI + 1.2);
+        ctx.stroke();
+        drawEyes("slash");
+      } else if (key === "boarDragon") {
+        this.drawPortraitMist(ctx, 20, "#2a211c");
+        ctx.fillStyle = "#6b4b3a";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 17, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        drawHorns("#e9b85f", 9, 23);
+        ctx.fillStyle = "#f3fff9";
+        ctx.beginPath();
+        ctx.moveTo(-8, 2);
+        ctx.lineTo(-16, 8);
+        ctx.lineTo(-5, 8);
+        ctx.moveTo(8, 2);
+        ctx.lineTo(16, 8);
+        ctx.lineTo(5, 8);
+        ctx.fill();
+        ctx.strokeStyle = "#9fd9cf";
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(-5, -3);
+        ctx.quadraticCurveTo(-18, 0, -20, -7);
+        ctx.moveTo(5, -3);
+        ctx.quadraticCurveTo(18, 0, 20, -7);
+        ctx.stroke();
+        drawEyes();
+      } else if (key === "frogDemon") {
+        this.drawPortraitMist(ctx, 17, "#163d31");
+        ctx.fillStyle = "#5f9d62";
+        ctx.beginPath();
+        ctx.ellipse(0, 3, 16, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#79b76e";
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          ctx.ellipse(side * 7, -10, 5, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#d7fff5";
+        ctx.beginPath();
+        ctx.ellipse(0, 7, 8, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        drawEyes();
+      } else if (key === "lampGranny") {
+        this.drawPortraitMist(ctx, 18, "#4a211e");
+        ctx.fillStyle = "#6a3a34";
+        ctx.beginPath();
+        ctx.moveTo(-11, 16);
+        ctx.quadraticCurveTo(0, -20, 11, 16);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#fff1bd";
+        ctx.beginPath();
+        ctx.arc(0, -7, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ff6b57";
+        ctx.beginPath();
+        ctx.moveTo(0, -25);
+        ctx.quadraticCurveTo(9, -12, 0, -5);
+        ctx.quadraticCurveTo(-9, -13, 0, -25);
+        ctx.fill();
+        drawEyes();
+      } else if (key === "stoneArmor") {
+        ctx.fillStyle = "#68736b";
+        ctx.beginPath();
+        ctx.moveTo(0, -20);
+        ctx.lineTo(16, -5);
+        ctx.lineTo(11, 16);
+        ctx.lineTo(-11, 16);
+        ctx.lineTo(-16, -5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 241, 189, 0.55)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-7, -8);
+        ctx.lineTo(-1, 0);
+        ctx.lineTo(-5, 11);
+        ctx.moveTo(7, -8);
+        ctx.lineTo(1, 2);
+        ctx.lineTo(8, 12);
+        ctx.stroke();
+        drawEyes();
+      } else if (key === "yaksha") {
+        this.drawPortraitMist(ctx, 18, "#1b0d24");
+        ctx.fillStyle = "#342447";
+        ctx.beginPath();
+        ctx.moveTo(0, -21);
+        ctx.lineTo(15, -2);
+        ctx.lineTo(8, 17);
+        ctx.lineTo(0, 11);
+        ctx.lineTo(-8, 17);
+        ctx.lineTo(-15, -2);
+        ctx.closePath();
+        ctx.fill();
+        drawHorns("#f5d78a", 7, 25);
+        ctx.strokeStyle = "#f3fff9";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-12, 5);
+        ctx.lineTo(-20, 12);
+        ctx.moveTo(12, 5);
+        ctx.lineTo(20, 12);
+        ctx.stroke();
+        drawEyes("slash");
+      } else if (key === "wingDemon") {
+        const flap = 2;
+        ctx.fillStyle = "rgba(20, 40, 43, 0.8)";
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          ctx.moveTo(side * 2, -4);
+          ctx.quadraticCurveTo(side * 24, -16 - flap, side * 17, 10);
+          ctx.quadraticCurveTo(side * 8, 3, side * 2, 6);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#253f43";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 7, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        drawEyes("slash");
+      } else if (key === "curseMage") {
+        this.drawPortraitMist(ctx, 17, "#281b3e");
+        ctx.strokeStyle = "rgba(255, 241, 189, 0.62)";
+        ctx.beginPath();
+        ctx.arc(0, 2, 18, 0.2, Math.PI * 1.55);
+        ctx.stroke();
+        ctx.fillStyle = "#3d2b57";
+        ctx.beginPath();
+        ctx.moveTo(0, -20);
+        ctx.quadraticCurveTo(14, -5, 8, 17);
+        ctx.quadraticCurveTo(0, 10, -8, 17);
+        ctx.quadraticCurveTo(-14, -5, 0, -20);
+        ctx.fill();
+        ctx.strokeStyle = "#fff1bd";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(13, -16);
+        ctx.lineTo(18, 16);
+        ctx.stroke();
+        drawEyes();
+      } else if (key === "nineTailShade") {
+        this.drawPortraitMist(ctx, 20, "#40284d");
+        ctx.strokeStyle = "rgba(238, 208, 255, 0.58)";
+        ctx.lineWidth = 4.8;
+        for (let i = -2; i <= 2; i += 1) {
+          ctx.beginPath();
+          ctx.moveTo(i * 2, 10);
+          ctx.quadraticCurveTo(i * 7 - 11, 1, i * 7 - 9, -16);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "rgba(182, 123, 174, 0.82)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 10, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+        drawEyes("slash");
+      } else if (key === "waterApe") {
+        this.drawPortraitMist(ctx, 19, "#174c57");
+        ctx.strokeStyle = "rgba(127, 209, 216, 0.72)";
+        for (let i = 0; i < 3; i += 1) {
+          ctx.beginPath();
+          ctx.ellipse(0, 8 + i * 2, 13 + i * 4, 4, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "#2d6e78";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 13, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#173f42";
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          ctx.ellipse(side * 14, 3, 5, 13, side * 0.25, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        drawEyes();
+      } else if (key === "blackWind") {
+        ctx.fillStyle = "rgba(18, 21, 24, 0.88)";
+        for (let i = 0; i < 4; i += 1) {
+          ctx.beginPath();
+          ctx.ellipse(Math.cos(i) * 2, Math.sin(i) * 2, 16 - i, 7 + i * 1.5, i * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.strokeStyle = "rgba(159, 217, 207, 0.56)";
+        for (let i = 0; i < 3; i += 1) {
+          ctx.beginPath();
+          ctx.arc(0, 0, 8 + i * 5, i, i + Math.PI * 1.15);
+          ctx.stroke();
+        }
+        drawEyes();
+      } else if (key === "boneDemon") {
+        ctx.strokeStyle = "#e8f7ef";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(0, -7);
+        ctx.lineTo(0, 13);
+        ctx.moveTo(-8, -1);
+        ctx.lineTo(8, -1);
+        ctx.moveTo(-4, 11);
+        ctx.lineTo(-11, 20);
+        ctx.moveTo(4, 11);
+        ctx.lineTo(11, 20);
+        ctx.stroke();
+        ctx.fillStyle = "#f3fff9";
+        ctx.beginPath();
+        ctx.ellipse(0, -15, 8, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ff6b57";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.quadraticCurveTo(-10, 5, 13, 3);
+        ctx.stroke();
+        drawEyes();
+      } else if (key === "bullVanguard") {
+        this.drawPortraitMist(ctx, 21, "#351b19");
+        ctx.fillStyle = "#5c2e28";
+        ctx.beginPath();
+        ctx.ellipse(0, 2, 16, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        drawHorns("#f5d78a", 11, 26);
+        ctx.strokeStyle = "#ff6b57";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-5, -10);
+        ctx.lineTo(1, 10);
+        ctx.moveTo(6, -8);
+        ctx.lineTo(-1, 11);
+        ctx.stroke();
+        drawEyes();
+      } else if (key === "bossBlackWind" || key === "bossYellowWind" || key === "bossBoneLady" || key === "bossBullKing") {
+        const bossColor = key === "bossBullKing" ? "#5b2b26" : key === "bossBoneLady" ? "#e8f7ef" : key === "bossYellowWind" ? "#806136" : "#20282c";
+        this.drawPortraitMist(ctx, 22, key === "bossYellowWind" ? "#806136" : "#111719");
+        ctx.fillStyle = bossColor;
+        ctx.beginPath();
+        ctx.moveTo(0, -22);
+        ctx.bezierCurveTo(21, -16, 19, 11, 5, 20);
+        ctx.lineTo(0, 17);
+        ctx.lineTo(-5, 20);
+        ctx.bezierCurveTo(-19, 11, -21, -16, 0, -22);
+        ctx.fill();
+        drawHorns(key === "bossBoneLady" ? "#9fd9cf" : "#f5d78a", 10, 27);
+        if (key === "bossBoneLady") {
+          ctx.strokeStyle = "#ff6b57";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.quadraticCurveTo(-14, 9, 14, 8);
+          ctx.stroke();
+        }
+        drawEyes(key === "bossBullKing" ? "dot" : "slash");
+      }
+    }
+
+    drawPortraitMist(ctx, r, color) {
+      ctx.save();
+      ctx.globalAlpha = 0.26;
+      ctx.fillStyle = color;
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.ellipse(Math.sin(i) * 2, 13 + i * 2, r + i * 3, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     }
 
     renderAchievements() {
