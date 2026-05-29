@@ -389,30 +389,31 @@
   ];
   const clampSetup = (value, min, max) => Math.max(min, Math.min(max, value));
   const ENEMY_UNLOCK_LEVEL = {
-    imp: 1,
-    runner: 2,
-    brute: 3,
-    shield: 4,
-    poison: 12,
-    stone: 13,
-    fireling: 15,
+    foxDemon: 1,
+    dogDemon: 2,
+    shrimpDemon: 3,
+    boarDragon: 4,
+    frogDemon: 5,
+    lampGranny: 12,
+    stoneArmor: 13,
     yaksha: 17,
-    flying: 22,
-    caster: 23,
-    xuanArmor: 24,
-    splitter: 28,
-    drainer: 32,
-    vanguard: 35,
-    boss10: 10,
-    boss20: 20,
-    boss30: 30,
-    boss40: 40,
+    wingDemon: 22,
+    curseMage: 23,
+    waterApe: 24,
+    nineTailShade: 28,
+    blackWind: 32,
+    boneDemon: 33,
+    bullVanguard: 35,
+    bossBlackWind: 10,
+    bossYellowWind: 20,
+    bossBoneLady: 30,
+    bossBullKing: 40,
   };
   const BOSS_LEVELS = {
-    10: { type: "boss10", name: "黑风怪", appearText: "黑风怪卷雾而来：把山门交出来！" },
-    20: { type: "boss20", name: "吴支祁", appearText: "吴支祁踏浪压阵：水府妖兵听令！" },
-    30: { type: "boss30", name: "白骨夫人", appearText: "白骨夫人现身：取经人，留下性命。" },
-    40: { type: "boss40", name: "牛魔王", appearText: "牛魔王降临：火焰山万妖听号！" },
+    10: { type: "bossBlackWind", name: "黑风怪", appearText: "黑风怪来袭！" },
+    20: { type: "bossYellowWind", name: "黄风妖王", appearText: "黄风妖王来袭！" },
+    30: { type: "bossBoneLady", name: "白骨夫人", appearText: "白骨夫人现身！" },
+    40: { type: "bossBullKing", name: "牛魔王", appearText: "牛魔王降临！" },
   };
   const getRealmByOrder = (order) => LEVEL_REALMS.find((realm) => order >= realm.start && order <= realm.end) || LEVEL_REALMS[0];
   const getStageIndexByOrder = (order) => Math.floor((order - 1) / 10);
@@ -435,40 +436,42 @@
     .filter(([id, unlock]) => unlock <= order && !id.startsWith("boss"))
     .map(([id]) => id);
   const getLevelEnemyTypes = (order) => {
-    const allowed = new Set(["imp"]);
-    if (order >= 2) allowed.add("runner");
-    if (order >= 3) allowed.add("brute");
-    if (order >= 4) allowed.add("shield");
-    if (order >= 12) allowed.add("poison");
-    if (order >= 13) allowed.add("stone");
-    if (order >= 15) allowed.add("fireling");
+    const allowed = new Set(["foxDemon"]);
+    if (order >= 2) allowed.add("dogDemon");
+    if (order >= 3) allowed.add("shrimpDemon");
+    if (order >= 4) allowed.add("boarDragon");
+    if (order >= 5) allowed.add("frogDemon");
+    if (order >= 12) allowed.add("lampGranny");
+    if (order >= 13) allowed.add("stoneArmor");
     if (order >= 17) allowed.add("yaksha");
-    if (order >= 22) allowed.add("flying");
-    if (order >= 23) allowed.add("caster");
-    if (order >= 24) allowed.add("xuanArmor");
-    if (order >= 28) allowed.add("splitter");
-    if (order >= 32) allowed.add("drainer");
-    if (order >= 35) allowed.add("vanguard");
+    if (order >= 22) allowed.add("wingDemon");
+    if (order >= 23) allowed.add("curseMage");
+    if (order >= 24) allowed.add("waterApe");
+    if (order >= 28) allowed.add("nineTailShade");
+    if (order >= 32) allowed.add("blackWind");
+    if (order >= 33) allowed.add("boneDemon");
+    if (order >= 35) allowed.add("bullVanguard");
     return getAllowedEnemyTypes(order).filter((id) => allowed.has(id));
   };
   const buildEnemyWeights = (order, segment) => {
-    const weights = { imp: 1 };
-    if (order >= 2) weights.runner = 0.1 + segment * 0.04 + (order >= 5 ? 0.1 : 0);
-    if (order >= 3) weights.brute = 0.06 + segment * 0.035 + (order % 10 === 3 ? 0.12 : 0);
-    if (order >= 4) weights.shield = 0.06 + segment * 0.04 + (order % 10 === 8 ? 0.16 : 0);
-    if (order >= 12) weights.poison = 0.05 + segment * 0.025 + (order === 14 ? 0.12 : 0);
-    if (order >= 13) weights.stone = 0.05 + segment * 0.025 + (order === 13 || order === 24 ? 0.14 : 0);
-    if (order >= 15) weights.fireling = 0.05 + segment * 0.025 + (order === 15 || order === 40 ? 0.1 : 0);
+    const weights = { foxDemon: 1 };
+    if (order >= 2) weights.dogDemon = 0.12 + segment * 0.035 + (order <= 10 ? 0.04 : 0);
+    if (order >= 3) weights.shrimpDemon = 0.12 + segment * 0.05 + (order >= 5 ? 0.08 : 0);
+    if (order >= 4) weights.boarDragon = 0.06 + segment * 0.035 + (order % 10 === 3 ? 0.12 : 0);
+    if (order >= 5) weights.frogDemon = 0.06 + segment * 0.04 + (order % 10 === 8 ? 0.16 : 0);
+    if (order >= 12) weights.lampGranny = 0.05 + segment * 0.025 + (order === 15 ? 0.12 : 0);
+    if (order >= 13) weights.stoneArmor = 0.05 + segment * 0.025 + (order === 13 || order === 24 ? 0.14 : 0);
     if (order >= 17) weights.yaksha = 0.035 + segment * 0.02 + (order === 17 || order === 32 ? 0.08 : 0);
-    if (order >= 22) weights.flying = 0.05 + segment * 0.025 + (order === 22 ? 0.14 : 0);
-    if (order >= 23) weights.caster = 0.035 + segment * 0.02 + (order === 23 || order === 27 ? 0.12 : 0);
-    if (order >= 24) weights.xuanArmor = 0.03 + segment * 0.018 + (order === 24 || order === 34 ? 0.12 : 0);
-    if (order >= 28) weights.splitter = 0.045 + segment * 0.025 + (order === 28 ? 0.12 : 0);
-    if (order >= 32) weights.drainer = 0.035 + segment * 0.018 + (order === 32 || order === 33 ? 0.1 : 0);
-    if (order >= 35) weights.vanguard = 0.025 + segment * 0.014 + (order === 35 || order === 38 ? 0.08 : 0);
+    if (order >= 22) weights.wingDemon = 0.05 + segment * 0.025 + (order === 22 ? 0.14 : 0);
+    if (order >= 23) weights.curseMage = 0.035 + segment * 0.02 + (order === 23 || order === 27 ? 0.12 : 0);
+    if (order >= 24) weights.waterApe = 0.03 + segment * 0.018 + (order === 24 || order === 26 ? 0.12 : 0);
+    if (order >= 28) weights.nineTailShade = 0.045 + segment * 0.025 + (order === 28 ? 0.12 : 0);
+    if (order >= 32) weights.blackWind = 0.04 + segment * 0.022 + (order === 32 || order === 38 ? 0.1 : 0);
+    if (order >= 33) weights.boneDemon = 0.035 + segment * 0.02 + (order === 33 ? 0.1 : 0);
+    if (order >= 35) weights.bullVanguard = 0.025 + segment * 0.014 + (order === 35 || order === 38 ? 0.08 : 0);
     if (order % 10 === 9) {
-      weights.brute = (weights.brute || 0) + 0.08;
-      weights.shield = (weights.shield || 0) + 0.08;
+      weights.boarDragon = (weights.boarDragon || 0) + 0.08;
+      weights.frogDemon = (weights.frogDemon || 0) + 0.08;
     }
     const allowed = new Set(getLevelEnemyTypes(order));
     for (const key of Object.keys(weights)) {
@@ -566,7 +569,7 @@
     rewardMultiplier: 1,
     enemyHpMaxMultiplier: 1.6,
     enemySpeedMaxMultiplier: 1.3,
-    enemyTypes: ["imp", "runner", "shield", "brute"],
+    enemyTypes: ["foxDemon", "dogDemon", "shrimpDemon", "boarDragon", "frogDemon"],
     phases: [
       { time: 0, text: "妖潮初现" },
       { time: 20, text: "妖气渐浓" },
@@ -576,11 +579,11 @@
       { time: 110, text: "宗门决战" },
     ],
     spawnProfiles: [
-      { start: 0, end: 20, intervalMin: 1.3, intervalMax: 1.6, extraChance: 0, weights: { imp: 1 } },
-      { start: 20, end: 40, intervalMin: 1.1, intervalMax: 1.3, extraChance: 0, weights: { imp: 0.82, runner: 0.18 } },
-      { start: 40, end: 70, intervalMin: 0.9, intervalMax: 1.1, extraChance: 0.05, weights: { imp: 0.58, runner: 0.2, shield: 0.1, brute: 0.12 } },
-      { start: 70, end: 95, intervalMin: 0.75, intervalMax: 0.95, extraChance: 0.12, weights: { imp: 0.42, runner: 0.27, shield: 0.16, brute: 0.15 } },
-      { start: 95, end: 120, intervalMin: 0.6, intervalMax: 0.8, extraChance: 0.18, weights: { imp: 0.4, runner: 0.3, shield: 0.16, brute: 0.14 } },
+      { start: 0, end: 20, intervalMin: 1.3, intervalMax: 1.6, extraChance: 0, weights: { foxDemon: 1 } },
+      { start: 20, end: 40, intervalMin: 1.1, intervalMax: 1.3, extraChance: 0, weights: { foxDemon: 0.72, dogDemon: 0.12, shrimpDemon: 0.16 } },
+      { start: 40, end: 70, intervalMin: 0.9, intervalMax: 1.1, extraChance: 0.05, weights: { foxDemon: 0.5, dogDemon: 0.15, shrimpDemon: 0.18, frogDemon: 0.08, boarDragon: 0.09 } },
+      { start: 70, end: 95, intervalMin: 0.75, intervalMax: 0.95, extraChance: 0.12, weights: { foxDemon: 0.38, dogDemon: 0.18, shrimpDemon: 0.22, frogDemon: 0.11, boarDragon: 0.11 } },
+      { start: 95, end: 120, intervalMin: 0.6, intervalMax: 0.8, extraChance: 0.18, weights: { foxDemon: 0.34, dogDemon: 0.2, shrimpDemon: 0.24, frogDemon: 0.11, boarDragon: 0.11 } },
     ],
   });
   const LEVEL_LIST = Object.values(LEVEL_CONFIG).sort((a, b) => a.order - b.order);
@@ -1004,6 +1007,483 @@
     config.baseSpeed = config.speed;
     config.baseDamage = config.damage;
   }
+
+  const CANONICAL_ENEMY_TYPES = {
+    foxDemon: {
+      key: "foxDemon",
+      name: "狐妖",
+      category: "normal",
+      unlockLevel: 1,
+      hp: 22,
+      speed: 44,
+      damage: 5,
+      exp: 5,
+      radius: 15,
+      visual: "foxDemon",
+      body: "#c97844",
+      eye: "#ff4b45",
+      colorTheme: { fur: "#c97844", belly: "#fff1bd", fire: "#f5a24d" },
+      traits: ["灵活小怪", "狐火"],
+      description: "山野狐火所化，耳尖尾大，常借妖雾穿行山林。",
+      lore: "山野狐火所化，耳尖尾大，常借妖雾穿行山林。",
+    },
+    dogDemon: {
+      key: "dogDemon",
+      name: "犬妖",
+      category: "normal",
+      unlockLevel: 2,
+      hp: 28,
+      speed: 52,
+      damage: 6,
+      exp: 6,
+      radius: 15,
+      visual: "dogDemon",
+      body: "#2b2b2c",
+      eye: "#ff4b45",
+      colorTheme: { fur: "#2b2b2c", cloth: "#8a6a44", belt: "#f5d78a" },
+      traits: ["冲锋小怪", "爪击"],
+      description: "黑毛犬头小妖，穿破布衣，低身前冲扑向山门。",
+      lore: "黑毛犬头小妖，穿破布衣，低身前冲扑向山门。",
+    },
+    shrimpDemon: {
+      key: "shrimpDemon",
+      name: "赤虾子",
+      category: "normal",
+      unlockLevel: 3,
+      hp: 24,
+      speed: 74,
+      damage: 6,
+      exp: 6,
+      radius: 12,
+      visual: "shrimpDemon",
+      body: "#d96943",
+      eye: "#ff4b45",
+      colorTheme: { shell: "#d96943", water: "#7fd1d8" },
+      traits: ["高速小怪", "拖影"],
+      description: "水府逃出的虾兵小妖，弯背长须，行如水线。",
+      lore: "水府逃出的虾兵小妖，弯背长须，行如水线。",
+    },
+    boarDragon: {
+      key: "boarDragon",
+      name: "猪龙",
+      category: "normal",
+      unlockLevel: 4,
+      hp: 74,
+      speed: 24,
+      damage: 12,
+      exp: 10,
+      radius: 23,
+      visual: "boarDragon",
+      body: "#6b4b3a",
+      eye: "#ff5b4f",
+      colorTheme: { hide: "#6b4b3a", scale: "#9f8b62", tusk: "#f3fff9" },
+      traits: ["厚血推进", "獠牙"],
+      description: "圆滚猪身长出龙须鳞片，慢而厚重，专撞结界。",
+      lore: "圆滚猪身长出龙须鳞片，慢而厚重，专撞结界。",
+    },
+    frogDemon: {
+      key: "frogDemon",
+      name: "蛙妖",
+      category: "normal",
+      unlockLevel: 5,
+      hp: 38,
+      speed: 36,
+      damage: 8,
+      exp: 8,
+      radius: 17,
+      visual: "frogDemon",
+      body: "#5f9d62",
+      eye: "#ff6b57",
+      jumpInterval: 2.4,
+      jumpBoost: 1.55,
+      colorTheme: { skin: "#5f9d62", robe: "#3f6f52", belly: "#d7fff5" },
+      traits: ["跳跃推进", "蹲坐"],
+      description: "鼓眼圆肚的蛙妖，披小荷袍，时不时一跃向前。",
+      lore: "鼓眼圆肚的蛙妖，披小荷袍，时不时一跃向前。",
+    },
+    lampGranny: {
+      key: "lampGranny",
+      name: "灯花婆婆",
+      category: "elite",
+      unlockLevel: 12,
+      hp: 62,
+      speed: 34,
+      damage: 8,
+      exp: 10,
+      radius: 16,
+      visual: "lampGranny",
+      body: "#6a3a34",
+      eye: "#fff1bd",
+      explodeNearWall: true,
+      explodeRadius: 58,
+      explodeDamageMult: 2.1,
+      colorTheme: { robe: "#6a3a34", flame: "#ff8a45", lamp: "#f5d78a" },
+      traits: ["火碗", "近门爆炎"],
+      description: "端灯盏的小老太妖，火光照脸，近门时妖火炸裂。",
+      lore: "端灯盏的小老太妖，火光照脸，近门时妖火炸裂。",
+    },
+    stoneArmor: {
+      key: "stoneArmor",
+      name: "石甲妖",
+      category: "elite",
+      unlockLevel: 13,
+      hp: 94,
+      speed: 25,
+      damage: 10,
+      exp: 11,
+      radius: 19,
+      visual: "stoneArmor",
+      body: "#68736b",
+      eye: "#ff6b57",
+      swordDamageTaken: 0.62,
+      colorTheme: { stone: "#68736b", crack: "#fff1bd" },
+      traits: ["高护甲", "裂纹"],
+      description: "灰青石壳成精，裂纹藏火，寻常剑影伤害降低。",
+      lore: "灰青石壳成精，裂纹藏火，寻常剑影伤害降低。",
+    },
+    yaksha: {
+      key: "yaksha",
+      name: "夜叉",
+      category: "elite",
+      unlockLevel: 17,
+      hp: 86,
+      speed: 72,
+      damage: 16,
+      exp: 14,
+      radius: 17,
+      visual: "yakshaCn",
+      body: "#342447",
+      eye: "#ff4b45",
+      colorTheme: { skin: "#342447", horn: "#f5d78a", claw: "#f3fff9" },
+      traits: ["高速高伤", "利爪"],
+      description: "双角利爪，披黑气而行，数量不多但压迫极强。",
+      lore: "双角利爪，披黑气而行，数量不多但压迫极强。",
+    },
+    wingDemon: {
+      key: "wingDemon",
+      name: "飞妖",
+      category: "elite",
+      unlockLevel: 22,
+      hp: 76,
+      speed: 58,
+      damage: 9,
+      exp: 13,
+      radius: 15,
+      visual: "wingDemon",
+      body: "#253f43",
+      eye: "#ff5b4f",
+      flying: true,
+      arrayDamageTaken: 0.3,
+      colorTheme: { wing: "#253f43", beak: "#e9b85f" },
+      traits: ["飞行", "阵法减伤"],
+      description: "鸟妖剪影掠空，翅影扑动，受地面阵法伤害降低。",
+      lore: "鸟妖剪影掠空，翅影扑动，受地面阵法伤害降低。",
+    },
+    curseMage: {
+      key: "curseMage",
+      name: "咒师妖",
+      category: "elite",
+      unlockLevel: 23,
+      hp: 104,
+      speed: 30,
+      damage: 9,
+      exp: 16,
+      radius: 18,
+      visual: "curseMage",
+      body: "#3d2b57",
+      eye: "#ff6b57",
+      allySpeedAura: 0.05,
+      auraRadius: 100,
+      colorTheme: { robe: "#3d2b57", charm: "#fff1bd", curse: "#bf7cff" },
+      traits: ["咒印光环", "小怪加速"],
+      description: "小妖道执杖画咒，脚下紫色咒印会鼓动附近妖物。",
+      lore: "小妖道执杖画咒，脚下紫色咒印会鼓动附近妖物。",
+    },
+    nineTailShade: {
+      key: "nineTailShade",
+      name: "九尾狐影",
+      category: "elite",
+      unlockLevel: 28,
+      hp: 96,
+      speed: 42,
+      damage: 10,
+      exp: 15,
+      radius: 18,
+      visual: "nineTailShade",
+      body: "#7c5c88",
+      eye: "#ff6b57",
+      splitInto: ["foxDemon", "shrimpDemon"],
+      evadeChance: 0.16,
+      colorTheme: { shade: "#d8b7e8", tail: "#fff1bd" },
+      traits: ["幻影闪避", "分裂"],
+      description: "白紫狐影摇出多尾，受击时偶尔化虚，死亡后裂出小妖。",
+      lore: "白紫狐影摇出多尾，受击时偶尔化虚，死亡后裂出小妖。",
+    },
+    waterApe: {
+      key: "waterApe",
+      name: "水猿妖",
+      category: "elite",
+      unlockLevel: 24,
+      hp: 186,
+      shield: 70,
+      speed: 22,
+      damage: 17,
+      exp: 23,
+      radius: 25,
+      visual: "waterApe",
+      body: "#2d6e78",
+      eye: "#ff6b57",
+      waterPulse: true,
+      colorTheme: { fur: "#2d6e78", wave: "#9fd9cf" },
+      traits: ["水波", "厚血"],
+      description: "青蓝水猿，臂长如桨，行走时水纹环绕。",
+      lore: "青蓝水猿，臂长如桨，行走时水纹环绕。",
+    },
+    blackWind: {
+      key: "blackWind",
+      name: "黑风怪卒",
+      category: "elite",
+      unlockLevel: 32,
+      hp: 118,
+      speed: 58,
+      damage: 12,
+      exp: 18,
+      radius: 18,
+      visual: "blackWind",
+      body: "#1d2430",
+      eye: "#ff5b4f",
+      dashInterval: 3.2,
+      dashBoost: 2.2,
+      colorTheme: { wind: "#1d2430", eye: "#ff5b4f" },
+      traits: ["旋风冲刺", "拖影"],
+      description: "黑色旋风团里露出眼睛、角与爪，短距冲刺压迫很强。",
+      lore: "黑色旋风团里露出眼睛、角与爪，短距冲刺压迫很强。",
+    },
+    boneDemon: {
+      key: "boneDemon",
+      name: "白骨妖",
+      category: "elite",
+      unlockLevel: 33,
+      hp: 112,
+      speed: 34,
+      damage: 11,
+      exp: 18,
+      radius: 18,
+      visual: "boneDemon",
+      body: "#e8f7ef",
+      eye: "#ff4b45",
+      reviveChance: 0.35,
+      colorTheme: { bone: "#e8f7ef", ribbon: "#d84e45" },
+      traits: ["概率复生", "骨片"],
+      description: "白骨架缠红绸，死亡后有概率骨片重组再起。",
+      lore: "白骨架缠红绸，死亡后有概率骨片重组再起。",
+    },
+    bullVanguard: {
+      key: "bullVanguard",
+      name: "牛魔先锋",
+      category: "elite",
+      unlockLevel: 35,
+      hp: 220,
+      shield: 60,
+      speed: 28,
+      damage: 20,
+      exp: 28,
+      radius: 24,
+      visual: "bullVanguard",
+      body: "#5c2e28",
+      eye: "#fff1bd",
+      allySpeedAura: 0.1,
+      auraRadius: 120,
+      colorTheme: { hide: "#5c2e28", mark: "#f5d78a" },
+      traits: ["精英光环", "牛角"],
+      description: "牛角壮体，金红妖纹绕身，能鼓舞周围小怪。",
+      lore: "牛角壮体，金红妖纹绕身，能鼓舞周围小怪。",
+    },
+    bossBlackWind: {
+      key: "bossBlackWind",
+      name: "黑风怪",
+      category: "boss",
+      unlockLevel: 10,
+      hp: 360,
+      speed: 18,
+      damage: 24,
+      exp: 50,
+      radius: 36,
+      visual: "bossBlackWind",
+      body: "#20282c",
+      eye: "#ff6b57",
+      boss: true,
+      summonTypes: ["foxDemon", "dogDemon", "blackWind"],
+      summonInterval: 5.8,
+      colorTheme: { wind: "#20282c", gold: "#f5d78a" },
+      traits: ["召唤", "黑风冲阵"],
+      description: "黑风山妖王，披风卷雾，召小妖冲阵。",
+      lore: "黑风山妖王，披风卷雾，召小妖冲阵。",
+    },
+    bossYellowWind: {
+      key: "bossYellowWind",
+      name: "黄风妖王",
+      category: "boss",
+      unlockLevel: 20,
+      hp: 760,
+      shield: 120,
+      speed: 16,
+      damage: 34,
+      exp: 80,
+      radius: 39,
+      visual: "bossYellowWind",
+      body: "#7b6531",
+      eye: "#fff1bd",
+      boss: true,
+      allySpeedAura: 0.12,
+      auraRadius: 155,
+      summonTypes: ["frogDemon", "boarDragon", "stoneArmor"],
+      summonInterval: 6.5,
+      colorTheme: { wind: "#e9b85f", robe: "#7b6531" },
+      traits: ["风压", "加速光环"],
+      description: "黄风岭妖王，风砂绕身，能推着小怪向山门压来。",
+      lore: "黄风岭妖王，风砂绕身，能推着小怪向山门压来。",
+    },
+    bossBoneLady: {
+      key: "bossBoneLady",
+      name: "白骨夫人",
+      category: "boss",
+      unlockLevel: 30,
+      hp: 1250,
+      shield: 260,
+      speed: 14,
+      damage: 38,
+      exp: 120,
+      radius: 41,
+      visual: "bossBoneLady",
+      body: "#e8f7ef",
+      eye: "#ff4b45",
+      boss: true,
+      summonTypes: ["curseMage", "boneDemon"],
+      summonInterval: 7,
+      phaseShieldRate: 0.55,
+      phaseShieldAmount: 260,
+      colorTheme: { bone: "#e8f7ef", ribbon: "#d84e45" },
+      traits: ["幻影", "阶段护盾"],
+      description: "白骨幻相结阵，妖咒与骨影接连压门。",
+      lore: "白骨幻相结阵，妖咒与骨影接连压门。",
+    },
+    bossBullKing: {
+      key: "bossBullKing",
+      name: "牛魔王",
+      category: "boss",
+      unlockLevel: 40,
+      hp: 2350,
+      shield: 360,
+      speed: 13,
+      damage: 48,
+      exp: 180,
+      radius: 46,
+      visual: "bossBullKing",
+      body: "#5b2b26",
+      eye: "#fff1bd",
+      boss: true,
+      summonTypes: ["yaksha", "bullVanguard"],
+      summonInterval: 6.4,
+      phaseSummons: [
+        { hpRate: 0.7, types: ["shrimpDemon", "blackWind"], text: "牛魔王号令黑风疾影！" },
+        { hpRate: 0.4, shield: 520, text: "牛魔王妖甲大开！" },
+        { hpRate: 0.2, types: ["lampGranny", "lampGranny", "bullVanguard"], text: "牛魔王唤出火焰山死士！" },
+      ],
+      colorTheme: { hide: "#5b2b26", flame: "#ff6b57", gold: "#f5d78a" },
+      traits: ["终章 Boss", "分阶段"],
+      description: "火焰山万妖共主，牛角如戟，妖纹如火。",
+      lore: "火焰山万妖共主，牛角如戟，妖纹如火。",
+    },
+  };
+
+  Object.assign(ENEMY_TYPES, CANONICAL_ENEMY_TYPES);
+  const ENEMY_KEY_ALIASES = {
+    small: "foxDemon",
+    imp: "foxDemon",
+    runner: "shrimpDemon",
+    giant: "boarDragon",
+    brute: "boarDragon",
+    shield: "frogDemon",
+    poison: "frogDemon",
+    fire: "lampGranny",
+    fireling: "lampGranny",
+    stone: "stoneArmor",
+    flying: "wingDemon",
+    mage: "curseMage",
+    caster: "curseMage",
+    xuanArmor: "waterApe",
+    split: "boneDemon",
+    splitter: "nineTailShade",
+    drainer: "boneDemon",
+    elite: "bullVanguard",
+    vanguard: "bullVanguard",
+    boss10: "bossBlackWind",
+    boss20: "bossYellowWind",
+    boss30: "bossBoneLady",
+    boss40: "bossBullKing",
+  };
+  for (const [legacy, canonical] of Object.entries(ENEMY_KEY_ALIASES)) {
+    if (ENEMY_TYPES[canonical]) {
+      ENEMY_TYPES[legacy] = {
+        ...ENEMY_TYPES[canonical],
+        key: legacy,
+        aliasOf: canonical,
+        type: canonical,
+      };
+    }
+  }
+  for (const [id, config] of Object.entries(ENEMY_TYPES)) {
+    config.key = config.key || id;
+    config.type = ENEMY_KEY_ALIASES[id] || config.type || id;
+    config.hp = config.hp ?? config.baseHp;
+    config.speed = config.speed ?? config.baseSpeed;
+    config.damage = config.damage ?? config.baseDamage;
+    config.unlockLevel = config.unlockLevel || ENEMY_UNLOCK_LEVEL[config.type] || ENEMY_UNLOCK_LEVEL[id] || 1;
+    config.category = config.category || (config.boss ? "boss" : config.allySpeedAura || config.shield ? "elite" : "normal");
+    config.baseHp = config.hp;
+    config.baseSpeed = config.speed;
+    config.baseDamage = config.damage;
+  }
+  const normalizeEnemyType = (type) => ENEMY_KEY_ALIASES[type] || type;
+  const MONSTER_TEXT = {
+    foxDemon: { name: "狐妖", traits: ["灵活小怪", "狐火"], description: "山野狐火所化，耳尖尾大，常借妖雾穿行山林。" },
+    dogDemon: { name: "犬妖", traits: ["冲锋小怪", "爪击"], description: "黑毛犬头小妖，穿破布衣，低身前冲扑向山门。" },
+    shrimpDemon: { name: "赤虾子", traits: ["高速小怪", "拖影"], description: "水府逃出的虾兵小妖，弯背长须，行如水线。" },
+    boarDragon: { name: "猪龙", traits: ["厚血推进", "獠牙"], description: "圆滚猪身长出龙须鳞片，慢而厚重，专撞结界。" },
+    frogDemon: { name: "蛙妖", traits: ["跳跃推进", "蹲坐"], description: "鼓眼圆肚的蛙妖，披小荷袍，时不时一跃向前。" },
+    lampGranny: { name: "灯花婆婆", traits: ["火碗", "近门爆燃"], description: "端灯盏的小老太妖，火光照脸，近门时妖火炸裂。" },
+    stoneArmor: { name: "石甲妖", traits: ["高护甲", "裂纹"], description: "灰青石壳成精，裂纹藏火，寻常剑影伤害降低。" },
+    yaksha: { name: "夜叉", traits: ["高速高伤", "利爪"], description: "双角利爪，披黑气而行，数量不多但压迫极强。" },
+    wingDemon: { name: "飞妖", traits: ["飞行", "阵法减伤"], description: "鸟妖剪影掠空，翅影扇动，受地面阵法伤害降低。" },
+    curseMage: { name: "咒师妖", traits: ["咒印光环", "小怪加速"], description: "小妖道执杖画咒，脚下紫色咒印会鼓动附近妖物。" },
+    nineTailShade: { name: "九尾狐影", traits: ["幻影闪避", "分裂"], description: "白紫狐影摇出多尾，受击时偶尔化虚，死亡后裂出小妖。" },
+    waterApe: { name: "水猿妖", traits: ["水波", "厚血"], description: "青蓝水猿，臂长如桨，行走时水纹环绕。" },
+    blackWind: { name: "黑风怪卒", traits: ["旋风冲刺", "拖影"], description: "黑色旋风团里露出眼睛、角与爪，短距冲刺压迫很强。" },
+    boneDemon: { name: "白骨妖", traits: ["复生", "骨片"], description: "白骨架披红绸，死亡时可能骨片重组，再度爬起。" },
+    bullVanguard: { name: "牛魔先锋", traits: ["精英光环", "牛角"], description: "壮硕牛角妖卒，金红妖纹缠身，能鼓动周围妖潮。" },
+    bossBlackWind: { name: "黑风怪", traits: ["Boss", "召唤黑风"], description: "黑风山妖王，披风卷雾，召小妖冲阵。" },
+    bossYellowWind: { name: "黄风妖王", traits: ["Boss", "风压光环"], description: "黄风岭妖王，风砂绕身，能推着小怪向山门压来。" },
+    bossBoneLady: { name: "白骨夫人", traits: ["Boss", "阶段护盾"], description: "白骨幻相结阵，妖咒与骨影接连压门。" },
+    bossBullKing: { name: "牛魔王", traits: ["终章 Boss", "分阶段"], description: "火焰山万妖共主，牛角如戟，妖纹如火。" },
+  };
+  for (const [id, text] of Object.entries(MONSTER_TEXT)) {
+    if (CANONICAL_ENEMY_TYPES[id]) Object.assign(CANONICAL_ENEMY_TYPES[id], text, { lore: text.description });
+    if (ENEMY_TYPES[id]) Object.assign(ENEMY_TYPES[id], text, { lore: text.description });
+  }
+  for (const [legacy, canonical] of Object.entries(ENEMY_KEY_ALIASES)) {
+    if (ENEMY_TYPES[legacy] && MONSTER_TEXT[canonical]) {
+      Object.assign(ENEMY_TYPES[legacy], MONSTER_TEXT[canonical], { lore: MONSTER_TEXT[canonical].description, key: legacy, aliasOf: canonical, type: canonical });
+    }
+  }
+  const MONSTER_BOOK = Object.fromEntries(Object.entries(CANONICAL_ENEMY_TYPES).map(([id, config]) => [id, {
+    name: config.name,
+    title: config.traits?.[0] || "西游路上妖物",
+    description: config.description || config.lore || "取经路上现身的志怪妖物。",
+    unlockLevel: config.unlockLevel || 1,
+    category: config.category || "normal",
+    traits: config.traits || [],
+  }]));
 
   const SKILL_ORDER = ["sword", "fire", "ice", "thunder", "array"];
   const SKILL_LABELS = {
@@ -1516,7 +1996,11 @@
       : [];
     const seen = source.bestiary?.seen && typeof source.bestiary.seen === "object" ? source.bestiary.seen : {};
     save.bestiary.seen = {};
-    for (const id of Object.keys(ENEMY_TYPES)) {
+    for (const id of Object.keys(seen)) {
+      const normalized = normalizeEnemyType(id);
+      if (seen[id] && MONSTER_BOOK[normalized]) save.bestiary.seen[normalized] = true;
+    }
+    for (const id of Object.keys(MONSTER_BOOK)) {
       if (seen[id]) save.bestiary.seen[id] = true;
     }
     const unlocked = source.achievements?.unlocked && typeof source.achievements.unlocked === "object" ? source.achievements.unlocked : {};
@@ -1976,8 +2460,9 @@
     }
 
     markEnemySeen(type) {
-      if (!ENEMY_TYPES[type]) return;
-      this.data.bestiary.seen[type] = true;
+      const normalized = normalizeEnemyType(type);
+      if (!MONSTER_BOOK[normalized]) return;
+      this.data.bestiary.seen[normalized] = true;
     }
 
     unlockAchievement(id) {
@@ -2193,14 +2678,16 @@
 
   class Enemy {
     constructor(type, game, options = {}) {
-      const config = ENEMY_TYPES[type];
+      const normalizedType = normalizeEnemyType(type) || "foxDemon";
+      const config = ENEMY_TYPES[normalizedType] || ENEMY_TYPES.foxDemon;
       const hpScale = game.enemyHpMultiplier || 1;
       const speedScale = game.enemySpeedMultiplier || 1;
       const damageScale = game.enemyDamageMultiplier || 1;
       this.config = config;
-      this.type = type;
+      this.sourceType = type;
+      this.type = config.type || normalizedType;
       this.name = config.name;
-      this.visual = config.visual || type;
+      this.visual = config.visual || this.type;
       this.isBoss = options.boss || config.boss === true;
       this.elite = options.elite || false;
       this.x = Number.isFinite(options.x) ? options.x : rand(config.radius + 8, game.width - config.radius - 8);
@@ -2223,6 +2710,11 @@
       this.burnVisualUntil = 0;
       this.visualSeed = rand(0, Math.PI * 2);
       this.specialTimer = rand(2.5, config.summonInterval || 5);
+      this.jumpTimer = rand(0.4, config.jumpInterval || 1.2);
+      this.jumpPulse = 0;
+      this.dashTimer = rand(0.5, config.dashInterval || 2.4);
+      this.dashPulse = 0;
+      this.revived = false;
       this.phaseFlags = {};
       this.targetable = options.targetable === true || this.y >= game.battleTop + this.radius;
       this.entering = !this.targetable;
@@ -2231,14 +2723,32 @@
     update(dt, game) {
       if (this.dead) return;
       this.hitPulse = Math.max(0, this.hitPulse - dt * 5);
+      this.jumpPulse = Math.max(0, this.jumpPulse - dt * 2.8);
+      this.dashPulse = Math.max(0, this.dashPulse - dt * 3.4);
       if (this.entering && this.y >= game.battleTop + this.radius) {
         this.entering = false;
         this.targetable = true;
       }
       if (this.isBoss && this.targetable) game.updateBossSpecial(this, dt);
       let speed = this.baseSpeed;
+      if (this.config.jumpInterval) {
+        this.jumpTimer -= dt;
+        if (this.jumpTimer <= 0) {
+          this.jumpPulse = 1;
+          this.jumpTimer = this.config.jumpInterval * rand(0.82, 1.18);
+        }
+      }
+      if (this.config.dashInterval) {
+        this.dashTimer -= dt;
+        if (this.dashTimer <= 0) {
+          this.dashPulse = 1;
+          this.dashTimer = this.config.dashInterval * rand(0.88, 1.2);
+        }
+      }
       if (game.elapsed < this.stunUntil) speed = 0;
       else if (game.elapsed < this.slowUntil) speed *= this.slowFactor;
+      if (this.jumpPulse > 0) speed *= this.config.jumpBoost || 1.35;
+      if (this.dashPulse > 0) speed *= this.config.dashBoost || 1.8;
       speed *= game.getEnemyAuraSpeedBonus(this);
       this.y += speed * dt;
 
@@ -2259,13 +2769,17 @@
       ctx.save();
       ctx.translate(this.x, this.y);
       this.drawEnemyAura(ctx, game, t);
-      if (this.visual === "runner" || this.visual === "yaksha") this.drawRunnerTrail(ctx, game, t);
+      if (["runner", "yaksha", "shrimpDemon", "yakshaCn", "blackWind"].includes(this.visual)) this.drawRunnerTrail(ctx, game, t);
       this.drawEnemyStatusEffects(ctx, game, t, true);
 
-      const bob = this.type === "imp" ? Math.sin(t * 4.2) * 1.8 : Math.sin(t * 2.6) * 0.7;
-      const breathe = this.type === "brute" ? 1 + Math.sin(t * 2.8) * 0.035 : 1 + Math.sin(t * 3.8) * 0.015;
+      const bouncy = ["foxDemon", "dogDemon", "frogDemon", "nineTailShade", "wingDemon"].includes(this.type);
+      const heavy = ["boarDragon", "stoneArmor", "waterApe", "bullVanguard"].includes(this.type) || this.isBoss;
+      const bob = bouncy ? Math.sin(t * 4.2) * 1.8 : Math.sin(t * 2.6) * 0.7;
+      const breathe = heavy ? 1 + Math.sin(t * 2.8) * 0.035 : 1 + Math.sin(t * 3.8) * 0.015;
+      const jumpSquash = this.jumpPulse > 0 ? Math.sin(this.jumpPulse * Math.PI) * 0.12 : 0;
+      const dashStretch = this.dashPulse > 0 ? Math.sin(this.dashPulse * Math.PI) * 0.12 : 0;
       ctx.translate(0, bob);
-      ctx.scale(breathe, breathe);
+      ctx.scale(breathe + dashStretch, breathe - jumpSquash);
 
       if (!this.drawJourneyEnemy(ctx, game, t)) {
         if (this.visual === "runner" || this.visual === "yaksha") this.drawRunnerDemon(ctx, game, t);
@@ -2285,17 +2799,22 @@
 
     drawJourneyEnemy(ctx, game, t) {
       const visual = this.visual;
-      if (visual === "fox" || visual === "splitFox") return this.drawFoxEnemy(ctx, t, visual === "splitFox");
-      if (visual === "shrimp") return this.drawShrimpEnemy(ctx, t);
-      if (visual === "boar") return this.drawBoarEnemy(ctx, t);
-      if (visual === "frog" || visual === "poisonFrog") return this.drawFrogEnemy(ctx, game, t, visual === "poisonFrog");
+      if (visual === "foxDemon" || visual === "fox" || visual === "splitFox") return this.drawFoxEnemy(ctx, t, visual === "splitFox");
+      if (visual === "dogDemon") return this.drawDogDemon(ctx, t);
+      if (visual === "shrimpDemon" || visual === "shrimp") return this.drawShrimpEnemy(ctx, t);
+      if (visual === "boarDragon" || visual === "boar") return this.drawBoarEnemy(ctx, t);
+      if (visual === "frogDemon" || visual === "frog" || visual === "poisonFrog") return this.drawFrogEnemy(ctx, game, t, visual === "poisonFrog");
       if (visual === "lampGranny") return this.drawLampGranny(ctx, t);
       if (visual === "yakshaCn") return this.drawYakshaEnemy(ctx, t);
-      if (visual === "stoneBeast") return this.drawStoneBeast(ctx, t);
-      if (visual === "birdDemon") return this.drawBirdDemon(ctx, t);
-      if (visual === "spellMaster" || visual === "boneDrainer") return this.drawSpellMaster(ctx, t, visual === "boneDrainer");
+      if (visual === "stoneArmor" || visual === "stoneBeast") return this.drawStoneBeast(ctx, t);
+      if (visual === "wingDemon" || visual === "birdDemon") return this.drawBirdDemon(ctx, t);
+      if (visual === "curseMage" || visual === "spellMaster" || visual === "boneDrainer") return this.drawSpellMaster(ctx, t, visual === "boneDrainer");
+      if (visual === "nineTailShade") return this.drawNineTailShade(ctx, t);
+      if (visual === "waterApe") return this.drawWaterApe(ctx, t);
+      if (visual === "blackWind") return this.drawBlackWind(ctx, t);
+      if (visual === "boneDemon") return this.drawBoneDemon(ctx, t);
       if (visual === "pigDragon" || visual === "bullVanguard") return this.drawPigDragon(ctx, t, visual === "bullVanguard");
-      if (visual === "blackWindBoss" || visual === "wuzhiqiBoss" || visual === "whiteBoneBoss" || visual === "bullKingBoss") {
+      if (visual === "bossBlackWind" || visual === "bossYellowWind" || visual === "bossBoneLady" || visual === "bossBullKing" || visual === "blackWindBoss" || visual === "wuzhiqiBoss" || visual === "whiteBoneBoss" || visual === "bullKingBoss") {
         return this.drawJourneyBoss(ctx, t, visual);
       }
       return false;
@@ -2312,17 +2831,21 @@
     drawFoxEnemy(ctx, t, split = false) {
       const r = this.radius;
       this.drawGroundMist(ctx, r, t, 0.75);
-      const tailCount = split ? 3 : 1;
+      const tailCount = this.visual === "nineTailShade" ? 5 : split ? 3 : 1;
       for (let i = 0; i < tailCount; i += 1) {
         const side = i - (tailCount - 1) / 2;
-        ctx.strokeStyle = split ? "rgba(255, 241, 189, 0.52)" : "rgba(255, 188, 114, 0.62)";
+        ctx.strokeStyle = this.visual === "nineTailShade"
+          ? "rgba(238, 208, 255, 0.46)"
+          : split
+            ? "rgba(255, 241, 189, 0.52)"
+            : "rgba(255, 188, 114, 0.62)";
         ctx.lineWidth = r * 0.34;
         ctx.beginPath();
         ctx.moveTo(-r * 0.25 + side * r * 0.22, r * 0.34);
         ctx.quadraticCurveTo(-r * (1.3 + i * 0.1), r * (0.2 + Math.sin(t * 5 + i) * 0.1), -r * 1.15 + side * r * 0.18, -r * 0.62);
         ctx.stroke();
       }
-      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : split ? "#65435d" : "#b76b42";
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : this.visual === "nineTailShade" ? "rgba(182, 123, 174, 0.78)" : split ? "#65435d" : "#b76b42";
       ctx.beginPath();
       ctx.ellipse(0, 0, r * 0.72, r * 0.9, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -2340,6 +2863,57 @@
       ctx.beginPath();
       ctx.ellipse(0, r * 0.28, r * 0.34, r * 0.22, 0, 0, Math.PI * 2);
       ctx.fill();
+      this.drawRedEyes(ctx, r, "slash");
+      ctx.fillStyle = "rgba(255, 204, 112, 0.54)";
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.arc(Math.sin(t * 3 + i) * r * 0.96, -r * (0.38 + i * 0.18), r * 0.08, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      return true;
+    }
+
+    drawDogDemon(ctx, t) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 0.82);
+      ctx.fillStyle = "rgba(18, 31, 32, 0.76)";
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.58, r * 0.26, r * 0.26, r * 0.42, -0.28, 0, Math.PI * 2);
+      ctx.ellipse(r * 0.58, r * 0.26, r * 0.26, r * 0.42, 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#202d2c";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.05);
+      ctx.quadraticCurveTo(r * 0.82, -r * 0.52, r * 0.52, r * 0.92);
+      ctx.lineTo(0, r * 0.72);
+      ctx.lineTo(-r * 0.52, r * 0.92);
+      ctx.quadraticCurveTo(-r * 0.82, -r * 0.52, 0, -r * 1.05);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(7, 18, 18, 0.82)", 2);
+      ctx.fillStyle = "#35413d";
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.12, r * 0.62, r * 0.66, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#e9b85f";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.48, -r * 0.66);
+      ctx.lineTo(-r * 0.82, -r * 1.18);
+      ctx.lineTo(-r * 0.22, -r * 0.92);
+      ctx.moveTo(r * 0.48, -r * 0.66);
+      ctx.lineTo(r * 0.82, -r * 1.18);
+      ctx.lineTo(r * 0.22, -r * 0.92);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(255, 241, 189, 0.52)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.5, r * 0.18);
+      ctx.lineTo(-r * 0.92, r * 0.5);
+      ctx.moveTo(r * 0.5, r * 0.18);
+      ctx.lineTo(r * 0.92, r * 0.5);
+      ctx.stroke();
+      ctx.fillStyle = "#a85f35";
+      ctx.fillRect(-r * 0.44, r * 0.34, r * 0.88, r * 0.14);
       this.drawRedEyes(ctx, r, "slash");
       return true;
     }
@@ -2397,6 +2971,20 @@
       ctx.moveTo(r * 0.48, -r * 0.65);
       ctx.lineTo(r * 0.9, -r * 1);
       ctx.stroke();
+      ctx.strokeStyle = "rgba(159, 217, 207, 0.62)";
+      ctx.lineWidth = 1.2;
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(side * r * 0.28, -r * 0.04);
+        ctx.quadraticCurveTo(side * r * 0.82, r * 0.04, side * r * 1.06, -r * 0.24);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "rgba(159, 217, 207, 0.5)";
+      for (let i = -2; i <= 2; i += 1) {
+        ctx.beginPath();
+        ctx.ellipse(i * r * 0.18, -r * 0.58, r * 0.09, r * 0.16, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       this.drawRedEyes(ctx, r, "giant");
       return true;
     }
@@ -2564,6 +3152,123 @@
       return true;
     }
 
+    drawNineTailShade(ctx, t) {
+      ctx.save();
+      ctx.globalAlpha = 0.78 + Math.sin(t * 7) * 0.08;
+      this.drawFoxEnemy(ctx, t, true);
+      ctx.restore();
+      const r = this.radius;
+      ctx.save();
+      ctx.globalAlpha = 0.28;
+      ctx.strokeStyle = "rgba(255, 241, 189, 0.8)";
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.ellipse(Math.sin(t * 8) * r * 0.18, 0, r * 1.18, r * 0.96, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      return true;
+    }
+
+    drawWaterApe(ctx, t) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 1.15);
+      ctx.strokeStyle = "rgba(127, 209, 216, 0.5)";
+      ctx.lineWidth = 1.4;
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.ellipse(0, r * (0.55 + i * 0.12), r * (0.78 + i * 0.22), r * 0.18, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#244f5a";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 0.8, r * 0.95, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(12, 43, 48, 0.78)", 2.3);
+      ctx.fillStyle = "#173f42";
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.ellipse(side * r * 0.78, r * 0.1, r * 0.26, r * 0.62, side * 0.26, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = "rgba(215, 255, 245, 0.62)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.42, r * 0.48, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, "giant");
+      return true;
+    }
+
+    drawBlackWind(ctx, t) {
+      const r = this.radius;
+      ctx.save();
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "rgba(18, 21, 24, 0.88)";
+      for (let i = 0; i < 4; i += 1) {
+        const a = t * 2.4 + i * Math.PI * 0.55;
+        ctx.beginPath();
+        ctx.ellipse(
+          Math.cos(a) * r * 0.16,
+          Math.sin(a) * r * 0.2,
+          r * (0.72 - i * 0.05),
+          r * (0.32 + i * 0.06),
+          a,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+      ctx.strokeStyle = "rgba(159, 217, 207, 0.48)";
+      ctx.lineWidth = 1.3;
+      for (let i = 0; i < 4; i += 1) {
+        ctx.beginPath();
+        ctx.arc(0, 0, r * (0.42 + i * 0.18), t * 2 + i, t * 2 + Math.PI * 1.2 + i);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#ff6b57";
+      ctx.shadowColor = "#ff6b57";
+      ctx.shadowBlur = 4;
+      ctx.beginPath();
+      ctx.arc(-r * 0.22, -r * 0.18, Math.max(2, r * 0.1), 0, Math.PI * 2);
+      ctx.arc(r * 0.22, -r * 0.18, Math.max(2, r * 0.1), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return true;
+    }
+
+    drawBoneDemon(ctx, t) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 0.86);
+      ctx.strokeStyle = this.hitPulse > 0 ? "#fff1bd" : "#e8f7ef";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.46);
+      ctx.lineTo(0, r * 0.62);
+      ctx.moveTo(-r * 0.48, -r * 0.16);
+      ctx.lineTo(r * 0.48, -r * 0.16);
+      ctx.moveTo(-r * 0.34, r * 0.08);
+      ctx.lineTo(r * 0.34, r * 0.08);
+      ctx.moveTo(-r * 0.2, r * 0.58);
+      ctx.lineTo(-r * 0.46, r * 0.96);
+      ctx.moveTo(r * 0.2, r * 0.58);
+      ctx.lineTo(r * 0.46, r * 0.96);
+      ctx.stroke();
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#f3fff9";
+      ctx.beginPath();
+      ctx.ellipse(0, -r * 0.78, r * 0.46, r * 0.38, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(49, 91, 87, 0.66)", 1.2);
+      ctx.strokeStyle = "#ff6b57";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.52, -r * 0.04);
+      ctx.quadraticCurveTo(0, r * 0.18 + Math.sin(t * 4) * 2, r * 0.54, -r * 0.08);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, "dot");
+      return true;
+    }
+
     drawPigDragon(ctx, t, vanguard = false) {
       const r = this.radius;
       this.drawGroundMist(ctx, r, t, 1.25);
@@ -2603,10 +3308,21 @@
     drawJourneyBoss(ctx, t, visual) {
       const r = this.radius;
       this.drawGroundMist(ctx, r, t, 1.7);
-      const isBull = visual === "bullKingBoss";
-      const isBone = visual === "whiteBoneBoss";
-      const isWater = visual === "wuzhiqiBoss";
-      const fill = this.hitPulse > 0 ? "#fff1bd" : isBull ? "#5b2b26" : isBone ? "#e8f7ef" : isWater ? "#244f5a" : "#20282c";
+      const isBull = visual === "bossBullKing" || visual === "bullKingBoss";
+      const isBone = visual === "bossBoneLady" || visual === "whiteBoneBoss";
+      const isYellow = visual === "bossYellowWind" || visual === "wuzhiqiBoss";
+      const isBlack = visual === "bossBlackWind" || visual === "blackWindBoss";
+      const fill = this.hitPulse > 0
+        ? "#fff1bd"
+        : isBull
+          ? "#5b2b26"
+          : isBone
+            ? "#e8f7ef"
+            : isYellow
+              ? "#806136"
+              : isBlack
+                ? "#20282c"
+                : "#244f5a";
       ctx.fillStyle = fill;
       ctx.beginPath();
       ctx.moveTo(0, -r * 1.25);
@@ -2616,7 +3332,7 @@
       ctx.bezierCurveTo(-r * 1.25, r * 0.48, -r * 1.2, -r * 0.9, 0, -r * 1.25);
       ctx.fill();
       this.drawInkOutline(ctx, "rgba(16, 20, 24, 0.86)", 3.2);
-      ctx.strokeStyle = isBull ? "#f5d78a" : isBone ? "#9fd9cf" : "#e9b85f";
+      ctx.strokeStyle = isBull ? "#f5d78a" : isBone ? "#9fd9cf" : isYellow ? "#fff1bd" : "#e9b85f";
       ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.moveTo(-r * 0.45, -r * 0.88);
@@ -2624,12 +3340,12 @@
       ctx.moveTo(r * 0.45, -r * 0.88);
       ctx.quadraticCurveTo(r * 1.45, -r * 1.45, r * 1.55, -r * 0.42);
       ctx.stroke();
-      if (isWater) {
-        ctx.strokeStyle = "rgba(127, 209, 216, 0.62)";
+      if (isYellow || isBlack) {
+        ctx.strokeStyle = isYellow ? "rgba(255, 241, 189, 0.62)" : "rgba(159, 217, 207, 0.52)";
         ctx.lineWidth = 1.6;
         for (let i = 0; i < 4; i += 1) {
           ctx.beginPath();
-          ctx.arc(0, r * 0.1, r * (0.45 + i * 0.15), t + i, t + Math.PI * 1.2 + i);
+          ctx.arc(0, r * 0.1, r * (0.45 + i * 0.15), t * (isYellow ? 1.7 : 2.4) + i, t * (isYellow ? 1.7 : 2.4) + Math.PI * 1.2 + i);
           ctx.stroke();
         }
       }
@@ -2642,6 +3358,22 @@
         ctx.moveTo(r * 0.35, -r * 0.45);
         ctx.lineTo(-r * 0.35, r * 0.48);
         ctx.stroke();
+        ctx.strokeStyle = "#ff6b57";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.72, r * 0.18);
+        ctx.quadraticCurveTo(0, r * 0.52 + Math.sin(t * 4) * 3, r * 0.72, r * 0.16);
+        ctx.stroke();
+      }
+      if (isBull) {
+        ctx.strokeStyle = "rgba(255, 107, 87, 0.64)";
+        ctx.lineWidth = 2.4;
+        for (let i = -1; i <= 1; i += 1) {
+          ctx.beginPath();
+          ctx.moveTo(i * r * 0.32, -r * 0.7);
+          ctx.lineTo(i * r * 0.1, r * 0.62);
+          ctx.stroke();
+        }
       }
       this.drawRedEyes(ctx, r, isBull ? "giant" : "slash");
       return true;
@@ -2649,15 +3381,24 @@
 
     drawEnemyAura(ctx, game, t) {
       const r = this.radius;
-      const auraR = r + (this.type === "brute" ? 12 : 8) + Math.sin(t * 3) * 1.4;
+      const heavy = ["boarDragon", "stoneArmor", "waterApe", "bullVanguard"].includes(this.type) || this.isBoss;
+      const auraR = r + (heavy ? 12 : 8) + Math.sin(t * 3) * 1.4;
       ctx.save();
-      ctx.globalAlpha = this.type === "runner" ? 0.2 : 0.26;
-      ctx.strokeStyle = this.type === "shield" && this.shield > 0 ? "#bfeee4" : "rgba(61, 29, 69, 0.7)";
-      ctx.lineWidth = this.type === "brute" ? 3 : 2;
+      ctx.globalAlpha = ["shrimpDemon", "yaksha", "blackWind"].includes(this.type) ? 0.2 : 0.26;
+      ctx.strokeStyle = this.shield > 0
+        ? "#bfeee4"
+        : this.visual === "blackWind"
+          ? "rgba(13, 18, 22, 0.72)"
+          : this.visual === "lampGranny"
+            ? "rgba(233, 184, 95, 0.52)"
+            : this.visual === "waterApe"
+              ? "rgba(127, 209, 216, 0.56)"
+              : "rgba(61, 29, 69, 0.42)";
+      ctx.lineWidth = heavy ? 3 : 2;
       ctx.beginPath();
       ctx.ellipse(0, 0, auraR * 0.95, auraR * 0.72, Math.sin(t) * 0.12, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.fillStyle = this.type === "runner" ? "rgba(31, 86, 87, 0.16)" : "rgba(38, 18, 48, 0.18)";
+      ctx.fillStyle = ["shrimpDemon", "yaksha", "blackWind"].includes(this.type) ? "rgba(31, 86, 87, 0.16)" : "rgba(38, 18, 48, 0.14)";
       ctx.beginPath();
       ctx.ellipse(0, r * 0.72, auraR * 0.82, r * 0.34, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -2905,7 +3646,7 @@
         ctx.stroke();
         ctx.setLineDash([]);
       }
-      if (this.visual === "poison") {
+      if (this.visual === "frogDemon" || this.visual === "poison") {
         ctx.fillStyle = "rgba(136, 210, 132, 0.58)";
         for (let i = 0; i < 4; i += 1) {
           const a = t * 2 + i * Math.PI * 0.5;
@@ -2914,7 +3655,7 @@
           ctx.fill();
         }
       }
-      if (this.visual === "stone" || this.visual === "xuanArmor") {
+      if (this.visual === "stoneArmor" || this.visual === "stone" || this.visual === "xuanArmor") {
         ctx.strokeStyle = "rgba(243, 255, 249, 0.42)";
         ctx.lineWidth = 1.1;
         ctx.beginPath();
@@ -2926,7 +3667,7 @@
         ctx.lineTo(r * 0.34, r * 0.5);
         ctx.stroke();
       }
-      if (this.visual === "fire") {
+      if (this.visual === "lampGranny" || this.visual === "fire") {
         ctx.fillStyle = "rgba(233, 184, 95, 0.72)";
         for (let i = 0; i < 5; i += 1) {
           const a = -t * 4 + i * Math.PI * 0.4;
@@ -2935,7 +3676,7 @@
           ctx.fill();
         }
       }
-      if (this.visual === "yaksha") {
+      if (this.visual === "yakshaCn" || this.visual === "yaksha") {
         ctx.strokeStyle = "rgba(243, 255, 249, 0.54)";
         ctx.lineWidth = 1.4;
         ctx.beginPath();
@@ -2945,7 +3686,7 @@
         ctx.lineTo(r * 1.05, r * 0.46);
         ctx.stroke();
       }
-      if (this.visual === "splitter") {
+      if (this.visual === "nineTailShade" || this.visual === "splitter") {
         ctx.strokeStyle = "rgba(255, 241, 189, 0.48)";
         ctx.lineWidth = 1.2;
         ctx.beginPath();
@@ -2954,14 +3695,30 @@
         ctx.lineTo(-r * 0.04, r * 0.72);
         ctx.stroke();
       }
-      if (this.visual === "drainer") {
+      if (this.visual === "waterApe" || this.visual === "drainer") {
         ctx.strokeStyle = "rgba(174, 188, 255, 0.46)";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(0, 0, r * (1.1 + Math.sin(t * 3) * 0.08), 0, Math.PI * 2);
         ctx.stroke();
       }
-      if (this.visual === "kingBoss") {
+      if (this.visual === "blackWind") {
+        ctx.strokeStyle = "rgba(159, 217, 207, 0.42)";
+        ctx.lineWidth = 1.1;
+        for (let i = 0; i < 3; i += 1) {
+          ctx.beginPath();
+          ctx.arc(0, 0, r * (0.8 + i * 0.18), t * 2 + i, t * 2 + Math.PI * 0.8 + i);
+          ctx.stroke();
+        }
+      }
+      if (this.visual === "boneDemon" || this.visual === "bossBoneLady") {
+        ctx.fillStyle = "rgba(255, 107, 87, 0.6)";
+        ctx.beginPath();
+        ctx.ellipse(-r * 0.38, r * 0.04, r * 0.12, r * 0.26, -0.6, 0, Math.PI * 2);
+        ctx.ellipse(r * 0.38, r * 0.04, r * 0.12, r * 0.26, 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (this.visual === "bossBullKing" || this.visual === "kingBoss") {
         ctx.fillStyle = "rgba(255, 241, 189, 0.72)";
         ctx.beginPath();
         ctx.moveTo(0, -r * 1.35);
@@ -3140,7 +3897,7 @@
 
     drawEnemyHealthBar(ctx, _game, t) {
       const hpRate = clamp(this.hp / this.maxHp, 0, 1);
-      const heavy = this.isBoss || this.visual === "brute" || this.visual === "stone" || this.visual === "xuanArmor";
+      const heavy = this.isBoss || ["brute", "stone", "xuanArmor", "boarDragon", "stoneArmor", "waterApe", "bullVanguard"].includes(this.visual);
       const barW = this.radius * (this.isBoss ? 3.4 : heavy ? 2.9 : 2.35);
       const barH = this.isBoss ? 6.5 : heavy ? 5.5 : 3.8;
       const x = this.x - barW / 2;
@@ -4853,7 +5610,7 @@
     }
 
     spawnEnemy(typeOverride = null, options = {}) {
-      const type = typeOverride || weightedPick(this.getSpawnProfile().weights);
+      const type = normalizeEnemyType(typeOverride || weightedPick(this.getSpawnProfile().weights)) || "foxDemon";
       const enemy = new Enemy(type, this, options);
       if (!enemy.isBoss && !enemy.elite && this.currentLevelConfig.eliteChance && Math.random() < this.currentLevelConfig.eliteChance) {
         this.makeElite(enemy);
@@ -4894,14 +5651,18 @@
       const boss = this.currentLevelConfig.boss;
       if (!boss || this.bossSpawned || this.elapsed < boss.time) return;
       this.bossSpawned = true;
-      const enemy = this.spawnEnemy(boss.type, {
+      const bossType = normalizeEnemyType(boss.type) || "bossBlackWind";
+      const bossRadius = ENEMY_TYPES[bossType]?.radius || 44;
+      const enemy = this.spawnEnemy(bossType, {
         boss: true,
         x: this.width / 2,
-        y: this.battleTop - ENEMY_TYPES[boss.type].radius * 1.1,
+        y: this.battleTop - bossRadius * 1.1,
       });
       this.bossEnemy = enemy;
       this.showToast(boss.appearText || `${enemy.name}来袭！`);
       this.floatingTexts.push(new FloatingText(boss.appearText || `${enemy.name}来袭！`, this.width / 2, 92, "#fff1bd", { size: 26, life: 1.6, kind: "crit" }));
+      this.addShake(6, 0.18);
+      this.addFlash(0.08);
     }
 
     updateRuntimeAuras() {
@@ -5145,6 +5906,12 @@
       if (this.iceVulnerabilityBonus > 0 && this.elapsed < enemy.slowUntil) {
         amount *= 1 + this.iceVulnerabilityBonus;
       }
+      if (!options.ignoreEvasion && enemy.config?.evadeChance && Math.random() < enemy.config.evadeChance) {
+        enemy.hitPulse = 0.8;
+        this.floatingTexts.push(new FloatingText("幻闪", enemy.x, enemy.y - enemy.radius, "#fff1bd", { size: 13 }));
+        this.spawnHitParticles(enemy, "array", false);
+        return 0;
+      }
       const crit = Math.random() < this.critChance;
       if (crit) amount *= this.critDamage;
       const rounded = Math.max(1, Math.round(amount));
@@ -5223,6 +5990,19 @@
 
     killEnemy(enemy) {
       if (enemy.dead) return;
+      if (enemy.config?.reviveChance && !enemy.revived && Math.random() < enemy.config.reviveChance) {
+        enemy.revived = true;
+        enemy.hp = Math.max(1, Math.round(enemy.maxHp * 0.42));
+        enemy.shield = 0;
+        enemy.hitPulse = 1;
+        this.floatingTexts.push(new FloatingText("白骨重聚", enemy.x, enemy.y - enemy.radius, "#d7fff5", { size: 13 }));
+        for (let i = 0; i < 12; i += 1) {
+          const angle = rand(0, Math.PI * 2);
+          const speed = rand(28, 86);
+          this.addParticle(enemy.x, enemy.y, i % 2 ? "#e8f7ef" : "#ff6b57", Math.cos(angle) * speed, Math.sin(angle) * speed, rand(1.6, 3.8), rand(0.34, 0.72), "death");
+        }
+        return;
+      }
       enemy.dead = true;
       this.kills += 1;
       const expGain = Math.max(1, Math.round(enemy.exp * this.expMultiplier));
@@ -5231,7 +6011,7 @@
       if (enemy.config?.splitInto?.length) this.spawnSplitChildren(enemy);
       this.spawnDeathParticles(enemy);
       if (enemy.isBoss) this.handleBossDeath(enemy);
-      if (enemy.type === "brute" || enemy.isBoss) this.addShake(enemy.isBoss ? 7 : 4, enemy.isBoss ? 0.18 : 0.12);
+      if (enemy.type === "boarDragon" || enemy.type === "bullVanguard" || enemy.isBoss) this.addShake(enemy.isBoss ? 7 : 4, enemy.isBoss ? 0.18 : 0.12);
     }
 
     spawnPoisonCloud(enemy) {
@@ -5278,19 +6058,32 @@
     }
 
     spawnDeathParticles(enemy) {
-      const count = enemy.type === "brute" ? 24 : enemy.type === "shield" ? 18 : 13;
-      const colors = ["#173f42", "#315b57", "#6f8f8b", "#9fd9cf"];
+      const visual = enemy.visual || enemy.type;
+      const heavy = ["boarDragon", "stoneArmor", "waterApe", "bullVanguard"].includes(enemy.type);
+      const count = enemy.isBoss ? 42 : heavy ? 24 : enemy.maxShield > 0 ? 18 : 13;
+      const paletteMap = {
+        lampGranny: ["#e9b85f", "#ff6b57", "#fff1bd"],
+        stoneArmor: ["#667066", "#9aa7a2", "#f3fff9"],
+        boneDemon: ["#e8f7ef", "#ff6b57", "#9fd9cf"],
+        bossBoneLady: ["#e8f7ef", "#ff6b57", "#fff1bd"],
+        blackWind: ["#111719", "#315b57", "#9fd9cf"],
+        bossBlackWind: ["#111719", "#315b57", "#9fd9cf", "#fff1bd"],
+        waterApe: ["#173f42", "#7fd1d8", "#d7fff5"],
+        bossYellowWind: ["#806136", "#e9b85f", "#fff1bd"],
+        bossBullKing: ["#5b2b26", "#ff6b57", "#f5d78a"],
+      };
+      const colors = paletteMap[visual] || ["#173f42", "#315b57", "#6f8f8b", "#9fd9cf"];
       for (let i = 0; i < count; i += 1) {
         const angle = rand(Math.PI * 1.05, Math.PI * 1.95);
-        const speed = rand(30, enemy.type === "brute" ? 130 : 95);
+        const speed = rand(30, heavy || enemy.isBoss ? 140 : 95);
         this.addParticle(
           enemy.x + rand(-enemy.radius * 0.38, enemy.radius * 0.38),
           enemy.y + rand(-enemy.radius * 0.22, enemy.radius * 0.38),
           randomFrom(colors),
           Math.cos(angle) * speed + rand(-18, 18),
           Math.sin(angle) * speed - rand(18, 56),
-          rand(2, enemy.type === "brute" ? 6 : 4.5),
-          rand(0.45, enemy.type === "brute" ? 1.05 : 0.85),
+          rand(2, heavy || enemy.isBoss ? 6 : 4.5),
+          rand(0.45, heavy || enemy.isBoss ? 1.05 : 0.85),
           "death",
         );
       }
@@ -5892,7 +6685,7 @@
       if (!this.dom.codexList) return;
       const seen = this.saveManager.data.bestiary.seen || {};
       this.dom.codexList.innerHTML = "";
-      for (const [id, def] of Object.entries(ENEMY_TYPES)) {
+      for (const [id, def] of Object.entries(MONSTER_BOOK)) {
         const unlocked = !!seen[id] || (def.unlockLevel || 1) <= 1;
         const card = document.createElement("article");
         card.className = `system-card ${unlocked ? "" : "locked"}`;
@@ -5900,8 +6693,8 @@
           <span class="system-icon">${unlocked ? def.name.slice(0, 1) : "?"}</span>
           <div class="system-copy">
             <strong>${unlocked ? def.name : "未遭遇妖怪"}</strong>
-            <p>${unlocked ? (def.lore || "取经路上现身的志怪妖物。") : `第 ${def.unlockLevel || 1} 关后可能出现。`}</p>
-            <div class="system-tags"><span>${def.boss ? "Boss" : def.elite ? "精英" : "妖怪"}</span><span>解锁 ${def.unlockLevel || 1}</span></div>
+            <p>${unlocked ? (def.description || "取经路上现身的志怪妖物。") : `第 ${def.unlockLevel || 1} 关后可能出现。`}</p>
+            <div class="system-tags"><span>${def.category === "boss" ? "Boss" : def.category === "elite" ? "精英" : "妖怪"}</span><span>解锁 ${def.unlockLevel || 1}</span></div>
           </div>
         `;
         this.dom.codexList.appendChild(card);
@@ -6455,7 +7248,7 @@
       if (!boss || boss.dead || !boss.isBoss) return;
       const w = Math.min(this.width - 46, 340);
       const x = (this.width - w) / 2;
-      const y = 12;
+      const y = Math.max(8, this.battleTop - 42);
       const hpRate = clamp(boss.hp / boss.maxHp, 0, 1);
       const shieldRate = boss.maxShield > 0 ? clamp(boss.shield / boss.maxShield, 0, 1) : 0;
       ctx.save();
@@ -6478,6 +7271,17 @@
       ctx.beginPath();
       roundedRectPath(ctx, x + 15, y + 18, Math.max(0, (w - 30) * hpRate), 5, 3);
       ctx.fill();
+      if (Array.isArray(boss.config?.phaseSummons)) {
+        ctx.strokeStyle = "rgba(255, 241, 189, 0.78)";
+        ctx.lineWidth = 1;
+        for (const phase of boss.config.phaseSummons) {
+          const px = x + 15 + (w - 30) * clamp(phase.hpRate || 0, 0, 1);
+          ctx.beginPath();
+          ctx.moveTo(px, y + 17);
+          ctx.lineTo(px, y + 25);
+          ctx.stroke();
+        }
+      }
       if (shieldRate > 0) {
         ctx.fillStyle = "rgba(159, 217, 207, 0.72)";
         ctx.beginPath();
