@@ -1538,10 +1538,6 @@
     bullVanguard: { sprite: "./assets/monsters/bull-vanguard.png", portraitScale: 1.08, battleScale: 0.58 },
     waterApe: { sprite: "./assets/monsters/water-dragon.png", portraitScale: 1.08, battleScale: 0.56 },
     yellowRobeGoblin: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.03, battleScale: 0.42 },
-    bossBlackWind: { sprite: "./assets/monsters/yaksha.png", portraitScale: 1.22, battleScale: 0.9 },
-    bossYellowWind: { sprite: "./assets/monsters/yellow-robe-goblin.png", portraitScale: 1.25, battleScale: 0.9 },
-    bossBoneLady: { sprite: "./assets/monsters/bone-demon.png", portraitScale: 1.25, battleScale: 0.9 },
-    bossBullKing: { sprite: "./assets/monsters/bull-vanguard.png", portraitScale: 1.28, battleScale: 0.95 },
   };
   for (const [id, spriteInfo] of Object.entries(MONSTER_SPRITES)) {
     if (CANONICAL_ENEMY_TYPES[id]) Object.assign(CANONICAL_ENEMY_TYPES[id], spriteInfo);
@@ -2357,6 +2353,314 @@
     ctx.restore();
   }
 
+  function drawBossBlackWindPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y + (gallery ? 1 : 0));
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(8, 18, 22, 0.36)", gallery ? 86 : 62, t);
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(9, 17, 20, 0.78)";
+    ctx.lineWidth = gallery ? 15 : 10;
+    ctx.lineCap = "round";
+    for (let i = 0; i < 5; i += 1) {
+      ctx.beginPath();
+      ctx.arc(0, -8, 24 + i * 8, t * 1.8 + i * 0.8, t * 1.8 + i * 0.8 + Math.PI * 1.15);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(159, 217, 207, 0.34)";
+    ctx.lineWidth = gallery ? 2.4 : 1.7;
+    for (let i = 0; i < 4; i += 1) {
+      ctx.beginPath();
+      ctx.arc(0, -7, 18 + i * 11, -t * 2.2 + i, -t * 2.2 + i + Math.PI * 0.88);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#151d21";
+    ctx.beginPath();
+    ctx.moveTo(-34, -32);
+    ctx.bezierCurveTo(-56, -10, -42, 43, -5, 48);
+    ctx.bezierCurveTo(35, 48, 55, 8, 35, -31);
+    ctx.bezierCurveTo(20, -50, -18, -50, -34, -32);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(3, 9, 12, 0.82)", gallery ? 3 : 2.4);
+
+    ctx.fillStyle = "#111719";
+    ctx.beginPath();
+    ctx.ellipse(0, -23, 23, 19, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(245, 215, 138, 0.38)", 1.2);
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = gallery ? 4.5 : 3.4;
+    ctx.beginPath();
+    ctx.moveTo(-14, -40);
+    ctx.quadraticCurveTo(-33, -63, -38, -34);
+    ctx.moveTo(14, -40);
+    ctx.quadraticCurveTo(33, -63, 38, -34);
+    ctx.stroke();
+    monsterEyes(ctx, -9, -25, 10, -25, "slash", gallery ? 2.9 : 2.2);
+
+    ctx.strokeStyle = "rgba(245, 215, 138, 0.82)";
+    ctx.lineWidth = gallery ? 3 : 2.2;
+    ctx.beginPath();
+    ctx.moveTo(-24, 0);
+    ctx.quadraticCurveTo(0, 14 + Math.sin(t * 4) * 2, 26, 0);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(255, 241, 189, 0.86)";
+    for (let i = 0; i < 5; i += 1) {
+      ctx.beginPath();
+      ctx.arc(-22 + i * 11, 7 + Math.sin(t * 3 + i) * 1.3, gallery ? 2.3 : 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawBossYellowWindPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(191, 142, 51, 0.26)", gallery ? 86 : 62, t);
+
+    ctx.strokeStyle = "rgba(233, 184, 95, 0.52)";
+    ctx.lineWidth = gallery ? 6 : 4;
+    ctx.lineCap = "round";
+    for (let i = 0; i < 5; i += 1) {
+      const yy = -42 + i * 20;
+      ctx.beginPath();
+      ctx.moveTo(-62 + Math.sin(t * 2 + i) * 8, yy);
+      ctx.quadraticCurveTo(-10, yy - 15, 54 + Math.cos(t * 2 + i) * 10, yy + 2);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(255, 241, 189, 0.32)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(2, -8, 52 + Math.sin(t * 2.2) * 3, t, t + Math.PI * 1.35);
+    ctx.stroke();
+
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#8b6a35";
+    ctx.beginPath();
+    ctx.moveTo(-31, -34);
+    ctx.bezierCurveTo(-49, -3, -40, 39, -6, 49);
+    ctx.bezierCurveTo(36, 52, 50, 10, 32, -34);
+    ctx.bezierCurveTo(18, -53, -18, -54, -31, -34);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(88, 59, 26, 0.78)", gallery ? 2.8 : 2.1);
+
+    ctx.fillStyle = "#b58a42";
+    ctx.beginPath();
+    ctx.moveTo(-20, -37);
+    ctx.lineTo(-31, -57);
+    ctx.lineTo(-5, -44);
+    ctx.moveTo(20, -37);
+    ctx.lineTo(32, -56);
+    ctx.lineTo(5, -44);
+    ctx.fill();
+    ctx.fillStyle = "#d8aa58";
+    ctx.beginPath();
+    ctx.ellipse(0, -25, 23, 17, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterEyes(ctx, -8, -27, 8, -27, "slash", gallery ? 2.4 : 2);
+
+    ctx.strokeStyle = "#fff1bd";
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(-14, -17);
+    ctx.quadraticCurveTo(-34, -13, -46, -18);
+    ctx.moveTo(14, -17);
+    ctx.quadraticCurveTo(35, -13, 47, -18);
+    ctx.stroke();
+
+    ctx.fillStyle = "#f5d78a";
+    ctx.beginPath();
+    ctx.moveTo(24, -4);
+    ctx.quadraticCurveTo(47, 5, 44, 31);
+    ctx.quadraticCurveTo(30, 18, 16, 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "rgba(122, 89, 38, 0.72)";
+    ctx.lineWidth = 1.1;
+    for (let i = 0; i < 4; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(24 + i * 4, 2 + i * 4);
+      ctx.lineTo(41 - i * 3, 12 + i * 3);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawBossBoneLadyPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(232, 247, 239, 0.18)", gallery ? 80 : 58, t);
+
+    ctx.save();
+    ctx.globalAlpha = 0.28;
+    ctx.strokeStyle = "#d7fff5";
+    ctx.lineWidth = 1.6;
+    for (let i = 0; i < 3; i += 1) {
+      ctx.beginPath();
+      ctx.ellipse((i - 1) * 22, -10 + i * 8, 22, 48, i * 0.55 + Math.sin(t) * 0.05, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(255, 107, 87, 0.78)";
+    ctx.lineWidth = gallery ? 6 : 4;
+    ctx.beginPath();
+    ctx.moveTo(-36, -8);
+    ctx.bezierCurveTo(-60, 12, -35, 38, -54, 57);
+    ctx.moveTo(35, -10);
+    ctx.bezierCurveTo(63, 10, 37, 38, 55, 58);
+    ctx.stroke();
+
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#f0f7ef";
+    ctx.beginPath();
+    ctx.moveTo(-19, -39);
+    ctx.bezierCurveTo(-34, -23, -31, 12, -7, 34);
+    ctx.bezierCurveTo(8, 47, 27, 20, 25, -14);
+    ctx.bezierCurveTo(24, -38, -2, -54, -19, -39);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(69, 84, 78, 0.78)", gallery ? 2.4 : 1.9);
+
+    ctx.fillStyle = "#e8f7ef";
+    ctx.beginPath();
+    ctx.ellipse(0, -39, 17, 19, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(69, 84, 78, 0.7)", 1.4);
+    monsterEyes(ctx, -6, -41, 6, -41, "dot", gallery ? 2.4 : 1.8);
+    ctx.strokeStyle = "#ff6b57";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(-10, -54);
+    ctx.lineTo(2, -65);
+    ctx.lineTo(13, -53);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#cfded6";
+    ctx.lineWidth = gallery ? 4.5 : 3.4;
+    ctx.beginPath();
+    ctx.moveTo(0, -19);
+    ctx.lineTo(0, 38);
+    ctx.moveTo(-19, -4);
+    ctx.lineTo(21, -4);
+    ctx.moveTo(-16, 9);
+    ctx.lineTo(18, 9);
+    ctx.moveTo(-7, 37);
+    ctx.lineTo(-19, 58);
+    ctx.moveTo(7, 37);
+    ctx.lineTo(20, 58);
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(49, 91, 87, 0.54)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-16, -5);
+    ctx.lineTo(16, 24);
+    ctx.moveTo(16, -5);
+    ctx.lineTo(-14, 24);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBossBullKingPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
+    const t = state.time || performance.now() / 1000;
+    const gallery = mode === "gallery";
+    const hit = state.hitPulse || 0;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    monsterMist(ctx, "rgba(105, 38, 27, 0.32)", gallery ? 96 : 70, t);
+
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = "#ff6b57";
+    ctx.lineWidth = gallery ? 5 : 3.5;
+    for (let i = 0; i < 4; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(-54 + i * 18, 52);
+      ctx.quadraticCurveTo(-39 + i * 20, 28 + Math.sin(t * 3 + i) * 5, -27 + i * 20, 45);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = hit > 0 ? "#fff1bd" : "#6c3027";
+    ctx.beginPath();
+    ctx.moveTo(-38, -31);
+    ctx.bezierCurveTo(-60, -3, -50, 43, -14, 57);
+    ctx.bezierCurveTo(20, 69, 61, 39, 45, -13);
+    ctx.bezierCurveTo(38, -43, -17, -60, -38, -31);
+    ctx.fill();
+    monsterInkStroke(ctx, "rgba(61, 24, 20, 0.86)", gallery ? 3.3 : 2.5);
+
+    ctx.strokeStyle = "#f5d78a";
+    ctx.lineWidth = gallery ? 8 : 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(-19, -45);
+    ctx.quadraticCurveTo(-65, -77, -74, -27);
+    ctx.moveTo(20, -45);
+    ctx.quadraticCurveTo(66, -78, 75, -27);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(255, 241, 189, 0.54)";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-49, -55);
+    ctx.lineTo(-71, -30);
+    ctx.moveTo(49, -56);
+    ctx.lineTo(72, -31);
+    ctx.stroke();
+
+    ctx.fillStyle = "#7b3b31";
+    ctx.beginPath();
+    ctx.ellipse(0, -28, 29, 23, 0, 0, Math.PI * 2);
+    ctx.fill();
+    monsterEyes(ctx, -10, -32, 10, -32, "slash", gallery ? 3 : 2.4);
+    ctx.fillStyle = "#8f4b3e";
+    ctx.beginPath();
+    ctx.ellipse(0, -17, 15, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#fff1bd";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, -14, 8, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#ff6b57";
+    ctx.lineWidth = gallery ? 3 : 2.2;
+    for (let i = -1; i <= 1; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(i * 14, -4);
+      ctx.lineTo(i * 5, 42);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "#3c1b18";
+    ctx.lineWidth = gallery ? 7 : 5;
+    ctx.beginPath();
+    ctx.moveTo(41, -2);
+    ctx.lineTo(70, 42);
+    ctx.stroke();
+    ctx.fillStyle = "#f5d78a";
+    ctx.beginPath();
+    ctx.moveTo(72, 38);
+    ctx.lineTo(91, 51);
+    ctx.lineTo(72, 60);
+    ctx.lineTo(58, 47);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
   function drawBullVanguardPortrait(ctx, x, y, scale = 1, mode = "battle", state = {}) {
     const t = state.time || performance.now() / 1000;
     ctx.save();
@@ -2406,16 +2710,13 @@
       ctx.shadowBlur = mode === "gallery" ? 18 : 8;
     }
     if (normalized === "bossBlackWind") {
-      drawBlackWindPortrait(ctx, x, y + 2, scale * 1.2, mode, { ...state, time: t });
-      drawYakshaPortrait(ctx, x, y + 4, scale * 0.78, mode, state);
+      drawBossBlackWindPortrait(ctx, x, y, scale, mode, { ...state, time: t });
     } else if (normalized === "bossYellowWind") {
-      drawBlackWindPortrait(ctx, x, y + 2, scale * 1.12, mode, { ...state, time: t, hitPulse });
-      drawLampGrannyPortrait(ctx, x, y + 4, scale * 0.72, mode, state);
+      drawBossYellowWindPortrait(ctx, x, y, scale, mode, { ...state, time: t });
     } else if (normalized === "bossBoneLady") {
-      drawBoneDemonPortrait(ctx, x, y + 3, scale * 1.32, mode, state);
-      drawCurseMagePortrait(ctx, x, y - 2, scale * 0.82, mode, state);
+      drawBossBoneLadyPortrait(ctx, x, y, scale, mode, { ...state, time: t });
     } else if (normalized === "bossBullKing") {
-      drawBullVanguardPortrait(ctx, x, y + 2, scale * 1.42, mode, state);
+      drawBossBullKingPortrait(ctx, x, y, scale, mode, { ...state, time: t });
     } else {
       switch (normalized) {
         case "foxDemon":
@@ -8219,7 +8520,7 @@
         const unlocked = galleryMode || !!seen[id] || (def.unlockLevel || 1) <= 1;
         const spritePath = def.sprite || ENEMY_TYPES[id]?.sprite || "";
         const spriteRecord = galleryMode && spritePath ? getMonsterSpriteRecord(id) : null;
-        const spriteStatus = !spritePath ? "无素材" : spriteRecord?.error ? "加载失败" : spriteRecord?.loaded ? "已加载" : "加载中";
+        const spriteStatus = !spritePath ? "专属绘制" : spriteRecord?.error ? "加载失败" : spriteRecord?.loaded ? "已加载" : "加载中";
         const card = document.createElement("article");
         card.className = `system-card monster-card ${def.category === "boss" ? "boss-card" : ""} ${def.category === "elite" ? "elite-card" : ""} ${unlocked ? "" : "locked"}`;
         card.innerHTML = `
