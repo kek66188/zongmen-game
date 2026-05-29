@@ -1525,6 +1525,7 @@
 
   const MONSTER_SPRITES = {
     foxDemon: { sprite: "./assets/monsters/fox-demon.png", portraitScale: 1.04, battleScale: 0.42 },
+    dogDemon: { sprite: "./assets/monsters/dog-demon.png", portraitScale: 1.08, battleScale: 0.46 },
     shrimpDemon: { sprite: "./assets/monsters/shrimp-demon.png", portraitScale: 1.02, battleScale: 0.44 },
     boarDragon: { sprite: "./assets/monsters/boar-dragon.png", portraitScale: 1.02, battleScale: 0.5 },
     frogDemon: { sprite: "./assets/monsters/frog-demon.png", portraitScale: 1.02, battleScale: 0.46 },
