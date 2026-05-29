@@ -547,6 +547,10 @@ h3 {
   gap: 9px;
 }
 
+.button-stack .ghost-button {
+  min-height: 40px;
+}
+
 .primary-button,
 .ghost-button,
 .danger-button,
@@ -641,6 +645,10 @@ h3 {
 .toast.hidden,
 .unlock-notice.hidden {
   display: none;
+}
+
+#companionOverlay {
+  z-index: 13;
 }
 
 .hidden {
@@ -931,6 +939,135 @@ h3 {
   overflow-y: auto;
   padding-right: 3px;
   -webkit-overflow-scrolling: touch;
+}
+
+.hero-section {
+  margin: 14px 0 0;
+}
+
+.hero-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.hero-card,
+.system-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  border: 1px solid rgba(191, 238, 228, 0.34);
+  border-radius: 22px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 241, 189, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(243, 255, 249, 0.22), rgba(159, 217, 207, 0.1)),
+    rgba(31, 86, 87, 0.32);
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.hero-card.selected,
+.system-card.equipped {
+  border-color: rgba(255, 241, 189, 0.78);
+  box-shadow: 0 0 18px rgba(255, 241, 189, 0.18), inset 0 0 18px rgba(255, 241, 189, 0.08);
+}
+
+.hero-card.locked {
+  opacity: 0.62;
+}
+
+.hero-portrait {
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255, 241, 189, 0.62);
+  border-radius: 50%;
+  background: rgba(243, 255, 249, 0.14);
+  box-shadow: inset 0 0 16px rgba(243, 255, 249, 0.18);
+}
+
+.hero-copy,
+.system-copy {
+  min-width: 0;
+}
+
+.hero-copy strong,
+.system-copy strong {
+  display: block;
+  color: var(--jade-white);
+  font-size: 16px;
+}
+
+.hero-copy p,
+.system-copy p,
+.rune-summary {
+  margin: 5px 0 0;
+  color: rgba(232, 247, 239, 0.76);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.hero-tags,
+.system-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.hero-tags span,
+.system-tags span {
+  padding: 3px 7px;
+  border: 1px solid rgba(191, 238, 228, 0.28);
+  border-radius: 999px;
+  color: var(--gold-soft);
+  background: rgba(191, 238, 228, 0.1);
+  font-size: 11px;
+}
+
+.system-dialog {
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+}
+
+.system-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.system-card {
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+}
+
+.system-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 241, 189, 0.58);
+  border-radius: 50%;
+  color: var(--gold-soft);
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.5), transparent 28%),
+    rgba(159, 217, 207, 0.18);
+  font-weight: 900;
+}
+
+.system-card.locked {
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+
+.rune-summary {
+  padding: 10px;
+  border: 1px solid rgba(255, 241, 189, 0.28);
+  border-radius: 18px;
+  background: rgba(255, 241, 189, 0.08);
 }
 
 .level-group-title {

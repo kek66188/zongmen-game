@@ -4,16 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#081416" />
-    <title>宗门守卫战</title>
+    <title>西游镇妖录</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main id="app" aria-label="宗门守卫战">
+    <main id="app" aria-label="西游镇妖录">
       <header class="game-header">
         <div class="title-row">
           <div>
-            <p class="eyebrow">妖潮将至，守我山门</p>
-            <h1>宗门守卫战</h1>
+            <p class="eyebrow">西游取经路，万妖叩山门</p>
+            <h1>西游镇妖录</h1>
           </div>
           <div class="timer-stack">
             <div class="stage-pill" id="stageText">妖潮初现</div>
@@ -24,7 +24,7 @@
 
         <section class="hud-grid" aria-label="战斗状态">
           <div class="hud-item">
-            <span>境界</span>
+            <span id="heroHudLabel">境界</span>
             <strong id="levelText">1</strong>
           </div>
           <div class="hud-item wide">
@@ -56,9 +56,9 @@
 
       <section class="screen-overlay" id="homeOverlay">
         <div class="dialog compact home-dialog">
-          <p class="eyebrow">妖潮将至，守我山门</p>
-          <h2>宗门守卫战</h2>
-          <p class="intro">飞剑自鸣，符火逐妖。守住山门 120 秒，护住宗门一线灵脉。</p>
+          <p class="eyebrow">西游取经路，万妖叩山门</p>
+          <h2>西游镇妖录</h2>
+          <p class="intro">选择西游角色，镇住志怪妖潮。每十关邀请一名同伴助战，收集符文，闯过四十重妖劫。</p>
 
           <div class="coin-banner">
             <span>当前灵石</span>
@@ -77,16 +77,62 @@
           <div class="button-stack">
             <button type="button" class="primary-button" id="startBtn">开始守山</button>
             <button type="button" class="ghost-button" id="cultivationBtn">宗门养成</button>
+            <button type="button" class="ghost-button" id="runeBtn">符文玉匣</button>
+            <button type="button" class="ghost-button" id="codexBtn">妖怪图鉴</button>
+            <button type="button" class="ghost-button" id="achievementBtn">取经成就</button>
             <button type="button" class="ghost-button sound-toggle" id="soundToggleBtn">音效：开</button>
             <button type="button" class="ghost-button" id="saveInfoBtn">存档信息</button>
             <button type="button" class="danger-button" id="resetSaveBtn">重置存档</button>
           </div>
+
+          <section class="hero-section" aria-label="选择角色">
+            <div class="panel-title">选择取经人</div>
+            <div class="hero-list" id="heroList"></div>
+          </section>
 
           <section class="trial-section" aria-label="选择试炼">
             <div class="panel-title">选择试炼</div>
             <div class="selected-trial" id="selectedTrialText">当前试炼：山门初守</div>
             <div class="level-list" id="levelList"></div>
           </section>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="runeOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">局外搭配</p>
+          <h2>符文玉匣</h2>
+          <div class="rune-summary" id="runeSummary"></div>
+          <div class="system-list" id="runeList"></div>
+          <button type="button" class="ghost-button sticky-return" id="closeRuneBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="codexOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">中国志怪</p>
+          <h2>妖怪图鉴</h2>
+          <div class="system-list codex-list" id="codexList"></div>
+          <button type="button" class="ghost-button sticky-return" id="closeCodexBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay scrollable hidden" id="achievementOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">取经路记</p>
+          <h2>取经成就</h2>
+          <div class="system-list" id="achievementList"></div>
+          <button type="button" class="ghost-button sticky-return" id="closeAchievementBtn">返回山门</button>
+        </div>
+      </section>
+
+      <section class="screen-overlay hidden" id="companionOverlay" aria-live="polite">
+        <div class="dialog compact system-dialog">
+          <p class="eyebrow">十关机缘</p>
+          <h2>邀请伙伴助战</h2>
+          <p class="intro">你已破一重妖劫，可邀请一位未同行的西游角色加入阵容。</p>
+          <div class="hero-list companion-list" id="companionList"></div>
+          <button type="button" class="ghost-button" id="skipCompanionBtn">稍后再邀</button>
         </div>
       </section>
 
@@ -136,7 +182,7 @@
             <div><span>总灵石</span><strong id="resultTotalCoins">0</strong></div>
           </div>
           <div class="result-shards">
-            <span>本局灵石碎晶</span>
+            <span>本局奖励</span>
             <strong id="resultShards">无</strong>
           </div>
           <div class="unlock-notice hidden" id="resultUnlockNotice"></div>

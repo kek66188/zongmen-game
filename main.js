@@ -372,19 +372,19 @@
     },
   };
   const LEVEL_REALMS = [
-    { start: 1, end: 10, name: "炼气试炼", phaseText: "炼气试炼开启" },
-    { start: 11, end: 20, name: "筑基妖潮", phaseText: "筑基妖潮开启" },
-    { start: 21, end: 30, name: "金丹魔影", phaseText: "金丹魔影降临" },
-    { start: 31, end: 40, name: "元婴大劫", phaseText: "元婴大劫将至" },
+    { start: 1, end: 10, name: "花果山妖乱", phaseText: "花果山妖乱开启" },
+    { start: 11, end: 20, name: "高老庄异闻", phaseText: "高老庄妖影现形" },
+    { start: 21, end: 30, name: "流沙河妖雾", phaseText: "流沙河妖雾翻涌" },
+    { start: 31, end: 40, name: "火焰山终劫", phaseText: "火焰山万妖压境" },
   ];
   const LEVEL_NAMES = [
-    "山门初试", "林间妖影", "灵田骚乱", "夜守山门", "小妖成群",
-    "寒潭异动", "符阵初成", "妖雾压境", "山道伏妖", "炼气终试",
-    "筑基妖潮", "疾影来袭", "石甲破阵", "毒雾山谷", "妖火焚林",
-    "灵脉震荡", "夜叉窥门", "护盾妖阵", "群妖叩关", "筑基终劫",
-    "金丹魔影", "飞妖掠空", "咒师结阵", "玄甲压境", "雷云妖潮",
-    "血月山门", "咒纹妖师", "双阵夹击", "万妖试炼", "金丹终战",
-    "元婴大劫", "妖王前锋", "冥雾围山", "破盾巨潮", "天魔压境",
+    "石猴初镇", "林间狐影", "灵田犬嚎", "夜守山门", "小妖成群",
+    "寒潭虾影", "蛙僧叩阵", "妖雾压境", "山道伏妖", "黑风试炼",
+    "高庄妖潮", "赤虾疾影", "石甲破阵", "毒雾山谷", "灯火焚林",
+    "灵脉震荡", "夜叉窥门", "蛙僧妖阵", "群妖叩关", "水猿终劫",
+    "流沙魔影", "鸟妖掠空", "咒师结阵", "猪龙压境", "雷云妖潮",
+    "血月山门", "咒纹妖师", "九尾裂影", "万妖试炼", "白骨终战",
+    "火焰大劫", "吸灵白骨", "冥雾围山", "破盾巨潮", "牛魔前锋",
     "灵墙将碎", "四方妖阵", "妖王亲临", "山门死守", "万妖终劫",
   ];
   const clampSetup = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -409,10 +409,10 @@
     boss40: 40,
   };
   const BOSS_LEVELS = {
-    10: { type: "boss10", name: "黑角妖将", appearText: "黑角妖将来袭！" },
-    20: { type: "boss20", name: "筑基妖帅", appearText: "筑基妖帅压阵！" },
-    30: { type: "boss30", name: "金丹魔修", appearText: "金丹魔修现身！" },
-    40: { type: "boss40", name: "万妖王", appearText: "万妖王降临！" },
+    10: { type: "boss10", name: "黑风怪", appearText: "黑风怪卷雾而来：把山门交出来！" },
+    20: { type: "boss20", name: "吴支祁", appearText: "吴支祁踏浪压阵：水府妖兵听令！" },
+    30: { type: "boss30", name: "白骨夫人", appearText: "白骨夫人现身：取经人，留下性命。" },
+    40: { type: "boss40", name: "牛魔王", appearText: "牛魔王降临：火焰山万妖听号！" },
   };
   const getRealmByOrder = (order) => LEVEL_REALMS.find((realm) => order >= realm.start && order <= realm.end) || LEVEL_REALMS[0];
   const getStageIndexByOrder = (order) => Math.floor((order - 1) / 10);
@@ -557,8 +557,8 @@
     };
   }
   Object.assign(LEVEL_CONFIG.level1, {
-    name: "山门初试",
-    description: "妖潮初现，守住宗门山门。",
+    name: "石猴初镇",
+    description: "花果山外妖影初现，随西游角色守住第一道山门。",
     enemyHpMultiplier: 1,
     enemySpeedMultiplier: 1,
     enemyDamageMultiplier: 1,
@@ -976,7 +976,28 @@
       ],
     },
   };
+  const JOURNEY_ENEMY_SKINS = {
+    imp: { name: "狐妖", visual: "fox", body: "#b76b42", eye: "#ff4f45", lore: "花果山外流窜的小狐妖，身形轻巧，尾火摇晃。" },
+    runner: { name: "赤虾子", visual: "shrimp", body: "#2c7b79", eye: "#ff4f45", lore: "水府逃出的虾兵妖，游影疾行，拖着青红水纹。" },
+    brute: { name: "小野猪妖", visual: "boar", body: "#5a4738", eye: "#ff5b4f", lore: "披着破甲的野猪妖，皮厚力沉，专撞结界。" },
+    shield: { name: "蛙僧", visual: "frog", body: "#517d55", eye: "#ff6b57", lore: "背负铜钹的蛙妖僧，妖纹护罩护住周身。" },
+    poison: { name: "毒雾蛙婆", visual: "poisonFrog", body: "#315f3d", eye: "#ff6b57", lore: "吐雾成瘴的蛙婆，死后仍会留下毒烟。" },
+    stone: { name: "石甲妖", visual: "stoneBeast", body: "#667066", eye: "#ff6b57", lore: "乱石成精，披甲带裂，寻常剑影难以破壳。" },
+    fireling: { name: "灯花婆婆", visual: "lampGranny", body: "#7c4434", eye: "#fff1bd", lore: "端着妖火灯盏的老妖，近门便爆成火碗。" },
+    yaksha: { name: "夜叉", visual: "yakshaCn", body: "#31233f", eye: "#ff4b45", lore: "双角利爪，夜行如鬼影，伤害极高。" },
+    flying: { name: "鸟妖", visual: "birdDemon", body: "#213f42", eye: "#ff5b4f", lore: "山林鸟妖，掠空而来，地面阵法难以完全伤它。" },
+    caster: { name: "咒师妖", visual: "spellMaster", body: "#3b2a55", eye: "#ff6b57", lore: "执杖画咒的妖师，符圈护身，常与妖潮结阵。" },
+    xuanArmor: { name: "猪龙", visual: "pigDragon", body: "#354a42", eye: "#ff6b57", lore: "披玄甲的猪龙妖，慢而厚重，盾甲难破。" },
+    splitter: { name: "九尾狐影", visual: "splitFox", body: "#65435d", eye: "#ff6b57", lore: "狐影裂身，死后分化小妖继续扑门。" },
+    drainer: { name: "吸灵白骨", visual: "boneDrainer", body: "#35426a", eye: "#d7fff5", lore: "白骨披蓝焰，吸走灵气，让修为与冷却变钝。" },
+    vanguard: { name: "牛魔先锋", visual: "bullVanguard", body: "#5c2e28", eye: "#fff1bd", lore: "牛魔麾下精锐，金红妖纹能鼓舞周围小妖。" },
+    boss10: { name: "黑风怪", visual: "blackWindBoss", lore: "黑风山妖王，披风卷雾，召小妖冲阵。" },
+    boss20: { name: "吴支祁", visual: "wuzhiqiBoss", lore: "水猿大妖，浪纹缠身，可号令护盾妖潮。" },
+    boss30: { name: "白骨夫人", visual: "whiteBoneBoss", lore: "白骨幻相结阵，妖咒与幻影接连压门。" },
+    boss40: { name: "牛魔王", visual: "bullKingBoss", lore: "终章妖王，火焰山群妖共主。" },
+  };
   for (const [id, config] of Object.entries(ENEMY_TYPES)) {
+    Object.assign(config, JOURNEY_ENEMY_SKINS[id] || {});
     config.type = config.type || id;
     config.unlockLevel = config.unlockLevel || ENEMY_UNLOCK_LEVEL[id] || 1;
     config.baseHp = config.hp;
@@ -1078,6 +1099,107 @@
       max: 5,
       current: (level) => `开局修为 +${level * 5}`,
     },
+  };
+
+  const HERO_DEFS = {
+    wukong: {
+      name: "孙悟空",
+      role: "高爆发 / 连击 / 分身",
+      initialSkills: ["sword", "thunder"],
+      passive: "暴击率 +8%，每 7 秒触发残影追击。",
+      playstyle: "攻速快，爆点密，适合主动清怪。",
+      color: "#d79b43",
+      accent: "#ff6b57",
+      labels: { sword: "如意金箍棒", thunder: "火眼雷引", array: "毫毛分身" },
+      icons: { sword: "棒", thunder: "雷", array: "影" },
+      bonuses: { critChance: 0.08, damageMultiplier: 1.08 },
+    },
+    tang: {
+      name: "唐僧",
+      role: "辅助 / 控制 / 回复 / 佛法光环",
+      initialSkills: ["ice", "array"],
+      passive: "冷却 -6%，升级时稀有机缘略增，护阵缓慢回元。",
+      playstyle: "生存强，节奏稳，适合持久战。",
+      color: "#fff1bd",
+      accent: "#d7fff5",
+      labels: { ice: "紧箍梵音", array: "禅杖佛光", sword: "禅杖击妖" },
+      icons: { ice: "梵", array: "佛", sword: "杖" },
+      bonuses: { cooldownMultiplier: 0.94, rareChanceBonus: 0.08, regenPerSecond: 0.12 },
+    },
+    bajie: {
+      name: "猪八戒",
+      role: "肉盾 / 范围 / 控场",
+      initialSkills: ["fire", "array"],
+      passive: "结界血量 +25%，受到撞击伤害 -12%。",
+      playstyle: "抗压强，范围横扫，适合妖潮堆叠。",
+      color: "#d9a35d",
+      accent: "#6f4d32",
+      labels: { fire: "九齿钉耙横扫", array: "饕餮吞势", sword: "钉耙重击" },
+      icons: { fire: "耙", array: "吞", sword: "钉" },
+      bonuses: { maxHpMultiplier: 1.25, wallDamageReduction: 0.12, fireRangeMultiplier: 1.08 },
+    },
+    shaseng: {
+      name: "沙僧",
+      role: "均衡 / 持续输出 / 水系减速",
+      initialSkills: ["sword", "ice"],
+      passive: "减速效果 +10%，持续伤害 +8%。",
+      playstyle: "控场稳定，适合拖慢妖群推进。",
+      color: "#6bb8c7",
+      accent: "#315b57",
+      labels: { sword: "月牙铲斩", ice: "流沙困阵", array: "流沙法阵" },
+      icons: { sword: "铲", ice: "沙", array: "阵" },
+      bonuses: { iceSlowBonus: 0.1, arrayDamageMultiplier: 1.08 },
+    },
+  };
+
+  const COMPANION_DEFS = {
+    wukong: { name: "孙悟空", skill: "分身突袭", cooldown: 8, desc: "金红分身冲击妖群，造成连段伤害。", color: "#f5b04e" },
+    tang: { name: "唐僧", skill: "佛光普照", cooldown: 11, desc: "回复结界，并短暂提升全体技能伤害。", color: "#fff1bd" },
+    bajie: { name: "猪八戒", skill: "钉耙震地", cooldown: 10, desc: "震退城门前妖群并造成范围伤害。", color: "#d9a35d" },
+    shaseng: { name: "沙僧", skill: "流沙牵引", cooldown: 9, desc: "生成流沙旋涡，减速并牵引妖怪。", color: "#7fd1d8" },
+  };
+
+  const RUNE_QUALITIES = {
+    common: { label: "凡品", mult: 1, color: "#bfeee4", weight: 52 },
+    fine: { label: "良品", mult: 1.35, color: "#d7fff5", weight: 30 },
+    superior: { label: "上品", mult: 1.75, color: "#fff1bd", weight: 14 },
+    spirit: { label: "灵品", mult: 2.25, color: "#f5d78a", weight: 4 },
+  };
+
+  const RUNE_DEFS = {
+    crit: { name: "狂击符", category: "攻击符文", desc: "暴击率提升", effect: (m) => ({ critChance: 0.04 * m }) },
+    pierce: { name: "穿透符", category: "攻击符文", desc: "飞剑 / 棍影穿透 +1", effect: (m) => ({ swordPierce: Math.max(1, Math.round(m)) }) },
+    fireBurst: { name: "爆炎符", category: "攻击符文", desc: "火系爆炸范围提升", effect: (m) => ({ fireRange: 0.12 * m }) },
+    chainThunder: { name: "连雷符", category: "攻击符文", desc: "天雷弹射 +1", effect: (m) => ({ thunderBounce: Math.max(1, Math.round(m)) }) },
+    bell: { name: "金钟符", category: "守御符文", desc: "结界最大血量提升", effect: (m) => ({ maxHpBonus: Math.round(28 * m) }) },
+    guard: { name: "护体符", category: "守御符文", desc: "结界受到伤害降低", effect: (m) => ({ wallDamageReduction: 0.06 * m }) },
+    returnHit: { name: "结界符", category: "守御符文", desc: "结界受击时反伤附近妖怪", effect: (m) => ({ retaliation: 8 * m }) },
+    gather: { name: "聚灵符", category: "机缘符文", desc: "修为获取增加", effect: (m) => ({ expMultiplier: 0.12 * m }) },
+    fortune: { name: "招财符", category: "机缘符文", desc: "通关灵石增加", effect: (m) => ({ coinMultiplier: 0.12 * m }) },
+    time: { name: "时轮符", category: "机缘符文", desc: "技能冷却缩短", effect: (m) => ({ cooldownMultiplier: 1 - Math.min(0.18, 0.06 * m) }) },
+  };
+
+  const CHAPTERS = [
+    { start: 1, end: 10, name: "第一章 花果山妖乱", intro: "花果山风起，群妖趁乱叩关。取经路第一步，从镇住山门开始。", boss: "黑风怪" },
+    { start: 11, end: 20, name: "第二章 高老庄异闻", intro: "高老庄夜雾沉沉，猪妖、夜叉与石甲妖混入村道。", boss: "吴支祁" },
+    { start: 21, end: 30, name: "第三章 流沙河妖雾", intro: "流沙河水雾翻卷，飞妖与咒师结阵，白骨幻影悄然逼近。", boss: "白骨夫人" },
+    { start: 31, end: 40, name: "第四章 火焰山终劫", intro: "火焰山妖旗连天，牛魔王集万妖压境，终章将启。", boss: "牛魔王" },
+  ];
+  const getChapterByOrder = (order) => CHAPTERS.find((chapter) => order >= chapter.start && order <= chapter.end) || CHAPTERS[0];
+  for (const level of LEVEL_LIST) {
+    const chapter = getChapterByOrder(level.order);
+    level.chapter = chapter.name;
+    level.story = chapter.intro;
+    level.description = `${chapter.name}：${level.name}。${chapter.intro}`;
+  }
+
+  const ACHIEVEMENT_DEFS = {
+    clear10: { name: "初破黑风", desc: "首次通关第 10 关" },
+    clear20: { name: "高庄镇妖", desc: "首次通关第 20 关" },
+    clear30: { name: "白骨退散", desc: "首次通关第 30 关" },
+    clear40: { name: "万妖退散", desc: "通关第 40 关" },
+    kill1000: { name: "千妖斩", desc: "累计斩妖 1000" },
+    threeSuperiorRunes: { name: "符箓有成", desc: "拥有 3 个上品及以上符文" },
   };
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -1230,6 +1352,22 @@
       soundEnabled: true,
       timeScale: readTimeScaleSetting(),
     },
+    selectedHero: "wukong",
+    heroes: Object.fromEntries(Object.keys(HERO_DEFS).map((id) => [id, { level: 1, exp: 0, wins: 0 }])),
+    companions: {
+      invited: [],
+      pendingInvites: [],
+    },
+    runes: {
+      owned: [],
+      equipped: [],
+    },
+    bestiary: {
+      seen: {},
+    },
+    achievements: {
+      unlocked: {},
+    },
   });
 
   const getGemNextCost = (level) => {
@@ -1347,6 +1485,45 @@
       : [];
     save.lastDailyRewardDate = typeof source.lastDailyRewardDate === "string" ? source.lastDailyRewardDate : "";
     save.totalRechargeTest = Number.isFinite(source.totalRechargeTest) ? Math.max(0, Math.floor(source.totalRechargeTest)) : 0;
+    save.selectedHero = HERO_DEFS[source.selectedHero] ? source.selectedHero : "wukong";
+    const sourceHeroes = source.heroes && typeof source.heroes === "object" ? source.heroes : {};
+    for (const id of Object.keys(HERO_DEFS)) {
+      const hero = sourceHeroes[id] || {};
+      save.heroes[id] = {
+        level: Number.isFinite(hero.level) ? clamp(Math.floor(hero.level), 1, 60) : 1,
+        exp: Number.isFinite(hero.exp) ? Math.max(0, Math.floor(hero.exp)) : 0,
+        wins: Number.isFinite(hero.wins) ? Math.max(0, Math.floor(hero.wins)) : 0,
+      };
+    }
+    const invited = Array.isArray(source.companions?.invited) ? source.companions.invited : [];
+    const pendingInvites = Array.isArray(source.companions?.pendingInvites) ? source.companions.pendingInvites : [];
+    save.companions.invited = Array.from(new Set(invited.filter((id) => HERO_DEFS[id] && id !== save.selectedHero))).slice(0, 3);
+    save.companions.pendingInvites = Array.from(new Set(pendingInvites.map((value) => Number(value)).filter((value) => [10, 20, 30].includes(value))));
+    const sourceRunes = source.runes && typeof source.runes === "object" ? source.runes : {};
+    save.runes.owned = Array.isArray(sourceRunes.owned)
+      ? sourceRunes.owned
+        .filter((rune) => rune && RUNE_DEFS[rune.id] && RUNE_QUALITIES[rune.quality])
+        .map((rune, index) => ({
+          uid: String(rune.uid || `rune_${Date.now()}_${index}`),
+          id: rune.id,
+          quality: rune.quality,
+          obtainedAt: Number.isFinite(rune.obtainedAt) ? rune.obtainedAt : Date.now(),
+        }))
+      : [];
+    const ownedIds = new Set(save.runes.owned.map((rune) => rune.uid));
+    save.runes.equipped = Array.isArray(sourceRunes.equipped)
+      ? sourceRunes.equipped.filter((uid) => ownedIds.has(uid)).slice(0, 3)
+      : [];
+    const seen = source.bestiary?.seen && typeof source.bestiary.seen === "object" ? source.bestiary.seen : {};
+    save.bestiary.seen = {};
+    for (const id of Object.keys(ENEMY_TYPES)) {
+      if (seen[id]) save.bestiary.seen[id] = true;
+    }
+    const unlocked = source.achievements?.unlocked && typeof source.achievements.unlocked === "object" ? source.achievements.unlocked : {};
+    save.achievements.unlocked = {};
+    for (const id of Object.keys(ACHIEVEMENT_DEFS)) {
+      if (unlocked[id]) save.achievements.unlocked[id] = true;
+    }
     return save;
   };
 
@@ -1430,6 +1607,9 @@
     }
     if (!save.levels[save.selectedLevelId]?.unlocked) save.selectedLevelId = getHighestUnlockedLevelId(save);
     save.records.bestLevel = Math.max(save.records.bestLevel || 1, save.records.highestPlayerLevel || 1);
+    if (!HERO_DEFS[save.selectedHero]) save.selectedHero = "wukong";
+    save.companions.invited = Array.from(new Set((save.companions.invited || []).filter((id) => HERO_DEFS[id] && id !== save.selectedHero))).slice(0, 3);
+    save.companions.pendingInvites = Array.from(new Set((save.companions.pendingInvites || []).filter((order) => [10, 20, 30].includes(order))));
     return save;
   }
 
@@ -1500,6 +1680,12 @@
       timeScale: save.settings?.timeScale === 2 ? 2 : 1,
       soundEnabled: save.settings?.soundEnabled !== false,
       totalRechargeTest: save.totalRechargeTest || 0,
+      selectedHero: save.selectedHero || "wukong",
+      heroes: save.heroes || {},
+      companions: save.companions || { invited: [], pendingInvites: [] },
+      runes: save.runes || { owned: [], equipped: [] },
+      bestiary: save.bestiary || { seen: {} },
+      achievements: save.achievements || { unlocked: {} },
     };
   }
 
@@ -1531,6 +1717,12 @@
         soundEnabled: saveData.soundEnabled !== false,
         timeScale: Number(saveData.timeScale) === 2 ? 2 : 1,
       },
+      selectedHero: saveData.selectedHero || "wukong",
+      heroes: saveData.heroes || {},
+      companions: saveData.companions || { invited: [], pendingInvites: [] },
+      runes: saveData.runes || { owned: [], equipped: [] },
+      bestiary: saveData.bestiary || { seen: {} },
+      achievements: saveData.achievements || { unlocked: {} },
     };
     return saveSave(reconcileSaveProgress(normalizeSave(source)));
   }
@@ -1584,23 +1776,100 @@
     if (window.hongyunGame) window.hongyunGame.showSaveInfo();
   }
 
+  function rollRuneQuality(isBossLevel = false) {
+    const weights = Object.entries(RUNE_QUALITIES).map(([id, quality]) => ({
+      id,
+      weight: quality.weight * (isBossLevel && (id === "superior" || id === "spirit") ? 2.1 : 1),
+    }));
+    const total = weights.reduce((sum, item) => sum + item.weight, 0);
+    let roll = Math.random() * total;
+    for (const item of weights) {
+      roll -= item.weight;
+      if (roll <= 0) return item.id;
+    }
+    return "common";
+  }
+
+  function createRuneDrop(isBossLevel = false) {
+    const ids = Object.keys(RUNE_DEFS);
+    const id = randomFrom(ids);
+    return {
+      uid: `rune_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      id,
+      quality: rollRuneQuality(isBossLevel),
+      obtainedAt: Date.now(),
+    };
+  }
+
+  function getRuneDisplay(rune) {
+    const def = RUNE_DEFS[rune?.id] || RUNE_DEFS.crit;
+    const quality = RUNE_QUALITIES[rune?.quality] || RUNE_QUALITIES.common;
+    return {
+      ...rune,
+      def,
+      quality,
+      name: `${quality.label}·${def.name}`,
+      desc: `${def.category}：${def.desc}`,
+    };
+  }
+
+  function getRuneBonuses(save) {
+    const data = save || createDefaultSave();
+    const owned = new Map((data.runes?.owned || []).map((rune) => [rune.uid, rune]));
+    const bonuses = {
+      critChance: 0,
+      swordPierce: 0,
+      fireRange: 0,
+      thunderBounce: 0,
+      maxHpBonus: 0,
+      wallDamageReduction: 0,
+      retaliation: 0,
+      expMultiplier: 0,
+      coinMultiplier: 0,
+      cooldownMultiplier: 1,
+    };
+    for (const uid of data.runes?.equipped || []) {
+      const rune = owned.get(uid);
+      const def = RUNE_DEFS[rune?.id];
+      const quality = RUNE_QUALITIES[rune?.quality];
+      if (!def || !quality) continue;
+      const effect = def.effect(quality.mult);
+      for (const [key, value] of Object.entries(effect)) {
+        if (key === "cooldownMultiplier") bonuses.cooldownMultiplier *= value;
+        else bonuses[key] = (bonuses[key] || 0) + value;
+      }
+    }
+    return bonuses;
+  }
+
   const getMetaBonuses = (save) => {
     const data = normalizeSave(save);
     const gems = data.gems;
     const talents = data.talents;
+    const runes = getRuneBonuses(data);
+    const hero = HERO_DEFS[data.selectedHero] || HERO_DEFS.wukong;
+    const heroBonuses = hero.bonuses || {};
     return {
-      damageMultiplier: 1 + gems.attack.level * 0.03,
-      cooldownMultiplier: 1 - Math.min(gems.cooldown.level * 0.02, 0.4),
-      maxHpBonus: gems.wall.level * 10 + talents.wallFortify * 15,
-      critChance: Math.min(gems.crit.level * 0.02, 0.5),
+      damageMultiplier: (1 + gems.attack.level * 0.03) * (heroBonuses.damageMultiplier || 1),
+      cooldownMultiplier: (1 - Math.min(gems.cooldown.level * 0.02, 0.4)) * (heroBonuses.cooldownMultiplier || 1) * runes.cooldownMultiplier,
+      maxHpBonus: gems.wall.level * 10 + talents.wallFortify * 15 + (runes.maxHpBonus || 0),
+      maxHpMultiplier: heroBonuses.maxHpMultiplier || 1,
+      critChance: Math.min(gems.crit.level * 0.02 + (heroBonuses.critChance || 0) + (runes.critChance || 0), 0.65),
       critDamageMultiplier: 2,
-      expMultiplier: 1 + gems.exp.level * 0.05 + talents.battleInsight * 0.03,
+      expMultiplier: 1 + gems.exp.level * 0.05 + talents.battleInsight * 0.03 + (runes.expMultiplier || 0),
       swordDamageMultiplier: 1 + talents.swordDamage * 0.05,
-      fireRangeMultiplier: 1 + talents.fireMastery * 0.04,
-      iceSlowBonus: talents.iceMastery * 0.03,
+      fireRangeMultiplier: 1 + talents.fireMastery * 0.04 + (heroBonuses.fireRangeMultiplier ? heroBonuses.fireRangeMultiplier - 1 : 0) + (runes.fireRange || 0),
+      iceSlowBonus: talents.iceMastery * 0.03 + (heroBonuses.iceSlowBonus || 0),
       thunderDamageMultiplier: 1 + talents.thunderMastery * 0.05,
-      swordArrayDamageMultiplier: 1 + talents.swordArrayMastery * 0.05,
+      swordArrayDamageMultiplier: 1 + talents.swordArrayMastery * 0.05 + (heroBonuses.arrayDamageMultiplier ? heroBonuses.arrayDamageMultiplier - 1 : 0),
       startExp: talents.startSpirit * 5,
+      swordPierceBonus: runes.swordPierce || 0,
+      thunderBounceBonus: runes.thunderBounce || 0,
+      wallDamageReduction: Math.min(0.55, (heroBonuses.wallDamageReduction || 0) + (runes.wallDamageReduction || 0)),
+      retaliationDamage: runes.retaliation || 0,
+      coinMultiplier: runes.coinMultiplier || 0,
+      rareChanceBonus: heroBonuses.rareChanceBonus || 0,
+      regenPerSecond: heroBonuses.regenPerSecond || 0,
     };
   };
 
@@ -1663,6 +1932,70 @@
       return { ok: true, message: `${def.name} 修至 ${this.data.talents[id]} 级` };
     }
 
+    selectHero(id) {
+      if (!HERO_DEFS[id]) return { ok: false, message: "角色不存在" };
+      this.data.selectedHero = id;
+      this.data.companions.invited = (this.data.companions.invited || []).filter((heroId) => heroId !== id);
+      this.save();
+      return { ok: true, message: `已选择${HERO_DEFS[id].name}` };
+    }
+
+    inviteCompanion(id) {
+      if (!COMPANION_DEFS[id] || id === this.data.selectedHero) return { ok: false, message: "该角色不能助战" };
+      const invited = this.data.companions.invited || [];
+      if (invited.includes(id)) return { ok: false, message: "已经邀请过该伙伴" };
+      if (invited.length >= 3) return { ok: false, message: "助战阵容已满" };
+      invited.push(id);
+      this.data.companions.invited = invited;
+      this.data.companions.pendingInvites = (this.data.companions.pendingInvites || []).slice(1);
+      this.save();
+      return { ok: true, message: `${COMPANION_DEFS[id].name}加入助战` };
+    }
+
+    addRune(rune) {
+      const item = rune || createRuneDrop(false);
+      this.data.runes.owned.push(item);
+      if (this.data.runes.equipped.length < 3) this.data.runes.equipped.push(item.uid);
+      this.save();
+      return item;
+    }
+
+    toggleRuneEquip(uid) {
+      const owned = this.data.runes.owned.some((rune) => rune.uid === uid);
+      if (!owned) return { ok: false, message: "符文不存在" };
+      const equipped = this.data.runes.equipped;
+      if (equipped.includes(uid)) {
+        this.data.runes.equipped = equipped.filter((item) => item !== uid);
+        this.save();
+        return { ok: true, message: "已卸下符文" };
+      }
+      if (equipped.length >= 3) return { ok: false, message: "最多装备 3 枚符文" };
+      equipped.push(uid);
+      this.save();
+      return { ok: true, message: "已装备符文" };
+    }
+
+    markEnemySeen(type) {
+      if (!ENEMY_TYPES[type]) return;
+      this.data.bestiary.seen[type] = true;
+    }
+
+    unlockAchievement(id) {
+      if (!ACHIEVEMENT_DEFS[id] || this.data.achievements.unlocked[id]) return false;
+      this.data.achievements.unlocked[id] = true;
+      return true;
+    }
+
+    updateAchievements(levelOrder) {
+      if (levelOrder >= 10) this.unlockAchievement("clear10");
+      if (levelOrder >= 20) this.unlockAchievement("clear20");
+      if (levelOrder >= 30) this.unlockAchievement("clear30");
+      if (levelOrder >= 40) this.unlockAchievement("clear40");
+      if ((this.data.records.totalKills || 0) >= 1000) this.unlockAchievement("kill1000");
+      const superiorCount = (this.data.runes.owned || []).filter((rune) => rune.quality === "superior" || rune.quality === "spirit").length;
+      if (superiorCount >= 3) this.unlockAchievement("threeSuperiorRunes");
+    }
+
     addRunResult({ victory, kills, survivalTime, level, levelId }) {
       const levelConfig = getLevelById(levelId);
       const levelRecord = this.data.levels[levelConfig.id] || createDefaultLevels()[levelConfig.id];
@@ -1670,10 +2003,11 @@
       const seconds = Math.floor(Math.min(survivalTime, levelConfig.duration));
       const clearReward = victory ? (levelConfig.clearReward || (50 + levelConfig.order * 15 + (levelConfig.boss ? 100 : 0))) : 0;
       const baseCoins = kills + Math.floor(seconds / 10) * 2 + clearReward;
-      const coins = Math.floor(baseCoins * (levelConfig.rewardMultiplier || 1));
+      const coins = Math.floor(baseCoins * (levelConfig.rewardMultiplier || 1) * (1 + (getRuneBonuses(this.data).coinMultiplier || 0)));
       const clearShardBonus = victory ? getLevelExtraClearShards(levelConfig.order) : 0;
       const shardCount = Math.floor(kills / 30) + (victory ? 2 : 0) + clearShardBonus;
       const drops = {};
+      const runeDrops = [];
       const gemIds = Object.keys(GEM_DEFS);
 
       for (let i = 0; i < shardCount; i += 1) {
@@ -1694,6 +2028,7 @@
       levelRecord.bestSurvivalTime = Math.max(levelRecord.bestSurvivalTime, seconds);
       levelRecord.bestLevel = Math.max(levelRecord.bestLevel, level);
       let unlockedLevel = null;
+      let pendingCompanionInvite = false;
       if (victory) {
         this.data.records.clearCount += 1;
         this.data.records.highestClearedLevel = Math.max(this.data.records.highestClearedLevel || 0, levelConfig.order);
@@ -1701,24 +2036,44 @@
         if (levelConfig.order >= 40) this.data.records.finalCleared = true;
         levelRecord.cleared = true;
         levelRecord.clearCount += 1;
+        const hero = this.data.heroes[this.data.selectedHero];
+        if (hero) {
+          hero.wins += 1;
+          hero.exp += 20 + levelConfig.order * 3;
+          hero.level = Math.min(60, 1 + Math.floor(hero.exp / 120));
+        }
+        const rune = createRuneDrop(!!levelConfig.boss);
+        this.data.runes.owned.push(rune);
+        if (this.data.runes.equipped.length < 3) this.data.runes.equipped.push(rune.uid);
+        runeDrops.push(rune);
+        if ([10, 20, 30].includes(levelConfig.order)) {
+          const eligible = Object.keys(COMPANION_DEFS).filter((id) => id !== this.data.selectedHero && !(this.data.companions.invited || []).includes(id));
+          if (eligible.length && !this.data.companions.pendingInvites.includes(levelConfig.order)) {
+            this.data.companions.pendingInvites.push(levelConfig.order);
+            pendingCompanionInvite = true;
+          }
+        }
         const nextLevel = getNextLevel(levelConfig.id);
         if (nextLevel && !this.data.levels[nextLevel.id].unlocked) {
           this.data.levels[nextLevel.id].unlocked = true;
           unlockedLevel = nextLevel;
         }
       }
+      this.updateAchievements(victory ? levelConfig.order : 0);
       this.save();
 
       return {
         coins,
         totalCoins: this.data.coins,
         drops,
+        runeDrops,
         shardCount,
         survivalSeconds: seconds,
         levelName: levelConfig.name,
         levelId: levelConfig.id,
         unlockedLevelId: unlockedLevel?.id || null,
         unlockedLevelName: unlockedLevel?.name || "",
+        pendingCompanionInvite,
       };
     }
   }
@@ -1912,18 +2267,384 @@
       ctx.translate(0, bob);
       ctx.scale(breathe, breathe);
 
-      if (this.visual === "runner" || this.visual === "yaksha") this.drawRunnerDemon(ctx, game, t);
-      else if (this.visual === "flying") this.drawFlyingDemon(ctx, game, t);
-      else if (this.visual === "caster" || this.visual === "casterBoss") this.drawCasterDemon(ctx, game, t);
-      else if (this.visual === "brute" || this.visual === "stone" || this.visual === "xuanArmor" || this.visual === "vanguard" || this.visual === "boss" || this.visual === "kingBoss") this.drawGiantDemon(ctx, game, t);
-      else if (this.visual === "shield") this.drawShieldDemon(ctx, game, t);
-      else this.drawSmallDemon(ctx, game, t);
+      if (!this.drawJourneyEnemy(ctx, game, t)) {
+        if (this.visual === "runner" || this.visual === "yaksha") this.drawRunnerDemon(ctx, game, t);
+        else if (this.visual === "flying") this.drawFlyingDemon(ctx, game, t);
+        else if (this.visual === "caster" || this.visual === "casterBoss") this.drawCasterDemon(ctx, game, t);
+        else if (this.visual === "brute" || this.visual === "stone" || this.visual === "xuanArmor" || this.visual === "vanguard" || this.visual === "boss" || this.visual === "kingBoss") this.drawGiantDemon(ctx, game, t);
+        else if (this.visual === "shield") this.drawShieldDemon(ctx, game, t);
+        else this.drawSmallDemon(ctx, game, t);
+      }
 
       this.drawEnemyTrait(ctx, game, t);
       this.drawHitOutline(ctx);
       this.drawEnemyStatusEffects(ctx, game, t, false);
       ctx.restore();
       if (this.targetable) this.drawEnemyHealthBar(ctx, game, t);
+    }
+
+    drawJourneyEnemy(ctx, game, t) {
+      const visual = this.visual;
+      if (visual === "fox" || visual === "splitFox") return this.drawFoxEnemy(ctx, t, visual === "splitFox");
+      if (visual === "shrimp") return this.drawShrimpEnemy(ctx, t);
+      if (visual === "boar") return this.drawBoarEnemy(ctx, t);
+      if (visual === "frog" || visual === "poisonFrog") return this.drawFrogEnemy(ctx, game, t, visual === "poisonFrog");
+      if (visual === "lampGranny") return this.drawLampGranny(ctx, t);
+      if (visual === "yakshaCn") return this.drawYakshaEnemy(ctx, t);
+      if (visual === "stoneBeast") return this.drawStoneBeast(ctx, t);
+      if (visual === "birdDemon") return this.drawBirdDemon(ctx, t);
+      if (visual === "spellMaster" || visual === "boneDrainer") return this.drawSpellMaster(ctx, t, visual === "boneDrainer");
+      if (visual === "pigDragon" || visual === "bullVanguard") return this.drawPigDragon(ctx, t, visual === "bullVanguard");
+      if (visual === "blackWindBoss" || visual === "wuzhiqiBoss" || visual === "whiteBoneBoss" || visual === "bullKingBoss") {
+        return this.drawJourneyBoss(ctx, t, visual);
+      }
+      return false;
+    }
+
+    drawInkOutline(ctx, color = "rgba(13, 32, 34, 0.72)", width = 2) {
+      ctx.strokeStyle = this.hitPulse > 0 ? "#fff1bd" : color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
+
+    drawFoxEnemy(ctx, t, split = false) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 0.75);
+      const tailCount = split ? 3 : 1;
+      for (let i = 0; i < tailCount; i += 1) {
+        const side = i - (tailCount - 1) / 2;
+        ctx.strokeStyle = split ? "rgba(255, 241, 189, 0.52)" : "rgba(255, 188, 114, 0.62)";
+        ctx.lineWidth = r * 0.34;
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.25 + side * r * 0.22, r * 0.34);
+        ctx.quadraticCurveTo(-r * (1.3 + i * 0.1), r * (0.2 + Math.sin(t * 5 + i) * 0.1), -r * 1.15 + side * r * 0.18, -r * 0.62);
+        ctx.stroke();
+      }
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : split ? "#65435d" : "#b76b42";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 0.72, r * 0.9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(74, 42, 35, 0.76)", 1.8);
+      ctx.fillStyle = split ? "#8d5c83" : "#f0aa73";
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.42, -r * 0.72);
+      ctx.lineTo(-r * 0.88, -r * 1.22);
+      ctx.lineTo(-r * 0.16, -r * 0.98);
+      ctx.moveTo(r * 0.42, -r * 0.72);
+      ctx.lineTo(r * 0.88, -r * 1.22);
+      ctx.lineTo(r * 0.16, -r * 0.98);
+      ctx.fill();
+      ctx.fillStyle = "#fff1bd";
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.28, r * 0.34, r * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawRedEyes(ctx, r, "slash");
+      return true;
+    }
+
+    drawShrimpEnemy(ctx, t) {
+      const r = this.radius;
+      this.drawRunnerTrail(ctx, null, t);
+      ctx.strokeStyle = "rgba(127, 209, 216, 0.52)";
+      ctx.lineWidth = 1.1;
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.2, -r * (0.9 + i * 0.12));
+        ctx.quadraticCurveTo(-r * 1.2, -r * (1.05 + i * 0.12), -r * 1.6, -r * (0.2 + i * 0.1));
+        ctx.moveTo(r * 0.2, -r * (0.9 + i * 0.12));
+        ctx.quadraticCurveTo(r * 1.2, -r * (1.05 + i * 0.12), r * 1.6, -r * (0.2 + i * 0.1));
+        ctx.stroke();
+      }
+      for (let i = 0; i < 4; i += 1) {
+        ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : i % 2 ? "#2f7470" : "#d46843";
+        ctx.beginPath();
+        ctx.ellipse(0, -r * 0.45 + i * r * 0.35, r * (0.48 - i * 0.03), r * 0.28, 0, 0, Math.PI * 2);
+        ctx.fill();
+        this.drawInkOutline(ctx, "rgba(18, 55, 55, 0.62)", 1.1);
+      }
+      this.drawRedEyes(ctx, r, "slash");
+      return true;
+    }
+
+    drawBoarEnemy(ctx, t) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 1.05);
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#5a4738";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 1.05, r * 0.82, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(34, 23, 18, 0.72)", 2.4);
+      ctx.fillStyle = "#74543f";
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.08, r * 0.48, r * 0.38, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f3fff9";
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.42, r * 0.12);
+      ctx.lineTo(-r * 0.8, r * 0.36);
+      ctx.lineTo(-r * 0.3, r * 0.34);
+      ctx.moveTo(r * 0.42, r * 0.12);
+      ctx.lineTo(r * 0.8, r * 0.36);
+      ctx.lineTo(r * 0.3, r * 0.34);
+      ctx.fill();
+      ctx.strokeStyle = "#e9b85f";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.48, -r * 0.65);
+      ctx.lineTo(-r * 0.9, -r * 1);
+      ctx.moveTo(r * 0.48, -r * 0.65);
+      ctx.lineTo(r * 0.9, -r * 1);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, "giant");
+      return true;
+    }
+
+    drawFrogEnemy(ctx, game, t, poison = false) {
+      const r = this.radius;
+      if (this.shield > 0) this.drawShieldAura(ctx, game, t);
+      this.drawGroundMist(ctx, r, t, poison ? 1.2 : 0.9);
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : poison ? "#315f3d" : "#517d55";
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.08, r * 0.9, r * 0.68, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(22, 58, 43, 0.72)", 2);
+      ctx.fillStyle = poison ? "#98b85d" : "#79a969";
+      for (const sx of [-0.38, 0.38]) {
+        ctx.beginPath();
+        ctx.ellipse(r * sx, -r * 0.55, r * 0.3, r * 0.24, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = "rgba(255, 241, 189, 0.58)";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.08, r * 0.42, 0.15, Math.PI - 0.15);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, "dot");
+      if (poison) {
+        ctx.fillStyle = "rgba(136, 210, 132, 0.5)";
+        for (let i = 0; i < 4; i += 1) {
+          ctx.beginPath();
+          ctx.arc(Math.sin(t * 2 + i) * r, -r * (1.1 + i * 0.15), r * 0.08, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      return true;
+    }
+
+    drawLampGranny(ctx, t) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 0.8);
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#4c3230";
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.55, r * 0.8);
+      ctx.quadraticCurveTo(0, -r * 1.15, r * 0.55, r * 0.8);
+      ctx.closePath();
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(38, 18, 16, 0.75)", 2);
+      ctx.fillStyle = "#fff1bd";
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.38, r * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ff6b57";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.42);
+      ctx.quadraticCurveTo(r * 0.42, -r * 0.78, 0, -r * 0.5);
+      ctx.quadraticCurveTo(-r * 0.42, -r * 0.84, 0, -r * 1.42);
+      ctx.fill();
+      ctx.strokeStyle = "#e9b85f";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.72, r * 0.48, 0, Math.PI * 2);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, "dot");
+      return true;
+    }
+
+    drawYakshaEnemy(ctx, t) {
+      const r = this.radius;
+      this.drawRunnerTrail(ctx, null, t);
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#31233f";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.2);
+      ctx.lineTo(r * 0.82, -r * 0.2);
+      ctx.lineTo(r * 0.42, r * 1.05);
+      ctx.lineTo(0, r * 0.68);
+      ctx.lineTo(-r * 0.42, r * 1.05);
+      ctx.lineTo(-r * 0.82, -r * 0.2);
+      ctx.closePath();
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(19, 9, 26, 0.78)", 2);
+      ctx.strokeStyle = "#e9b85f";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.3, -r * 0.88);
+      ctx.quadraticCurveTo(-r * 1, -r * 1.34, -r * 0.98, -r * 0.45);
+      ctx.moveTo(r * 0.3, -r * 0.88);
+      ctx.quadraticCurveTo(r * 1, -r * 1.34, r * 0.98, -r * 0.45);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, "slash");
+      return true;
+    }
+
+    drawStoneBeast(ctx, t) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 1);
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#667066";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.1);
+      ctx.lineTo(r * 0.9, -r * 0.2);
+      ctx.lineTo(r * 0.6, r * 0.9);
+      ctx.lineTo(-r * 0.6, r * 0.9);
+      ctx.lineTo(-r * 0.9, -r * 0.2);
+      ctx.closePath();
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(44, 53, 48, 0.72)", 2.4);
+      ctx.strokeStyle = "rgba(255, 241, 189, 0.38)";
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < 4; i += 1) {
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.55 + i * r * 0.3, -r * 0.5 + i * r * 0.12);
+        ctx.lineTo(-r * 0.2 + i * r * 0.25, r * 0.42);
+        ctx.stroke();
+      }
+      this.drawRedEyes(ctx, r, "dot");
+      return true;
+    }
+
+    drawBirdDemon(ctx, t) {
+      const r = this.radius;
+      const flap = Math.sin(t * 9) * r * 0.22;
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : "#213f42";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 0.42, r * 0.74, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(20, 40, 43, 0.72)";
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(side * r * 0.12, -r * 0.18);
+        ctx.quadraticCurveTo(side * r * 1.5, -r * 0.8 - flap, side * r * 1.18, r * 0.58);
+        ctx.quadraticCurveTo(side * r * 0.52, r * 0.18, side * r * 0.12, r * 0.28);
+        ctx.fill();
+      }
+      ctx.fillStyle = "#e9b85f";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.82);
+      ctx.lineTo(r * 0.18, -r * 1.16);
+      ctx.lineTo(-r * 0.18, -r * 1.16);
+      ctx.fill();
+      this.drawRedEyes(ctx, r, "slash");
+      return true;
+    }
+
+    drawSpellMaster(ctx, t, bone = false) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, bone ? 1.1 : 0.8);
+      ctx.strokeStyle = bone ? "rgba(215, 255, 245, 0.58)" : "rgba(255, 241, 189, 0.48)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * (1.05 + Math.sin(t * 2) * 0.05), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : bone ? "#35426a" : "#3b2a55";
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.05);
+      ctx.quadraticCurveTo(r * 0.75, -r * 0.1, r * 0.36, r * 1);
+      ctx.lineTo(-r * 0.36, r * 1);
+      ctx.quadraticCurveTo(-r * 0.75, -r * 0.1, 0, -r * 1.05);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(21, 15, 35, 0.74)", 2);
+      ctx.strokeStyle = "#fff1bd";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(r * 0.62, -r * 0.7);
+      ctx.lineTo(r * 0.92, r * 0.88);
+      ctx.stroke();
+      this.drawRedEyes(ctx, r, bone ? "dot" : "slash");
+      return true;
+    }
+
+    drawPigDragon(ctx, t, vanguard = false) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 1.25);
+      if (this.shield > 0) {
+        ctx.strokeStyle = "rgba(159, 217, 207, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 1.35, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = this.hitPulse > 0 ? "#fff1bd" : vanguard ? "#5c2e28" : "#354a42";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 1.05, r * 0.92, 0, 0, Math.PI * 2);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(16, 28, 25, 0.78)", 2.5);
+      ctx.strokeStyle = vanguard ? "#f5d78a" : "#9fd9cf";
+      ctx.lineWidth = 2.2;
+      for (let i = -1; i <= 1; i += 1) {
+        ctx.beginPath();
+        ctx.moveTo(i * r * 0.35, -r * 0.72);
+        ctx.lineTo(i * r * 0.18, r * 0.62);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#f3fff9";
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.5, r * 0.1);
+      ctx.lineTo(-r * 0.92, r * 0.36);
+      ctx.lineTo(-r * 0.38, r * 0.34);
+      ctx.moveTo(r * 0.5, r * 0.1);
+      ctx.lineTo(r * 0.92, r * 0.36);
+      ctx.lineTo(r * 0.38, r * 0.34);
+      ctx.fill();
+      this.drawRedEyes(ctx, r, "giant");
+      return true;
+    }
+
+    drawJourneyBoss(ctx, t, visual) {
+      const r = this.radius;
+      this.drawGroundMist(ctx, r, t, 1.7);
+      const isBull = visual === "bullKingBoss";
+      const isBone = visual === "whiteBoneBoss";
+      const isWater = visual === "wuzhiqiBoss";
+      const fill = this.hitPulse > 0 ? "#fff1bd" : isBull ? "#5b2b26" : isBone ? "#e8f7ef" : isWater ? "#244f5a" : "#20282c";
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.25);
+      ctx.bezierCurveTo(r * 1.2, -r * 0.9, r * 1.25, r * 0.48, r * 0.4, r * 1.18);
+      ctx.lineTo(0, r * 1.35);
+      ctx.lineTo(-r * 0.4, r * 1.18);
+      ctx.bezierCurveTo(-r * 1.25, r * 0.48, -r * 1.2, -r * 0.9, 0, -r * 1.25);
+      ctx.fill();
+      this.drawInkOutline(ctx, "rgba(16, 20, 24, 0.86)", 3.2);
+      ctx.strokeStyle = isBull ? "#f5d78a" : isBone ? "#9fd9cf" : "#e9b85f";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.45, -r * 0.88);
+      ctx.quadraticCurveTo(-r * 1.45, -r * 1.45, -r * 1.55, -r * 0.42);
+      ctx.moveTo(r * 0.45, -r * 0.88);
+      ctx.quadraticCurveTo(r * 1.45, -r * 1.45, r * 1.55, -r * 0.42);
+      ctx.stroke();
+      if (isWater) {
+        ctx.strokeStyle = "rgba(127, 209, 216, 0.62)";
+        ctx.lineWidth = 1.6;
+        for (let i = 0; i < 4; i += 1) {
+          ctx.beginPath();
+          ctx.arc(0, r * 0.1, r * (0.45 + i * 0.15), t + i, t + Math.PI * 1.2 + i);
+          ctx.stroke();
+        }
+      }
+      if (isBone) {
+        ctx.strokeStyle = "rgba(49, 91, 87, 0.6)";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.35, -r * 0.45);
+        ctx.lineTo(r * 0.35, r * 0.48);
+        ctx.moveTo(r * 0.35, -r * 0.45);
+        ctx.lineTo(-r * 0.35, r * 0.48);
+        ctx.stroke();
+      }
+      this.drawRedEyes(ctx, r, isBull ? "giant" : "slash");
+      return true;
     }
 
     drawEnemyAura(ctx, game, t) {
@@ -2651,6 +3372,11 @@
         if (!game.isEnemyTargetable(enemy)) continue;
         const radius = this.radius + enemy.radius;
         if (distSq(this.x, this.y, enemy.x, enemy.y) <= radius * radius) {
+          if (this.kind === "sand") {
+            enemy.slowUntil = Math.max(enemy.slowUntil, game.elapsed + 0.3);
+            enemy.slowFactor = Math.min(enemy.slowFactor, 0.58);
+            enemy.x += (this.x - enemy.x) * dt * 0.35;
+          }
           game.damageEnemy(enemy, damage, this.tickSource, { silent: true });
           if (this.kind === "array" && Math.random() < 0.18) {
             game.addParticle(enemy.x, enemy.y, "#d7fff5", rand(-35, 35), rand(-35, 35), rand(2, 4), rand(0.18, 0.35), "sword");
@@ -2672,6 +3398,10 @@
         ? "rgba(215, 255, 245, 0.68)"
         : this.kind === "poison"
           ? "rgba(136, 210, 132, 0.58)"
+          : this.kind === "sand"
+            ? "rgba(127, 209, 216, 0.62)"
+            : this.kind === "quake"
+              ? "rgba(245, 215, 138, 0.64)"
           : "rgba(233, 184, 95, 0.58)";
       ctx.lineWidth = 2;
       ctx.setLineDash(this.kind === "array" ? [8, 6] : [4, 5]);
@@ -2732,6 +3462,24 @@
           ctx.beginPath();
           ctx.arc(this.x + Math.cos(a) * this.radius * 0.45, this.y + Math.sin(a * 1.3) * this.radius * 0.28, this.radius * 0.08, 0, Math.PI * 2);
           ctx.fill();
+        }
+      } else if (this.kind === "sand") {
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.age * 2.4);
+        ctx.strokeStyle = "rgba(127, 209, 216, 0.58)";
+        ctx.lineWidth = 1.3;
+        for (let i = 0; i < 4; i += 1) {
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius * (0.25 + i * 0.15), i * 0.8, Math.PI + i * 0.8);
+          ctx.stroke();
+        }
+      } else if (this.kind === "quake") {
+        ctx.strokeStyle = "rgba(245, 215, 138, 0.68)";
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 4; i += 1) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius * (0.3 + i * 0.18 + this.age * 0.25), 0, Math.PI * 2);
+          ctx.stroke();
         }
       }
       ctx.restore();
@@ -3228,7 +3976,10 @@
       const source = [...this.pool];
       const picks = [];
       const makeOption = (base, forcedRarity) => {
-        const rarityKey = forcedRarity || (base.fixed ? "rare" : pickRarity());
+        let rarityKey = forcedRarity || (base.fixed ? "rare" : pickRarity());
+        if (!forcedRarity && !base.fixed && (this.game.metaBonuses.rareChanceBonus || 0) > 0 && Math.random() < this.game.metaBonuses.rareChanceBonus) {
+          rarityKey = rarityKey === "common" ? "rare" : "epic";
+        }
         const rarity = RARITY[rarityKey];
         const value = base.fixed
           ? base.value
@@ -3323,6 +4074,7 @@
       this.ctx = this.canvas.getContext("2d");
       this.dom = {
         levelText: document.getElementById("levelText"),
+        heroHudLabel: document.getElementById("heroHudLabel"),
         expText: document.getElementById("expText"),
         timeText: document.getElementById("timeText"),
         stageText: document.getElementById("stageText"),
@@ -3332,6 +4084,10 @@
         skillStrip: document.getElementById("skillStrip"),
         homeOverlay: document.getElementById("homeOverlay"),
         cultivationOverlay: document.getElementById("cultivationOverlay"),
+        runeOverlay: document.getElementById("runeOverlay"),
+        codexOverlay: document.getElementById("codexOverlay"),
+        achievementOverlay: document.getElementById("achievementOverlay"),
+        companionOverlay: document.getElementById("companionOverlay"),
         saveInfoOverlay: document.getElementById("saveInfoOverlay"),
         upgradeOverlay: document.getElementById("upgradeOverlay"),
         upgradeOptions: document.getElementById("upgradeOptions"),
@@ -3350,6 +4106,12 @@
         homeCoins: document.getElementById("homeCoins"),
         selectedTrialText: document.getElementById("selectedTrialText"),
         levelList: document.getElementById("levelList"),
+        heroList: document.getElementById("heroList"),
+        runeSummary: document.getElementById("runeSummary"),
+        runeList: document.getElementById("runeList"),
+        codexList: document.getElementById("codexList"),
+        achievementList: document.getElementById("achievementList"),
+        companionList: document.getElementById("companionList"),
         cultivationCoins: document.getElementById("cultivationCoins"),
         gemList: document.getElementById("gemList"),
         talentList: document.getElementById("talentList"),
@@ -3360,6 +4122,9 @@
         totalRuns: document.getElementById("totalRuns"),
         startBtn: document.getElementById("startBtn"),
         cultivationBtn: document.getElementById("cultivationBtn"),
+        runeBtn: document.getElementById("runeBtn"),
+        codexBtn: document.getElementById("codexBtn"),
+        achievementBtn: document.getElementById("achievementBtn"),
         soundToggleBtn: document.getElementById("soundToggleBtn"),
         saveInfoBtn: document.getElementById("saveInfoBtn"),
         saveInfoGrid: document.getElementById("saveInfoGrid"),
@@ -3370,6 +4135,10 @@
         copyCloudCodeBtn: document.getElementById("copyCloudCodeBtn"),
         closeSaveInfoBtn: document.getElementById("closeSaveInfoBtn"),
         backHomeBtn: document.getElementById("backHomeBtn"),
+        closeRuneBtn: document.getElementById("closeRuneBtn"),
+        closeCodexBtn: document.getElementById("closeCodexBtn"),
+        closeAchievementBtn: document.getElementById("closeAchievementBtn"),
+        skipCompanionBtn: document.getElementById("skipCompanionBtn"),
         resetSaveBtn: document.getElementById("resetSaveBtn"),
         pauseBtn: document.getElementById("pauseBtn"),
         restartBtn: document.getElementById("restartBtn"),
@@ -3410,6 +4179,9 @@
       this.renderTimeScale();
       this.renderHome();
       this.renderCultivation();
+      this.renderRunes();
+      this.renderCodex();
+      this.renderAchievements();
       requestAnimationFrame((time) => this.loop(time));
     }
 
@@ -3422,6 +4194,9 @@
       this.dom.pauseBtn.addEventListener("click", () => this.togglePause());
       this.dom.speedBtn.addEventListener("click", () => this.toggleTimeScale());
       this.dom.cultivationBtn.addEventListener("click", () => this.openCultivation());
+      this.dom.runeBtn.addEventListener("click", () => this.openRunes());
+      this.dom.codexBtn.addEventListener("click", () => this.openCodex());
+      this.dom.achievementBtn.addEventListener("click", () => this.openAchievements());
       this.dom.soundToggleBtn.addEventListener("click", () => this.toggleSound());
       this.dom.saveInfoBtn.addEventListener("click", () => this.showSaveInfo());
       this.dom.closeSaveInfoBtn.addEventListener("click", () => this.closeSaveInfo());
@@ -3432,6 +4207,10 @@
         this.dom.cloudSaveCodeInput.value = normalizeSaveCode(this.dom.cloudSaveCodeInput.value);
       });
       this.dom.backHomeBtn.addEventListener("click", () => this.showHome());
+      this.dom.closeRuneBtn.addEventListener("click", () => this.showHome());
+      this.dom.closeCodexBtn.addEventListener("click", () => this.showHome());
+      this.dom.closeAchievementBtn.addEventListener("click", () => this.showHome());
+      this.dom.skipCompanionBtn.addEventListener("click", () => this.closeCompanionInvite());
       this.dom.resultHomeBtn.addEventListener("click", () => this.showHome());
       this.dom.resetSaveBtn.addEventListener("click", () => this.resetSave());
       document.addEventListener("click", (event) => {
@@ -3510,11 +4289,18 @@
       const levelConfig = this.currentLevelConfig || getLevelById(this.selectedLevelId);
       this.currentLevelConfig = levelConfig;
       this.metaBonuses = this.saveManager.getMetaBonuses();
+      this.heroId = this.saveManager.data.selectedHero || "wukong";
+      this.heroDef = HERO_DEFS[this.heroId] || HERO_DEFS.wukong;
+      this.companionIds = [...(this.saveManager.data.companions.invited || [])];
+      this.companionTimers = Object.fromEntries(this.companionIds.map((id) => [id, rand(1.2, 3.2)]));
+      this.heroShadowTimer = 4.5;
+      this.heroRegenTimer = 1;
+      this.companionBuffUntil = 0;
       this.elapsed = 0;
       this.level = 1;
       this.exp = levelConfig.startExp + this.metaBonuses.startExp;
       this.expToNext = levelConfig.baseExpNeed;
-      this.maxWallHp = levelConfig.wallHp + this.metaBonuses.maxHpBonus;
+      this.maxWallHp = Math.round((levelConfig.wallHp + this.metaBonuses.maxHpBonus) * (this.metaBonuses.maxHpMultiplier || 1));
       this.wallHp = this.maxWallHp;
       this.kills = 0;
       this.difficultyTier = 0;
@@ -3551,6 +4337,14 @@
       this.areaEffects = [];
       this.lightningEffects = [];
       this.skills = this.createSkills();
+      for (const id of this.heroDef.initialSkills || []) {
+        if (this.skills[id]) {
+          this.skills[id].enabled = true;
+          this.skills[id].level = Math.max(1, this.skills[id].level || 0);
+        }
+      }
+      this.skills.sword.pierce += this.metaBonuses.swordPierceBonus || 0;
+      this.skills.thunder.bounces += this.metaBonuses.thunderBounceBonus || 0;
       this.leveling = false;
       const firstPhase = (levelConfig.phases || levelConfig.stages || [])[0];
       if (this.dom.stageText) this.dom.stageText.textContent = firstPhase?.text || firstPhase?.name || levelConfig.name;
@@ -3571,6 +4365,10 @@
       this.state = "playing";
       this.dom.homeOverlay.classList.add("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
+      this.dom.runeOverlay.classList.add("hidden");
+      this.dom.codexOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.add("hidden");
+      this.dom.companionOverlay.classList.add("hidden");
       this.dom.saveInfoOverlay.classList.add("hidden");
       this.dom.gameOverOverlay.classList.add("hidden");
       this.dom.upgradeOverlay.classList.add("hidden");
@@ -3625,6 +4423,10 @@
       this.saveManager.save();
       this.dom.homeOverlay.classList.remove("hidden");
       this.dom.cultivationOverlay.classList.add("hidden");
+      this.dom.runeOverlay.classList.add("hidden");
+      this.dom.codexOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.add("hidden");
+      this.dom.companionOverlay.classList.add("hidden");
       this.dom.saveInfoOverlay.classList.add("hidden");
       this.dom.gameOverOverlay.classList.add("hidden");
       this.dom.upgradeOverlay.classList.add("hidden");
@@ -3638,7 +4440,31 @@
       this.state = "cultivation";
       this.dom.homeOverlay.classList.add("hidden");
       this.dom.cultivationOverlay.classList.remove("hidden");
+      this.dom.runeOverlay.classList.add("hidden");
+      this.dom.codexOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.add("hidden");
       this.renderCultivation();
+    }
+
+    openRunes() {
+      this.state = "runes";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.runeOverlay.classList.remove("hidden");
+      this.renderRunes();
+    }
+
+    openCodex() {
+      this.state = "codex";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.codexOverlay.classList.remove("hidden");
+      this.renderCodex();
+    }
+
+    openAchievements() {
+      this.state = "achievements";
+      this.dom.homeOverlay.classList.add("hidden");
+      this.dom.achievementOverlay.classList.remove("hidden");
+      this.renderAchievements();
     }
 
     toggleSound() {
@@ -3688,6 +4514,10 @@
         ["最高通关", `第 ${highestCleared} 关`],
         ["最高解锁", `第 ${highestUnlocked} 关`],
         ["当前选择", `第 ${getLevelById(this.selectedLevelId).order} 关`],
+        ["当前角色", HERO_DEFS[save.selectedHero]?.name || "孙悟空"],
+        ["助战伙伴", (save.companions.invited || []).map((id) => COMPANION_DEFS[id]?.name).filter(Boolean).join("、") || "暂无"],
+        ["已装备符文", `${(save.runes.equipped || []).length}/3`],
+        ["妖怪图鉴", `${Object.keys(save.bestiary.seen || {}).length} 种`],
         ["强化总等级", totalTalentLevel],
         ["礼包码记录", `${(save.redeemedCodes || []).length} 个`],
         ["每日奖励", save.lastDailyRewardDate || "未领取"],
@@ -3747,6 +4577,9 @@
         this.renderTimeScale();
         this.renderHome();
         this.renderCultivation();
+        this.renderRunes();
+        this.renderCodex();
+        this.renderAchievements();
         this.renderSaveInfo();
         this.setCloudResult(`云存档读取成功：${result.code}`);
         this.showToast("云存档读取成功");
@@ -3778,6 +4611,9 @@
       this.reset();
       this.renderHome();
       this.renderCultivation();
+      this.renderRunes();
+      this.renderCodex();
+      this.renderAchievements();
       this.renderTimeScale();
       this.showToast("存档已重置");
     }
@@ -3847,6 +4683,7 @@
 
       this.updateSpawns(dt);
       for (const skill of Object.values(this.skills)) skill.update(dt, this);
+      this.updateHeroAndCompanions(dt);
       for (const area of this.areaEffects) area.update(dt, this);
       for (const enemy of this.enemies) enemy.update(dt, this);
       for (const projectile of this.projectiles) projectile.update(dt, this);
@@ -4022,6 +4859,7 @@
         this.makeElite(enemy);
       }
       this.enemies.push(enemy);
+      this.saveManager.markEnemySeen(enemy.type);
       this.maybeAnnounceEnemy(enemy);
       return enemy;
     }
@@ -4086,10 +4924,99 @@
       return 1 + bonus;
     }
 
+    updateHeroAndCompanions(dt) {
+      if (this.metaBonuses.regenPerSecond) {
+        this.heroRegenTimer -= dt;
+        if (this.heroRegenTimer <= 0) {
+          this.heroRegenTimer += 1;
+          this.wallHp = Math.min(this.maxWallHp, this.wallHp + this.metaBonuses.regenPerSecond);
+        }
+      }
+      if (this.heroId === "wukong") {
+        this.heroShadowTimer -= dt;
+        if (this.heroShadowTimer <= 0) {
+          this.heroShadowTimer += 7;
+          this.castHeroShadow();
+        }
+      }
+      for (const id of this.companionIds || []) {
+        const def = COMPANION_DEFS[id];
+        if (!def) continue;
+        this.companionTimers[id] = (this.companionTimers[id] || def.cooldown) - dt;
+        if (this.companionTimers[id] > 0) continue;
+        this.companionTimers[id] += def.cooldown;
+        this.castCompanionSkill(id);
+      }
+    }
+
+    castHeroShadow() {
+      const target = this.findClosestToWall();
+      if (!target) return;
+      const damage = this.skills.sword.baseDamage * this.skills.sword.damageMult * 1.15;
+      this.damageEnemy(target, damage, "sword", { x: target.x, y: target.y - 8 });
+      this.spawnSlash(target.x, target.y, -Math.PI / 2);
+      this.floatingTexts.push(new FloatingText("残影追击", target.x, target.y - 24, "#fff1bd", { size: 14, life: 0.8 }));
+      for (let i = 0; i < 14; i += 1) {
+        this.addParticle(target.x, target.y, i % 2 ? "#f5d78a" : "#ff6b57", rand(-120, 120), rand(-90, 40), rand(2, 4.5), rand(0.28, 0.55), "sword");
+      }
+    }
+
+    castCompanionSkill(id) {
+      const def = COMPANION_DEFS[id];
+      if (!def) return;
+      const target = this.findDenseTarget() || this.findClosestToWall();
+      if (id !== "tang" && !target) return;
+      this.floatingTexts.push(new FloatingText(def.skill, this.width / 2, this.battleTop + 56, def.color, { size: 18, life: 1, kind: "crit" }));
+      if (id === "wukong") {
+        const radius = 86;
+        for (const enemy of this.enemies) {
+          if (!this.isEnemyTargetable(enemy)) continue;
+          if (distSq(target.x, target.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
+            this.damageEnemy(enemy, 34, "sword", { x: enemy.x, y: enemy.y, silent: false });
+          }
+        }
+        this.lightningEffects.push({ x1: target.x - 80, y1: target.y - 35, x2: target.x + 80, y2: target.y + 35, life: 0.2, age: 0, sword: true });
+        this.addShake(2.5, 0.08);
+      } else if (id === "tang") {
+        const heal = Math.round(this.maxWallHp * 0.08 + 12);
+        this.wallHp = Math.min(this.maxWallHp, this.wallHp + heal);
+        this.companionBuffUntil = Math.max(this.companionBuffUntil, this.elapsed + 5);
+        this.floatingTexts.push(new FloatingText(`佛光 +${heal}`, this.width / 2, this.wallY - 72, "#fff1bd", { size: 16, life: 1 }));
+        for (let i = 0; i < 24; i += 1) {
+          const a = (Math.PI * 2 * i) / 24;
+          this.addParticle(this.width / 2, this.wallY - 45, "#fff1bd", Math.cos(a) * rand(35, 90), Math.sin(a) * rand(35, 90), rand(2, 4), rand(0.35, 0.75), "heal");
+        }
+      } else if (id === "bajie") {
+        const centerX = this.width / 2;
+        const centerY = this.wallY - 72;
+        const radius = 110;
+        this.areaEffects.push(new AreaEffect({ kind: "quake", x: centerX, y: centerY, radius, duration: 0.45, damagePerSecond: 0, color: "rgba(217, 163, 93, 0.2)", tickSource: "array" }));
+        for (const enemy of this.enemies) {
+          if (!this.isEnemyTargetable(enemy)) continue;
+          if (distSq(centerX, centerY, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
+            enemy.y = Math.max(this.battleTop + enemy.radius, enemy.y - 24);
+            this.damageEnemy(enemy, 32, "array", { x: enemy.x, y: enemy.y });
+          }
+        }
+        this.addShake(5, 0.12);
+      } else if (id === "shaseng") {
+        const radius = 92;
+        this.areaEffects.push(new AreaEffect({ kind: "sand", x: target.x, y: target.y, radius, duration: 3, damagePerSecond: 12, color: "rgba(127, 209, 216, 0.2)", tickSource: "ice" }));
+        for (const enemy of this.enemies) {
+          if (!this.isEnemyTargetable(enemy)) continue;
+          if (distSq(target.x, target.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) {
+            enemy.slowUntil = Math.max(enemy.slowUntil, this.elapsed + 2.5);
+            enemy.slowFactor = Math.min(enemy.slowFactor, 0.55);
+          }
+        }
+      }
+    }
+
     damageWall(amount, x, y) {
-      const finalAmount = this.elapsed < this.currentLevelConfig.newbieProtectionSeconds
-        ? Math.ceil(amount * 0.5)
+      const protectedAmount = this.elapsed < this.currentLevelConfig.newbieProtectionSeconds
+        ? amount * 0.5
         : amount;
+      const finalAmount = Math.max(1, Math.ceil(protectedAmount * (1 - (this.metaBonuses.wallDamageReduction || 0))));
       this.wallHp = Math.max(0, this.wallHp - finalAmount);
       this.wallHitFlash = 1;
       this.redFlashAlpha = Math.max(this.redFlashAlpha, 0.18);
@@ -4099,6 +5026,14 @@
       this.floatingTexts.push(new FloatingText(`-${finalAmount}`, x, y, "#ff7f6b", { size: 15 }));
       for (let i = 0; i < 8; i += 1) {
         this.addParticle(x, y, "#fff1bd", rand(-80, 80), rand(-80, -20), rand(2, 5), rand(0.35, 0.7), "hit");
+      }
+      if (this.metaBonuses.retaliationDamage > 0) {
+        for (const enemy of this.enemies) {
+          if (!this.isEnemyTargetable(enemy)) continue;
+          if (distSq(x, y, enemy.x, enemy.y) <= 100 * 100) {
+            this.damageEnemy(enemy, this.metaBonuses.retaliationDamage, "array", { silent: true });
+          }
+        }
       }
       if (
         !this.emergencyHealUsed &&
@@ -4204,6 +5139,7 @@
       if (!enemy || enemy.dead) return 0;
       if (!options.ignoreTargetable && !this.isEnemyTargetable(enemy)) return 0;
       let amount = baseAmount * this.globalDamageMult;
+      if (this.elapsed < this.companionBuffUntil) amount *= 1.16;
       if (enemy.config?.swordDamageTaken && source === "sword") amount *= enemy.config.swordDamageTaken;
       if (enemy.config?.flying && source === "array") amount *= enemy.config.arrayDamageTaken || 0.3;
       if (this.iceVulnerabilityBonus > 0 && this.elapsed < enemy.slowUntil) {
@@ -4399,8 +5335,16 @@
         skill.enabled = true;
         skill.level = 1;
         skill.timer = 0.2;
-        this.floatingTexts.push(new FloatingText(`习得${SKILL_LABELS[id]}`, this.width / 2, this.wallY - 95, "#d7fff5"));
+        this.floatingTexts.push(new FloatingText(`习得${this.getSkillLabel(id)}`, this.width / 2, this.wallY - 95, "#d7fff5"));
       }
+    }
+
+    getSkillLabel(id) {
+      return this.heroDef?.labels?.[id] || SKILL_LABELS[id] || id;
+    }
+
+    getSkillIcon(id) {
+      return this.heroDef?.icons?.[id] || SKILL_ICONS[id] || "法";
     }
 
     findClosestToWall() {
@@ -4708,7 +5652,7 @@
       this.dom.resultClear.textContent = victory ? "已通关" : "未通关";
       this.dom.resultCoins.textContent = reward.coins;
       this.dom.resultTotalCoins.textContent = reward.totalCoins;
-      this.dom.resultShards.textContent = this.formatShardDrops(reward.drops);
+      this.dom.resultShards.textContent = this.formatShardDrops(reward.drops, reward.runeDrops);
       if (victory && this.currentLevelConfig.id === "level40") {
         this.dom.resultUnlockNotice.textContent = "万妖退散，山门永固";
         this.dom.resultUnlockNotice.classList.remove("hidden");
@@ -4719,6 +5663,9 @@
         this.dom.resultUnlockNotice.classList.remove("hidden");
       } else if (victory && nextLevel) {
         this.dom.resultUnlockNotice.textContent = `已解锁：第 ${nextLevel.order} 关 ${nextLevel.name}`;
+        this.dom.resultUnlockNotice.classList.remove("hidden");
+      } else if (reward.pendingCompanionInvite) {
+        this.dom.resultUnlockNotice.textContent = "新的西游伙伴可邀请助战";
         this.dom.resultUnlockNotice.classList.remove("hidden");
       } else if (reward.unlockedLevelName) {
         this.dom.resultUnlockNotice.textContent = `新试炼已解封：${reward.unlockedLevelName}`;
@@ -4739,6 +5686,14 @@
       }
       this.renderHome();
       this.renderCultivation();
+      this.renderRunes();
+      this.renderCodex();
+      this.renderAchievements();
+      if (reward.pendingCompanionInvite) {
+        window.setTimeout(() => {
+          if (this.state === "ended") this.showCompanionInvite();
+        }, 450);
+      }
     }
 
     configureResultButtons(victory) {
@@ -4760,13 +5715,16 @@
       }
     }
 
-    formatShardDrops(drops) {
+    formatShardDrops(drops, runeDrops = []) {
       const entries = Object.entries(drops);
-      if (!entries.length) return "无";
-      return entries.map(([id, count]) => `${GEM_DEFS[id].shardName} x${count}`).join("、");
+      const parts = entries.map(([id, count]) => `${GEM_DEFS[id].shardName} x${count}`);
+      for (const rune of runeDrops || []) parts.push(getRuneDisplay(rune).name);
+      if (!parts.length) return "无";
+      return parts.join("、");
     }
 
     updateUI() {
+      if (this.dom.heroHudLabel) this.dom.heroHudLabel.textContent = this.heroDef ? this.heroDef.name : "境界";
       this.dom.levelText.textContent = this.level;
       this.dom.expText.textContent = `${Math.floor(this.exp)} / ${this.expToNext}`;
       const remaining = this.currentLevelConfig.duration - this.elapsed;
@@ -4791,8 +5749,222 @@
       this.dom.bestLevel.textContent = save.records.bestLevel;
       this.dom.clearCount.textContent = save.records.clearCount;
       this.dom.totalRuns.textContent = save.records.totalRuns;
+      this.renderHeroList();
       this.renderLevelSelector();
       this.renderSoundToggle();
+    }
+
+    renderHeroList() {
+      if (!this.dom.heroList) return;
+      const save = this.saveManager.data;
+      this.dom.heroList.innerHTML = "";
+      for (const [id, hero] of Object.entries(HERO_DEFS)) {
+        const state = save.heroes[id] || { level: 1, wins: 0 };
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `hero-card ${save.selectedHero === id ? "selected" : ""}`;
+        button.innerHTML = `
+          <canvas class="hero-portrait" width="72" height="72" data-hero="${id}"></canvas>
+          <div class="hero-copy">
+            <strong>${hero.name} · Lv.${state.level}</strong>
+            <p>${hero.role}</p>
+            <p>${hero.passive}</p>
+            <div class="hero-tags"><span>${hero.initialSkills.map((skill) => hero.labels?.[skill] || SKILL_LABELS[skill]).join("</span><span>")}</span><span>胜场 ${state.wins || 0}</span></div>
+          </div>
+        `;
+        button.addEventListener("click", () => {
+          const result = this.saveManager.selectHero(id);
+          this.heroId = id;
+          this.heroDef = hero;
+          this.showToast(result.message);
+          this.renderHome();
+          this.renderSkillStrip();
+        });
+        this.dom.heroList.appendChild(button);
+      }
+      this.drawHeroPortraits(this.dom.heroList);
+    }
+
+    drawHeroPortraits(root = document) {
+      root.querySelectorAll("canvas.hero-portrait").forEach((canvas) => {
+        const id = canvas.dataset.hero;
+        const hero = HERO_DEFS[id] || HERO_DEFS.wukong;
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const grad = ctx.createRadialGradient(w * 0.35, h * 0.25, 4, w / 2, h / 2, w * 0.5);
+        grad.addColorStop(0, "rgba(255,255,255,0.8)");
+        grad.addColorStop(0.45, hero.color);
+        grad.addColorStop(1, "rgba(23,63,66,0.9)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2, w * 0.46, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fff1bd";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = "rgba(23, 63, 66, 0.72)";
+        ctx.beginPath();
+        ctx.ellipse(w / 2, h * 0.56, w * 0.22, h * 0.28, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = hero.accent;
+        if (id === "wukong") {
+          ctx.fillRect(w * 0.2, h * 0.34, w * 0.6, 4);
+          ctx.fillStyle = "#fff1bd";
+          ctx.beginPath();
+          ctx.arc(w * 0.5, h * 0.3, 7, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (id === "tang") {
+          ctx.beginPath();
+          ctx.arc(w * 0.5, h * 0.28, 12, Math.PI, 0);
+          ctx.fill();
+          ctx.strokeStyle = "#fff1bd";
+          ctx.beginPath();
+          ctx.arc(w * 0.5, h * 0.43, 22, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (id === "bajie") {
+          ctx.beginPath();
+          ctx.ellipse(w * 0.5, h * 0.44, 16, 10, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#f3fff9";
+          ctx.fillRect(w * 0.37, h * 0.42, 5, 7);
+          ctx.fillRect(w * 0.58, h * 0.42, 5, 7);
+        } else {
+          ctx.strokeStyle = "#d7fff5";
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.25, h * 0.72);
+          ctx.lineTo(w * 0.78, h * 0.22);
+          ctx.stroke();
+          ctx.fillStyle = "#fff1bd";
+          ctx.beginPath();
+          ctx.arc(w * 0.52, h * 0.5, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#ff6b57";
+        ctx.beginPath();
+        ctx.arc(w * 0.43, h * 0.52, 2.2, 0, Math.PI * 2);
+        ctx.arc(w * 0.57, h * 0.52, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    renderRunes() {
+      if (!this.dom.runeList) return;
+      const save = this.saveManager.data;
+      const equipped = new Set(save.runes.equipped || []);
+      const owned = save.runes.owned || [];
+      this.dom.runeSummary.textContent = owned.length
+        ? `已拥有 ${owned.length} 枚符文，已装备 ${equipped.size}/3。通关会获得随机符文，Boss 关更容易出上品与灵品。`
+        : "暂未获得符文。通关任意试炼后会掉落第一枚符文。";
+      this.dom.runeList.innerHTML = "";
+      if (!owned.length) {
+        const empty = document.createElement("article");
+        empty.className = "system-card";
+        empty.innerHTML = `<span class="system-icon">符</span><div class="system-copy"><strong>符文未开匣</strong><p>先通关一关，带回第一枚取经符箓。</p></div>`;
+        this.dom.runeList.appendChild(empty);
+        return;
+      }
+      for (const rune of owned) {
+        const info = getRuneDisplay(rune);
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = `system-card ${equipped.has(rune.uid) ? "equipped" : ""}`;
+        card.innerHTML = `
+          <span class="system-icon" style="color:${info.quality.color}">符</span>
+          <div class="system-copy">
+            <strong>${info.name}</strong>
+            <p>${info.desc}</p>
+            <div class="system-tags"><span>${equipped.has(rune.uid) ? "已装备" : "点击装备"}</span><span>${info.def.category}</span></div>
+          </div>
+        `;
+        card.addEventListener("click", () => {
+          const result = this.saveManager.toggleRuneEquip(rune.uid);
+          this.showToast(result.message);
+          this.renderRunes();
+        });
+        this.dom.runeList.appendChild(card);
+      }
+    }
+
+    renderCodex() {
+      if (!this.dom.codexList) return;
+      const seen = this.saveManager.data.bestiary.seen || {};
+      this.dom.codexList.innerHTML = "";
+      for (const [id, def] of Object.entries(ENEMY_TYPES)) {
+        const unlocked = !!seen[id] || (def.unlockLevel || 1) <= 1;
+        const card = document.createElement("article");
+        card.className = `system-card ${unlocked ? "" : "locked"}`;
+        card.innerHTML = `
+          <span class="system-icon">${unlocked ? def.name.slice(0, 1) : "?"}</span>
+          <div class="system-copy">
+            <strong>${unlocked ? def.name : "未遭遇妖怪"}</strong>
+            <p>${unlocked ? (def.lore || "取经路上现身的志怪妖物。") : `第 ${def.unlockLevel || 1} 关后可能出现。`}</p>
+            <div class="system-tags"><span>${def.boss ? "Boss" : def.elite ? "精英" : "妖怪"}</span><span>解锁 ${def.unlockLevel || 1}</span></div>
+          </div>
+        `;
+        this.dom.codexList.appendChild(card);
+      }
+    }
+
+    renderAchievements() {
+      if (!this.dom.achievementList) return;
+      const unlocked = this.saveManager.data.achievements.unlocked || {};
+      this.dom.achievementList.innerHTML = "";
+      for (const [id, def] of Object.entries(ACHIEVEMENT_DEFS)) {
+        const done = !!unlocked[id];
+        const card = document.createElement("article");
+        card.className = `system-card ${done ? "equipped" : "locked"}`;
+        card.innerHTML = `
+          <span class="system-icon">${done ? "成" : "未"}</span>
+          <div class="system-copy">
+            <strong>${def.name}</strong>
+            <p>${def.desc}</p>
+            <div class="system-tags"><span>${done ? "已完成" : "未完成"}</span></div>
+          </div>
+        `;
+        this.dom.achievementList.appendChild(card);
+      }
+    }
+
+    showCompanionInvite() {
+      const pending = this.saveManager.data.companions.pendingInvites || [];
+      if (!pending.length || !this.dom.companionOverlay) return false;
+      const invited = new Set(this.saveManager.data.companions.invited || []);
+      const eligible = Object.keys(COMPANION_DEFS).filter((id) => id !== this.saveManager.data.selectedHero && !invited.has(id));
+      if (!eligible.length) return false;
+      this.dom.companionList.innerHTML = "";
+      for (const id of eligible) {
+        const hero = HERO_DEFS[id];
+        const companion = COMPANION_DEFS[id];
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "hero-card";
+        button.innerHTML = `
+          <canvas class="hero-portrait" width="72" height="72" data-hero="${id}"></canvas>
+          <div class="hero-copy">
+            <strong>${hero.name}</strong>
+            <p>${companion.skill}：${companion.desc}</p>
+            <div class="hero-tags"><span>助战技能</span><span>${hero.role}</span></div>
+          </div>
+        `;
+        button.addEventListener("click", () => {
+          const result = this.saveManager.inviteCompanion(id);
+          this.showToast(result.message);
+          this.closeCompanionInvite();
+          this.renderHome();
+        });
+        this.dom.companionList.appendChild(button);
+      }
+      this.drawHeroPortraits(this.dom.companionList);
+      this.dom.companionOverlay.classList.remove("hidden");
+      return true;
+    }
+
+    closeCompanionInvite() {
+      if (this.dom.companionOverlay) this.dom.companionOverlay.classList.add("hidden");
+      this.renderHome();
     }
 
     renderLevelSelector() {
@@ -4944,7 +6116,15 @@
         const item = document.createElement("div");
         item.className = `skill-chip skill-${id} ${skill.enabled ? "" : "locked"}`;
         const value = skill.enabled ? `Lv.${skill.level}` : "未悟";
-        item.innerHTML = `<span class="skill-icon">${SKILL_ICONS[id]}</span><strong>${SKILL_LABELS[id]}</strong><span>${value}</span>`;
+        item.innerHTML = `<span class="skill-icon">${this.getSkillIcon(id)}</span><strong>${this.getSkillLabel(id)}</strong><span>${value}</span>`;
+        this.dom.skillStrip.appendChild(item);
+      }
+      for (const id of this.companionIds || []) {
+        const def = COMPANION_DEFS[id];
+        if (!def) continue;
+        const item = document.createElement("div");
+        item.className = "skill-chip companion-chip";
+        item.innerHTML = `<span class="skill-icon">${def.name.slice(0, 1)}</span><strong>${def.skill}</strong><span>助战</span>`;
         this.dom.skillStrip.appendChild(item);
       }
     }
@@ -5171,7 +6351,7 @@
       ctx.fillStyle = "rgba(255, 241, 189, 0.95)";
       ctx.font = "bold 13px KaiTi, SimSun, serif";
       ctx.textAlign = "center";
-      ctx.fillText("宗门", center, wallTop + 30);
+      ctx.fillText("西行门", center, wallTop + 30);
 
       ctx.fillStyle = "rgba(255, 107, 87, 0.46)";
       ctx.beginPath();
