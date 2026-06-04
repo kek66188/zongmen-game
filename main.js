@@ -450,16 +450,16 @@
     const early = order <= 27;
     const mid = order > 27 && order <= 54;
     const hpMultiplier = early
-      ? 1 + (order - 1) * 0.075
+      ? 1 + (order - 1) * 0.085
       : mid
-        ? 3.05 + (order - 28) * 0.09
-        : 5.55 + (order - 55) * 0.115;
+        ? 3.25 + (order - 28) * 0.1
+        : 5.95 + (order - 55) * 0.125;
     return {
       hpMultiplier: Number(hpMultiplier.toFixed(2)),
-      speedMultiplier: Number((1 + Math.floor((order - 1) / 9) * 0.045).toFixed(2)),
-      damageMultiplier: Number((1 + (order - 1) * 0.042).toFixed(2)),
-      spawnMultiplier: Number((1 + (order - 1) * 0.026).toFixed(2)),
-      eliteChance: order >= 18 ? clampSetup(0.02 + Math.floor(order / 9) * 0.015, 0.02, 0.18) : order >= 9 ? 0.02 : 0,
+      speedMultiplier: Number((1 + Math.floor((order - 1) / 9) * 0.05).toFixed(2)),
+      damageMultiplier: Number((1 + (order - 1) * 0.047).toFixed(2)),
+      spawnMultiplier: Number((1 + (order - 1) * 0.03).toFixed(2)),
+      eliteChance: order >= 18 ? clampSetup(0.025 + Math.floor(order / 9) * 0.018, 0.025, 0.22) : order >= 9 ? 0.025 : 0,
       bossPhaseCount: order >= 73 ? 4 : order >= 55 ? 3 : order >= 28 ? 2 : 1,
     };
   }
@@ -516,14 +516,15 @@
   const buildSpawnProfiles = (order, duration) => {
     const cuts = [0, 0.22, 0.46, 0.68, 0.86, 1].map((value) => Math.round(duration * value));
     const stage = getStageIndexByOrder(order);
-    const baseMin = Math.max(0.62, 1.35 - stage * 0.12 - order * 0.008);
-    const pressure = order % 5 === 0 ? 0.08 : 0;
+    const pressureBias = order >= 55 ? 0.08 : order >= 28 ? 0.06 : order >= 10 ? 0.04 : 0;
+    const baseMin = Math.max(0.58, 1.35 - stage * 0.13 - order * 0.009 - pressureBias);
+    const pressure = order % 5 === 0 ? 0.1 : 0;
     return Array.from({ length: 5 }, (_, index) => ({
       start: cuts[index],
       end: cuts[index + 1] || duration,
-      intervalMin: Math.max(0.42, baseMin - index * 0.14 - pressure),
-      intervalMax: Math.max(0.58, baseMin + 0.24 - index * 0.12 - pressure),
-      extraChance: clampSetup(0.02 * order + index * 0.08 + (order % 5 === 0 ? 0.08 : 0), 0, 0.68),
+      intervalMin: Math.max(0.38, baseMin - index * 0.15 - pressure),
+      intervalMax: Math.max(0.54, baseMin + 0.22 - index * 0.13 - pressure),
+      extraChance: clampSetup(0.023 * order + index * 0.085 + (order % 5 === 0 ? 0.1 : 0), 0, 0.75),
       weights: buildEnemyWeights(order, index),
     }));
   };
@@ -575,8 +576,8 @@
       newbieProtectionSeconds: order <= 10 ? 12 : 8,
       emergencyHealThreshold: order <= 20 ? 0.38 : 0.34,
       emergencyHealAmount: Math.max(18, 30 - Math.floor(order / 3)),
-      enemyHpMaxMultiplier: order === 1 ? 1.6 : Number((1.16 + Math.min(0.1, order * 0.002)).toFixed(2)),
-      enemySpeedMaxMultiplier: order === 1 ? 1.3 : Number((1.08 + Math.min(0.1, order * 0.002)).toFixed(2)),
+      enemyHpMaxMultiplier: order === 1 ? 1.6 : Number((1.18 + Math.min(0.16, order * 0.0025)).toFixed(2)),
+      enemySpeedMaxMultiplier: order === 1 ? 1.3 : Number((1.1 + Math.min(0.13, order * 0.0025)).toFixed(2)),
       enemyTypes: getLevelEnemyTypes(order),
       eliteChance: difficulty.eliteChance,
       bossPhaseCount: difficulty.bossPhaseCount,
@@ -4589,12 +4590,12 @@
       chapter: "无尽镇妖",
       description: "九九劫后开启的无尽妖潮。",
       duration: 999999,
-      maxEnemies: 130,
+      maxEnemies: 140,
       rewardMultiplier: 1,
       boss: null,
       phases: [{ time: 0, text: "无尽镇妖开启" }],
       spawnProfiles: [
-        { start: 0, end: 999999, intervalMin: 1.05, intervalMax: 1.35, extraChance: 0.08, weights: { foxDemon: 0.28, dogDemon: 0.18, shrimpDemon: 0.16, frogDemon: 0.14, boarDragon: 0.08, lampGranny: 0.06, stoneArmor: 0.05, yaksha: 0.03, wingDemon: 0.02 } },
+        { start: 0, end: 999999, intervalMin: 0.95, intervalMax: 1.22, extraChance: 0.12, weights: { foxDemon: 0.25, dogDemon: 0.18, shrimpDemon: 0.17, frogDemon: 0.14, boarDragon: 0.09, lampGranny: 0.07, stoneArmor: 0.06, yaksha: 0.04, wingDemon: 0.03 } },
       ],
       isEndless: true,
     };
@@ -8516,11 +8517,11 @@
       if (this.elapsed < (this.endlessNextWaveTime || 60)) return;
       this.endlessWave += 1;
       this.endlessNextWaveTime += 60;
-      const pressure = 1 + Math.floor((this.endlessWave - 1) / 2) * 0.04;
-      this.currentLevelConfig.enemyHpMultiplier = 2.2 * pressure;
-      this.currentLevelConfig.enemySpeedMultiplier = 1.12 + Math.min(0.5, this.endlessWave * 0.01);
-      this.currentLevelConfig.enemyDamageMultiplier = 1.2 + Math.min(1.2, this.endlessWave * 0.035);
-      this.currentLevelConfig.spawnMultiplier = 1.2 + Math.min(1.6, this.endlessWave * 0.05);
+      const pressure = 1 + Math.floor((this.endlessWave - 1) / 2) * 0.045;
+      this.currentLevelConfig.enemyHpMultiplier = 2.45 * pressure;
+      this.currentLevelConfig.enemySpeedMultiplier = 1.16 + Math.min(0.55, this.endlessWave * 0.012);
+      this.currentLevelConfig.enemyDamageMultiplier = 1.3 + Math.min(1.35, this.endlessWave * 0.04);
+      this.currentLevelConfig.spawnMultiplier = 1.3 + Math.min(1.75, this.endlessWave * 0.055);
       if (this.endlessWave % 10 === 0) {
         const bossTypes = ["bossBlackWind", "bossYellowWind", "bossBoneLady", "bossBullKing"];
         const type = bossTypes[Math.min(bossTypes.length - 1, Math.floor(this.endlessWave / 10) - 1)];
